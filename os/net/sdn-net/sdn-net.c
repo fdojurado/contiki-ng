@@ -46,26 +46,14 @@
 #include "contiki.h"
 #include "net/packetbuf.h"
 #include "net/netstack.h"
-#include "sdn-net.h"
-#include "sdn.h"
-#include "sdnbuf.h"
-#include "sdn-neighbor-discovery.h"
-#include "sd-wsn.h"
-#include "sdn-advertisement.h"
-#include "sdn-ds-nbr.h"
-#include "sdn-ds-route.h"
-#include "sdn-network-config.h"
-#include "dev/watchdog.h"
+#include "net/sdn-net/sdn-net.h"
+#include "net/sdn-net/sdn.h"
+#include "net/sdn-net/sdnbuf.h"
 #include <string.h>
 /* Log configuration */
-/* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
-#else
-#define PRINTF(...)
-#endif
+#include "sys/log.h"
+#define LOG_MODULE "SDN-Net"
+#define LOG_LEVEL LOG_CONF_LEVEL_6LOWPAN
 
 // uint8_t *sdn_net_buf;
 // uint16_t sdn_net_len;
@@ -96,7 +84,7 @@ static int last_rssi;
 static void
 init(void)
 {
-  PRINTF("init\n");
+  LOG_INFO("init\n");
   // current_callback = NULL;
 }
 /*--------------------------------------------------------------------*/
@@ -114,7 +102,7 @@ input(void)
 
   if (packetbuf_datalen() == 0)
   {
-    PRINTF("input: empty packet\n");
+    LOG_WARN("input: empty packet\n");
     return;
   }
 
@@ -135,9 +123,9 @@ input(void)
 
   // if (current_callback != NULL)
   // {
-  PRINTF("received %u bytes from %d.%d\n", packetbuf_datalen(),
-         packetbuf_addr(PACKETBUF_ADDR_SENDER)->u8[0],
-         packetbuf_addr(PACKETBUF_ADDR_SENDER)->u8[1]);
+  LOG_INFO("received %u bytes from ", packetbuf_datalen());
+  LOG_PRINT_LLADDR(packetbuf_addr(PACKETBUF_ADDR_SENDER));
+  LOG_INFO_("\n");
   // current_callback(packetbuf_dataptr(), packetbuf_datalen(),
   //                  packetbuf_addr(PACKETBUF_ADDR_SENDER), packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
   // }
@@ -205,9 +193,9 @@ output(const linkaddr_t *localdest)
   // PRINTF("output: sending SDN IP packet with len %d to %d.%d\n", sdn_len,
   //          dest.u8[0], dest.u8[1]);
 
-  PRINTF("sending %u bytes to %d.%d\n", packetbuf_datalen(),
-         packetbuf_addr(PACKETBUF_ADDR_RECEIVER)->u8[0],
-         packetbuf_addr(PACKETBUF_ADDR_RECEIVER)->u8[1]);
+  LOG_INFO("sending %u bytes to ", packetbuf_datalen());
+  LOG_PRINT_LLADDR(packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
+  LOG_INFO_("\n");
 
   // packetbuf_clear();
   // packetbuf_copyfrom(sdn_net_buf, sdn_net_len);
@@ -221,7 +209,7 @@ output(const linkaddr_t *localdest)
   // LOG_PRINT_LLADDR(packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
   // PRINTF_("\n");
   // NETSTACK_MAC.send(NULL, NULL);
-  NETSTACK_LLSEC.send(NULL, NULL);
+   NETSTACK_MAC.send(NULL, NULL);
   /* If we are sending multiple packets in a row, we need to let the
      watchdog know that we are still alive. */
   watchdog_periodic();

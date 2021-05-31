@@ -40,25 +40,21 @@
 
 #include "contiki.h"
 #include "net/netstack.h"
-#include "net/sdn-net/sd-wsn.h"
 #include "net/sdn-net/sdn.h"
+#include "net/sdn-net/sd-wsn.h"
 #include "net/sdn-net/sdn-net.h"
 #include <string.h>
 #include <stdio.h> /* For printf() */
-#include "sdn-energy.h"
+#include "services/sdn-energy/sdn-energy.h"
 
 #if MAC_CONF_WITH_TSCH
 #include "net/mac/tsch/tsch.h"
 #endif
 
 /* Log configuration */
-#define DEBUG 1
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
-#else
-#define PRINTF(...)
-#endif
+#include "sys/log.h"
+#define LOG_MODULE "App"
+#define LOG_LEVEL LOG_LEVEL_INFO
 
 linkaddr_t ctrl_addr;
 
@@ -80,7 +76,7 @@ AUTOSTART_PROCESSES(&sdn_node_process, &sdn_energy);
 /*---------------------------------------------------------------------------*/
 void static print_stats(void)
 {
-    PRINTF("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
+    LOG_INFO("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
            SDN_STAT(sdn_stat.ip.forwarded),
            SDN_STAT(sdn_stat.data.sent_agg),
            SDN_STAT(sdn_stat.data.sent_agg_bytes),
@@ -123,8 +119,9 @@ PROCESS_THREAD(sdn_node_process, ev, data)
     ctrl_addr.u8[0] = 1;
     ctrl_addr.u8[1] = 0;
 
-    // PRINTF("Setting controller addr %d.%d\n",
-    //        ctrl_addr.u8[0], ctrl_addr.u8[1]);
+    LOG_INFO("Setting controller addr ");
+    LOG_INFO_LLADDR((linkaddr_t *)&ctrl_addr);
+    LOG_INFO_("\n");
     /* Initialize NullNet */
     //sdn_net_buf = (uint8_t *)&count;
     //sdn_net_len = sizeof(count);
@@ -139,7 +136,7 @@ PROCESS_THREAD(sdn_node_process, ev, data)
         PROCESS_YIELD_UNTIL(etimer_expired(&et));
         etimer_reset(&et);
     }
-    PRINTF("tsch_is_associated\n");
+    LOG_INFO("tsch_is_associated\n");
 #endif
     process_start(&sdn_process, NULL);
     while (1)
@@ -150,11 +147,11 @@ PROCESS_THREAD(sdn_node_process, ev, data)
             if (energy < 100)
             {
                 /* This node is dead */
-                // PRINTF("Node dead\n");
+                // LOG_INFO("Node dead\n");
                 SDN_STAT(++sdn_stat.nodes.dead);
                 print_stats();
                 /* Turn off the radio */
-                NETSTACK_MAC.off(0);
+                NETSTACK_MAC.off();
                 NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, -25);
                 process_exit(&sdn_process);
                 process_exit(&sdn_energy);

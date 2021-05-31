@@ -42,6 +42,7 @@
 #include "sdn-neighbor-discovery.h"
 #include "sdn-advertisement.h"
 #include "sdn-ds-nbr.h"
+#include "net/ipv6/uip.h" // show this header be here?
 #include "sdn-ds-route.h"
 #include "sdn-network-config.h"
 #include "sdn-data-packets.h"
