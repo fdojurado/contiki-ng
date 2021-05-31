@@ -128,7 +128,7 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     cc2520_set_txpower(0xF7);
 #endif
 
-    NETSTACK_MAC.off(1);
+    NETSTACK_MAC.on();
 
     process_start(&sdn_process, NULL);
     /* start the sdn serial interface */

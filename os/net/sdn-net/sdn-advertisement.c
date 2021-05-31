@@ -56,7 +56,7 @@
 #endif
 
 #if SERIAL_SDN_CONTROLLER
-#include "sdn-serial.h"
+#include "sdn-controller-serial/sdn-serial.h"
 #include "sdn-controller-serial/sdn-serial-protocol.h"
 #endif /* SERIAL_SDN_CONTROLLER */
 

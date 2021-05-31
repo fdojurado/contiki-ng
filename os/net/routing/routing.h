@@ -57,7 +57,7 @@
 #endif
 
 #if ROUTING_CONF_SDN
-#include "sdn-ds-nbr.h"
+#include "net/sdn-net/sdn-ds-nbr.h"
 #endif
 /**
  * The structure of a routing protocol driver.

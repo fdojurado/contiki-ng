@@ -11,11 +11,11 @@ MODULES += $(CONTIKI_NG_SERVICES_DIR)/sdn-energy
 
 # Here, we want to select whether we want this node to be controller or not.
 WITH_SDN_CONTROLLER=0
-ifeq ($(WITH_SDN_CONTROLLER),1)
-CFLAGS += -DSDN_CONTROLLER=1
-else
-CFLAGS += -DSDN_CONTROLLER=0
-endif
+# ifeq ($(WITH_SDN_CONTROLLER),1)
+# CFLAGS += -DSDN_CONTROLLER=1
+# else
+# CFLAGS += -DSDN_CONTROLLER=0
+# endif
 
 #use this to enable TSCH: MAKE_MAC = MAKE_MAC_TSCH
 MAKE_MAC = MAKE_MAC_TSCH
