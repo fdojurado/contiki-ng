@@ -51,7 +51,7 @@
 #undef NETSTACK_CONF_NETWORK
 #define NETSTACK_CONF_NETWORK sdn_net_driver
 #undef NETSTACK_CONF_ROUTING
-#define NETSTACK_CONF_ROUTING sdn_cluster_driver
+#define NETSTACK_CONF_ROUTING sdn_remaining_driver
 // #define QUEUEBUF_CONF_NUM 16
 // #define UIP_CONF_BUFFER_SIZE 0
 // #define TSCH_QUEUE_CONF_NUM_PER_NEIGHBOR 16

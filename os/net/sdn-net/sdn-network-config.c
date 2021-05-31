@@ -43,7 +43,7 @@
 #include "net/sdn-net/sdn.h"
 #include "stdbool.h"
 #if SDN_CONTROLLER
-#include "routing/sdn-cluster/cluster-list.h"
+#include "routing/clustering/cluster-list.h"
 #include "sdn-net/sdn-controller/sdn-ctrl-types.h"
 #include "lib/random.h"
 #include "sdn-controller/sdn-ds-config-routes.h"
@@ -54,13 +54,9 @@
 #endif
 #include "net/routing/routing.h"
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
-#else
-#define PRINTF(...)
-#endif
+#include "sys/log.h"
+#define LOG_MODULE "SDN-NC"
+#define LOG_LEVEL LOG_CONF_LEVEL_TCPIP
 
 #if SDN_CONTROLLER
 /** Period for uip-ds6 periodic task*/
@@ -164,7 +160,7 @@ chksum(uint16_t sum, const uint8_t *data, uint16_t len)
         }
     }
 
-    PRINTF("chksum, sum 0x%04x\n",
+    LOG_INFO("chksum, sum 0x%04x\n",
            sum);
 
     /* Return sum in host byte order. */
@@ -192,25 +188,25 @@ static uint16_t calculate_node_chksum(sdn_ds_config_route_t *rt)
          list_rt != NULL;
          list_rt = list_item_next(list_rt))
     {
-        PRINTF("calculate_table_chksum: %d.%d - %d.%d\n",
+        LOG_INFO("calculate_table_chksum: %d.%d - %d.%d\n",
                list_rt->dest.u8[0], list_rt->dest.u8[1],
                list_rt->via.u8[0], list_rt->via.u8[1]);
         data.u16[0] = list_rt->dest.u16;
         data.u16[1] = list_rt->via.u16;
         sum = chksum(sum, &data.u8[0], 4);
-        PRINTF("sum 0x%04x\n",
+        LOG_INFO("sum 0x%04x\n",
                sum);
     }
-    PRINTF("routing table chksum: sum 0x%04x\n",
+    LOG_INFO("routing table chksum: sum 0x%04x\n",
            sum);
     data.u16[0] = sum;
     data.u16[1] = rt->recv_chksum;
-    PRINTF("rcv chksum of node %d.%d: 0x%04x\n",
+    LOG_INFO("rcv chksum of node %d.%d: 0x%04x\n",
            rt->scr.u8[0], rt->scr.u8[1],
            rt->recv_chksum);
     sum = chksum(0, &data.u8[0], 4);
 
-    PRINTF("sum with rcv chksum 0x%04x\n",
+    LOG_INFO("sum with rcv chksum 0x%04x\n",
            sum);
 
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
@@ -221,7 +217,7 @@ static uint16_t calculate_node_chksum(sdn_ds_config_route_t *rt)
 void sdn_nc_ack_input()
 {
     ack_rcv = sdnip_htons(SDN_NC_ACK_BUF->ack);
-    PRINTF("NC-ACK received: %u\n", ack_rcv);
+    LOG_INFO("NC-ACK received: %u\n", ack_rcv);
 }
 #endif
 /*---------------------------------------------------------------------------*/
@@ -233,7 +229,7 @@ void send_ack(uint16_t ack)
     nxthop = NETSTACK_ROUTING.nexthop(&ctrl_addr);
     if (nxthop != NULL)
     {
-        PRINTF("Sending ACK (%u) to %d.%d via %d.%d\n",
+        LOG_INFO("Sending ACK (%u) to %d.%d via %d.%d\n",
                ack + 1,
                ctrl_addr.u8[0], ctrl_addr.u8[1],
                nxthop->u8[0], nxthop->u8[1]);
@@ -289,12 +285,12 @@ void sdn_nc_input(void)
     if (ch_addr.u16 != 0xFFFF)
     {
         cluster_head = 0;
-        PRINTF("NC processing %d routes (CH %d.%d)\n", num_rt, ch_addr.u8[0], ch_addr.u8[1]);
+        LOG_INFO("NC processing %d routes (CH %d.%d)\n", num_rt, ch_addr.u8[0], ch_addr.u8[1]);
     }
     else
     {
         cluster_head = 1;
-        PRINTF("NC processing %d routes\n", num_rt);
+        LOG_INFO("NC processing %d routes\n", num_rt);
     }
     for (i = 0; i < num_rt; i++)
     {
@@ -344,7 +340,7 @@ static struct ack_num *ack_lookup(uint16_t *ack)
     }
     if (found != NULL)
     {
-        PRINTF("Ack found: %u\n",
+        LOG_INFO("Ack found: %u\n",
                found->ack);
     }
     return found;
@@ -383,7 +379,7 @@ static struct ack_num *ack_add(uint16_t *ack)
 
     if (ack_ptr != NULL)
     {
-        PRINTF("ack already exists.\n");
+        LOG_INFO("ack already exists.\n");
         return NULL;
     }
 
@@ -399,13 +395,13 @@ static struct ack_num *ack_add(uint16_t *ack)
 
     if (ack_ptr == NULL)
     {
-        PRINTF("Couldn't allocate more acks.\n");
+        LOG_INFO("Couldn't allocate more acks.\n");
         return NULL;
     }
 
     ack_ptr->ack = *ack;
     list_add(ack_list, ack_ptr);
-    PRINTF("adding ack: %u\n",
+    LOG_INFO("adding ack: %u\n",
            ack_ptr->ack);
 
     return ack_ptr;
@@ -475,7 +471,7 @@ static PT_THREAD(send_nc_output(linkaddr_t *addr))
                 }
                 SDN_CP_BUF->rank = sdnip_htons(ack);
 
-                PRINTF("Sending NC to %d.%d via %d.%d with ACK %u (%d)\n",
+                LOG_INFO("Sending NC to %d.%d via %d.%d with ACK %u (%d)\n",
                        addr->u8[0], addr->u8[1],
                        nxthop->u8[0], nxthop->u8[1],
                        ack,
@@ -501,7 +497,7 @@ static PT_THREAD(send_nc_output(linkaddr_t *addr))
 
                 if (rt == NULL)
                 {
-                    PRINTF("No NC routes for %d.%d\n", addr->u8[0], addr->u8[1]);
+                    LOG_INFO("No NC routes for %d.%d\n", addr->u8[0], addr->u8[1]);
                     break;
                 }
 
@@ -564,7 +560,7 @@ static PT_THREAD(send_nc_pkt(void))
         addr = sdn_config_routes_min_depth();
         if (addr != NULL)
         {
-            PRINTF("New config packet to send (%d.%d)\n",
+            LOG_INFO("New config packet to send (%d.%d)\n",
                    addr->u8[0], addr->u8[1]);
             PT_SPAWN(&send_pt, &output_pt, send_nc_output(addr));
         }
@@ -601,7 +597,7 @@ static PT_THREAD(sdn_nc_build(void))
     sdn_ds_node_num(&num_vx); //number of vertices
     // num_vx = sdn_ds_node_num();
     // uint8_t j;
-    // PRINTF("NODE_CACHES=%d size of visited_buff=%d (%d,%d)\n", NODE_BUFF,
+    // LOG_INFO("NODE_CACHES=%d size of visited_buff=%d (%d,%d)\n", NODE_BUFF,
     //        sizeof(visited_buff), NELEMS(visited_buff), sizeof(visited_buff[0]));
     // uint8_t *visited = visited_buff; //this allows to reuse the sdn buffer
     uint8_t discovered = 0; //flag used for discovering nodes
@@ -618,7 +614,7 @@ static PT_THREAD(sdn_nc_build(void))
     /* rename nodes */
     if (!rename_nodes(&num_vx))
     {
-        PRINTF("num of vx greater than buffer.\n");
+        LOG_INFO("num of vx greater than buffer.\n");
         return 0;
     }
 #if SDN_WITH_TABLE_CHKSUM
@@ -634,7 +630,7 @@ static PT_THREAD(sdn_nc_build(void))
             // max_index = sdn_ds_node_max_index();
             /* map adress */
             id = nodes_ids_lookup(&node->addr);
-            PRINTF("node to test: %d.%d rank %d (name=%d)\n",
+            LOG_INFO("node to test: %d.%d rank %d (name=%d)\n",
                    id->addr.u8[0],
                    id->addr.u8[1],
                    node->rank,
@@ -643,21 +639,21 @@ static PT_THREAD(sdn_nc_build(void))
             do
             {
                 id = neighbor_to_ctr;
-                PRINTF("j=%d (%d.%d) neighbor_to_ctr=%d (%d.%d)\n",
+                LOG_INFO("j=%d (%d.%d) neighbor_to_ctr=%d (%d.%d)\n",
                        id->name,
                        id->addr.u8[0], id->addr.u8[1],
                        neighbor_to_ctr->name,
                        neighbor_to_ctr->addr.u8[0], neighbor_to_ctr->addr.u8[1]);
-                // PRINTF("no. elems in array=%d\n", NELEMS(visited_buff));
+                // LOG_INFO("no. elems in array=%d\n", NELEMS(visited_buff));
                 clean_nodes(&num_vx, &discovered);
                 scr = new_node(&id->addr);
-                PRINTF("source data: %d.%d (j=%d) (%d.%d)\n",
+                LOG_INFO("source data: %d.%d (j=%d) (%d.%d)\n",
                        scr->addr.u8[0],
                        scr->addr.u8[1],
                        id->name,
                        id->addr.u8[0], id->addr.u8[1]);
                 neighbor_to_ctr = dfs(scr, &controller_id->addr, &num_vx, neighbor_to_ctr, &discovered);
-                PRINTF("neighbor node to ctr of node %d (%d.%d) is %d (%d.%d)\n",
+                LOG_INFO("neighbor node to ctr of node %d (%d.%d) is %d (%d.%d)\n",
                        id->name,
                        id->addr.u8[0], id->addr.u8[1],
                        neighbor_to_ctr->name,
@@ -687,7 +683,7 @@ static PT_THREAD(sdn_nc_build(void))
             id = nodes_ids_lookup(&node->addr);
             depth = 0;
             neighbor_to_node = controller_id;
-            PRINTF("Finding path %d (%d.%d) to %d (%d.%d)\n",
+            LOG_INFO("Finding path %d (%d.%d) to %d (%d.%d)\n",
                    neighbor_to_node->name,
                    neighbor_to_node->addr.u8[0], neighbor_to_node->addr.u8[1],
                    id->name,
@@ -700,7 +696,7 @@ static PT_THREAD(sdn_nc_build(void))
                 scr = new_node(&neighbor_node->addr);
 
                 neighbor_to_node = dfs(scr, &id->addr, &num_vx, neighbor_to_node, &discovered);
-                PRINTF("dest %d (%d.%d) via %d (%d.%d)\n",
+                LOG_INFO("dest %d (%d.%d) via %d (%d.%d)\n",
                        id->name,
                        id->addr.u8[0], id->addr.u8[1],
                        neighbor_to_node->name,
@@ -780,11 +776,11 @@ static PT_THREAD(pt_timer_callback(void))
 void sdn_nc_periodic(void)
 {
     /* Periodic ND sending */
-    // PRINTF("periodic.\n");
+    // LOG_INFO("periodic.\n");
     if (stimer_expired(&nc_timer_nc) /* && (sdn_len == 0) */)
     {
         sdn_send_nc_periodic();
-        PRINTF("send nc periodic\n");
+        LOG_INFO("send nc periodic\n");
         stimer_reset(&nc_timer_nc);
     }
     if (timer_expired(&pt_timer_pt) /* && (sdn_len == 0) */)

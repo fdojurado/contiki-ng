@@ -51,13 +51,9 @@
 #endif
 
 /* Log configuration */
-#define DEBUG 1
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
-#else
-#define PRINTF(...)
-#endif
+#include "sys/log.h"
+#define LOG_MODULE "App"
+#define LOG_LEVEL LOG_LEVEL_INFO
 
 linkaddr_t ctrl_addr;
 
@@ -119,14 +115,14 @@ PROCESS_THREAD(sdn_controller_process, ev, data)
         PROCESS_YIELD_UNTIL(etimer_expired(&et));
         etimer_reset(&et);
     }
-    PRINTF("tsch_is_associated\n");
+    LOG_INFO("tsch_is_associated\n");
 #endif /* MAC_CONF_WITH_TSCH */
 
 #if CONTIKI_TARGET_WISMOTE
     cc2520_set_txpower(0xF7);
 #endif
 
-    NETSTACK_MAC.off(1);
+    NETSTACK_MAC.on();
     
     process_start(&sdn_process, NULL);
     /* Initialize NullNet */
@@ -138,7 +134,7 @@ PROCESS_THREAD(sdn_controller_process, ev, data)
     while (1)
     {
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&stats_timer));
-        PRINTF("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
+        LOG_INFO("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
                SDN_STAT(sdn_stat.ip.forwarded),
                SDN_STAT(sdn_stat.data.sent_agg),
                SDN_STAT(sdn_stat.data.sent_agg_bytes),
