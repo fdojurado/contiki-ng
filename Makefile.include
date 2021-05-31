@@ -187,6 +187,7 @@ endif
 MAKE_NET_NULLNET = 0
 MAKE_NET_IPV6 = 1
 MAKE_NET_OTHER = 2
+MAKE_NET_SDN = 3
 
 # Make IPv6 the default stack
 MAKE_NET ?= MAKE_NET_IPV6
@@ -203,6 +204,11 @@ endif
 
 ifeq ($(MAKE_NET),MAKE_NET_OTHER)
   CFLAGS += -DNETSTACK_CONF_WITH_OTHER=1
+endif
+
+ifeq ($(MAKE_NET),MAKE_NET_SDN)
+  CFLAGS += -DNETSTACK_CONF_WITH_SDN=1
+  MODULES += $(CONTIKI_NG_NET_DIR)/sdn-net
 endif
 
 ifeq ($(WITH_IP64),1)
