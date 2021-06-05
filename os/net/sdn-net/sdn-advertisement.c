@@ -245,11 +245,21 @@ void sdn_na_input(void)
     sender_energy = sdnip_htons(SDN_CP_BUF->energy);
     /* # of previous and next ranks */
     PRINTF("num of neighbors %d sender rank %d sender energy %d\n", num_nb, sender_rank, sender_energy);
+#if SERIAL_SDN_CONTROLLER
+    uint8_t count = 0;
+#endif
     for (i = 0; i < num_nb; i++)
     {
         neighbor_addr.u16 = sdnip_htons(SDN_NA_BUF(i)->addr.u16);
         neighbor_rssi = sdnip_htons(SDN_NA_BUF(i)->rssi);
         neighbor_rank = sdnip_htons(SDN_NA_BUF(i)->rank);
+#if SERIAL_SDN_CONTROLLER
+        SDN_SERIAL_PACKET_NBR_BUF(count)->addr.u8[0] = neighbor_addr.u8[0];
+        SDN_SERIAL_PACKET_NBR_BUF(count)->addr.u8[1] = neighbor_addr.u8[1];
+        SDN_SERIAL_PACKET_NBR_BUF(count)->rssi = neighbor_rssi;
+        SDN_SERIAL_PACKET_NBR_BUF(count)->rank = neighbor_rank;
+        count++;
+#endif
         /* count prev and nxt ranks */
         if (sender_rank > neighbor_rank)
             prev_ranks++;
@@ -262,6 +272,17 @@ void sdn_na_input(void)
         sdn_ds_node_route_add(&from, neighbor_rssi, &neighbor_addr);
 #endif /* SDN_CONTROLLER */
     }
+#if SERIAL_SDN_CONTROLLER
+    /* Send sensors' neighbours to the serial controller */
+    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_NA_LEN * num_nb;
+    SDN_SERIAL_PACKET_BUF->addr.u8[0] = from.u8[0];
+    SDN_SERIAL_PACKET_BUF->addr.u8[1] = from.u8[1];
+    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_NBR;
+    SDN_SERIAL_PACKET_BUF->payload_len = SDN_NA_LEN * num_nb;
+    SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
+    SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
+    serial_packet_output();
+#endif
 #if SDN_CONTROLLER
     sdn_ds_node_add(&from, sender_energy, sender_rank, prev_ranks, nxt_ranks, num_nb, 1);
 #endif /* SDN_CONTROLLER */
