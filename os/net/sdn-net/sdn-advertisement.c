@@ -228,15 +228,33 @@ void sdn_na_init(void)
 #if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
 void sdn_na_input(void)
 {
-
-    uint8_t prev_ranks = 0, i;
-    uint8_t nxt_ranks = 0;
-    int16_t sender_rank, sender_energy, neighbor_rssi, neighbor_rank;
-    linkaddr_t neighbor_addr, from;
+    linkaddr_t from;
     /* Get the sender node address */
     from.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
     PRINTF("NA processing rcv from %d.%d\n",
            from.u8[0], from.u8[1]);
+#if SERIAL_SDN_CONTROLLER
+    /* We want to forward the entire CP packet to the serial controller.
+    This needs to be done instantenously to avoid incoming/outcoming packets
+    erase the content of the sdn_ip buffer */
+    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + (SDN_CPH_LEN + SDN_CP_BUF->len);
+    SDN_SERIAL_PACKET_BUF->addr.u8[0] = from.u8[0];
+    SDN_SERIAL_PACKET_BUF->addr.u8[1] = from.u8[1];
+    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_CP;
+    SDN_SERIAL_PACKET_BUF->payload_len = SDN_CPH_LEN + SDN_CP_BUF->len;
+    SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
+    SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
+    // copy payload to send serial buffer
+    memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_CP_BUF, sdn_serial_len);
+    // send serial packet
+    serial_packet_output();
+#endif /* SERIAL_SDN_CONTROLLER */
+
+    uint8_t prev_ranks = 0,
+            i;
+    linkaddr_t neighbor_addr;
+    uint8_t nxt_ranks = 0;
+    int16_t sender_rank, sender_energy, neighbor_rssi, neighbor_rank;
     /* Calculate number of neighbors */
     uint8_t num_nb = SDN_CP_BUF->len / SDN_NA_LEN;
     /* Sender rank in host byte order */
@@ -245,21 +263,11 @@ void sdn_na_input(void)
     sender_energy = sdnip_htons(SDN_CP_BUF->energy);
     /* # of previous and next ranks */
     PRINTF("num of neighbors %d sender rank %d sender energy %d\n", num_nb, sender_rank, sender_energy);
-#if SERIAL_SDN_CONTROLLER
-    uint8_t count = 0;
-#endif
     for (i = 0; i < num_nb; i++)
     {
         neighbor_addr.u16 = sdnip_htons(SDN_NA_BUF(i)->addr.u16);
         neighbor_rssi = sdnip_htons(SDN_NA_BUF(i)->rssi);
         neighbor_rank = sdnip_htons(SDN_NA_BUF(i)->rank);
-#if SERIAL_SDN_CONTROLLER
-        SDN_SERIAL_PACKET_NBR_BUF(count)->addr.u8[0] = neighbor_addr.u8[0];
-        SDN_SERIAL_PACKET_NBR_BUF(count)->addr.u8[1] = neighbor_addr.u8[1];
-        SDN_SERIAL_PACKET_NBR_BUF(count)->rssi = neighbor_rssi;
-        SDN_SERIAL_PACKET_NBR_BUF(count)->rank = neighbor_rank;
-        count++;
-#endif
         /* count prev and nxt ranks */
         if (sender_rank > neighbor_rank)
             prev_ranks++;
@@ -272,17 +280,6 @@ void sdn_na_input(void)
         sdn_ds_node_route_add(&from, neighbor_rssi, &neighbor_addr);
 #endif /* SDN_CONTROLLER */
     }
-#if SERIAL_SDN_CONTROLLER
-    /* Send sensors' neighbours to the serial controller */
-    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_NA_LEN * num_nb;
-    SDN_SERIAL_PACKET_BUF->addr.u8[0] = from.u8[0];
-    SDN_SERIAL_PACKET_BUF->addr.u8[1] = from.u8[1];
-    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_NBR;
-    SDN_SERIAL_PACKET_BUF->payload_len = SDN_NA_LEN * num_nb;
-    SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
-    SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
-    serial_packet_output();
-#endif
 #if SDN_CONTROLLER
     sdn_ds_node_add(&from, sender_energy, sender_rank, prev_ranks, nxt_ranks, num_nb, 1);
 #endif /* SDN_CONTROLLER */
@@ -290,28 +287,6 @@ void sdn_na_input(void)
 #if SDN_WITH_TABLE_CHKSUM
     sdn_ds_config_routes_chksum(&from, sdnip_htons(SDN_CP_BUF->rt_chksum));
 #endif /* SDN_WITH_TABLE_CHKSUM */
-
-#if SERIAL_SDN_CONTROLLER
-    /* Send nodes' info to serial controller */
-    /* Total length */
-    PRINTF("from %d.%d\n",
-           from.u8[0], from.u8[1]);
-    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_SERIAL_PACKET_NODEH_LEN;
-    SDN_SERIAL_PACKET_BUF->addr.u8[0] = from.u8[0];
-    SDN_SERIAL_PACKET_BUF->addr.u8[1] = from.u8[1];
-    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_NODES;
-    SDN_SERIAL_PACKET_BUF->payload_len = SDN_SERIAL_PACKET_NODEH_LEN;
-    SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
-    SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
-    SDN_SERIAL_PACKET_NODE_BUF->energy = sender_energy;
-    SDN_SERIAL_PACKET_NODE_BUF->rank = sender_rank;
-    SDN_SERIAL_PACKET_NODE_BUF->prev_ranks = prev_ranks;
-    SDN_SERIAL_PACKET_NODE_BUF->next_ranks = nxt_ranks;
-    SDN_SERIAL_PACKET_NODE_BUF->total_ranks = nxt_ranks + prev_ranks;
-    SDN_SERIAL_PACKET_NODE_BUF->total_nb = num_nb;
-    SDN_SERIAL_PACKET_NODE_BUF->alive = 1;
-    serial_packet_output();
-#endif /* SERIAL_SDN_CONTROLLER */
 }
 #endif
 /*---------------------------------------------------------------------------*/

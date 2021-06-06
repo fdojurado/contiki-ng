@@ -60,7 +60,7 @@
 
 /* Header size */
 #define SDN_SERIAL_PACKETH_LEN 6      /* Size of the sdn serial packet header */
-#define SDN_SERIAL_PACKET_NODEH_LEN 8 /* Size of the sdn serial packet header */
+#define SDN_SERIAL_PACKET_NODEH_LEN 8 /* Size of the sdn serial node packet header */
 
 #define SDN_SERIAL_MAX_PACKET_SIZE (SDN_SERIAL_PACKET_BUFFER_SIZE - SDN_SERIAL_PACKETH_LEN)
 
@@ -70,15 +70,10 @@
 #define SDN_SERIAL_PACKET_BUF ((struct sdn_serial_packet_hdr *)sdn_serial_packet_buf)
 #define SDN_SERIAL_PACKET_PAYLOAD_BUF(ext) ((unsigned char *)sdn_serial_packet_buf + SDN_SERIAL_PACKETH_LEN + (ext))
 
-/**
- * Direct access to SDN serial packet nodes' information
- */
-#define SDN_SERIAL_PACKET_NODE_BUF ((struct sdn_serial_node *)SDN_SERIAL_PACKET_PAYLOAD_BUF(0))
-#define SDN_SERIAL_PACKET_NODE_PAYLOAD(ext) ((unsigned char *)SDN_SERIAL_PACKET_PAYLOAD_BUF(0) + SDN_SERIAL_PACKET_NODEH_LEN + (ext))
-
 /* Define types of messages */
 #define SDN_SERIAL_MSG_TYPE_EMPTY 1
-#define SDN_SERIAL_MSG_TYPE_NODES 2
+#define SDN_SERIAL_MSG_TYPE_CP 2 // Sensor node information
+// #define SDN_SERIAL_MSG_TYPE_NBR 3   // Sensor node neighbors, rssi and rank
 
 /* SDN serail packet header */
 struct sdn_serial_packet_hdr
