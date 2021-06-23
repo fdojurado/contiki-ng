@@ -73,6 +73,7 @@
 /* Define types of messages */
 #define SDN_SERIAL_MSG_TYPE_EMPTY 1
 #define SDN_SERIAL_MSG_TYPE_CP 2 // Sensor node information
+#define SDN_SERIAL_MSG_TYPE_DP 3 // Sensor data packet
 // #define SDN_SERIAL_MSG_TYPE_NBR 3   // Sensor node neighbors, rssi and rank
 
 /* SDN serail packet header */

@@ -52,6 +52,11 @@
 #include "lib/list.h"
 #include "lib/memb.h"
 
+#if SERIAL_SDN_CONTROLLER
+#include "sdn-controller-serial/sdn-serial.h"
+#include "sdn-controller-serial/sdn-serial-protocol.h"
+#endif /* SERIAL_SDN_CONTROLLER */
+
 /* Log configuration */
 #define DEBUG 1
 #if DEBUG
@@ -72,7 +77,7 @@
 struct etimer data_timer_periodic;
 struct stimer data_timer_send; /**< ND timer, to schedule ND sending */
 static uint16_t rand_time;     /**< random time value for timers */
-static uint8_t seq = 0;
+static uint16_t seq = 0;
 #endif
 
 #if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
@@ -219,6 +224,26 @@ void sdn_data_input(void)
     uint16_t seq;
     uint8_t num;
 
+    /* Get the sender node address */
+    sender.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
+
+#if SERIAL_SDN_CONTROLLER
+    /* We want to forward the entire data packet to the serial controller.
+    This needs to be done instantenously to avoid incoming/outcoming packets
+    erase the content of the sdn_ip buffer */
+    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + (SDN_DATAH_LEN + SDN_DATA_HDR_BUF->len);
+    SDN_SERIAL_PACKET_BUF->addr.u8[0] = sender.u8[0];
+    SDN_SERIAL_PACKET_BUF->addr.u8[1] = sender.u8[1];
+    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_DP;
+    SDN_SERIAL_PACKET_BUF->payload_len = SDN_DATAH_LEN + SDN_DATA_HDR_BUF->len;
+    SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
+    SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
+    // copy payload to send serial buffer
+    memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_DATA_HDR_BUF, sdn_serial_len);
+    // send serial packet
+    serial_packet_output();
+#endif /* SERIAL_SDN_CONTROLLER */
+
     num = SDN_DATA_HDR_BUF->len / SDN_DATA_LEN;
 
     if (num == 1)
@@ -272,8 +297,8 @@ static void send_data_output(void)
             SDN_DATA_HDR_BUF->len = SDN_DATA_LEN;
             SDN_DATA_BUF(0)->addr.u16 = sdnip_htons(linkaddr_node_addr.u16);
             SDN_DATA_BUF(0)->seq = sdnip_htons(seq);
-            SDN_DATA_BUF(0)->temp = sdnip_htons(random_rand() % (uint8_t)(0xFFFF));
-            SDN_DATA_BUF(0)->humidty = sdnip_htons(random_rand() % (uint8_t)(0xFFFF));
+            SDN_DATA_BUF(0)->temp = sdnip_htons(random_rand() % (uint8_t)(0x23));
+            SDN_DATA_BUF(0)->humidty = sdnip_htons(random_rand() % (uint8_t)(0x64));
 
             PRINTF("1, %d, %u, %u, , , , , , , , ,\n",
                    linkaddr_node_addr.u8[0],
@@ -287,8 +312,8 @@ static void send_data_output(void)
             SDN_DATA_HDR_BUF->len = SDN_DATA_LEN * (sdn_data_aggregation_num_packets() + 1);
             SDN_DATA_BUF(0)->addr.u16 = sdnip_htons(linkaddr_node_addr.u16);
             SDN_DATA_BUF(0)->seq = sdnip_htons(seq);
-            SDN_DATA_BUF(0)->temp = sdnip_htons(random_rand() % (uint8_t)(0xFFFF));
-            SDN_DATA_BUF(0)->humidty = sdnip_htons(random_rand() % (uint8_t)(0xFFFF));
+            SDN_DATA_BUF(0)->temp = sdnip_htons(random_rand() % (uint8_t)(0x23));
+            SDN_DATA_BUF(0)->humidty = sdnip_htons(random_rand() % (uint8_t)(0x64));
 
             PRINTF("1, %d, %u, %u, , , , , , , , ,\n",
                    linkaddr_node_addr.u8[0],
