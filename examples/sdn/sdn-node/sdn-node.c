@@ -77,18 +77,18 @@ AUTOSTART_PROCESSES(&sdn_node_process, &sdn_energy);
 void static print_stats(void)
 {
     LOG_INFO("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
-           SDN_STAT(sdn_stat.ip.forwarded),
-           SDN_STAT(sdn_stat.data.sent_agg),
-           SDN_STAT(sdn_stat.data.sent_agg_bytes),
-           SDN_STAT(sdn_stat.data.sent_nagg),
-           SDN_STAT(sdn_stat.data.sent_nagg_bytes),
-           SDN_STAT(sdn_stat.cp.adv),
-           SDN_STAT(sdn_stat.cp.adv_bytes),
-           SDN_STAT(sdn_stat.cp.nc),
-           SDN_STAT(sdn_stat.cp.nc_bytes),
-           SDN_STAT(sdn_stat.nd.sent),
-           SDN_STAT(sdn_stat.nd.sent_bytes),
-           SDN_STAT(sdn_stat.nodes.dead));
+             SDN_STAT(sdn_stat.ip.forwarded),
+             SDN_STAT(sdn_stat.data.sent_agg),
+             SDN_STAT(sdn_stat.data.sent_agg_bytes),
+             SDN_STAT(sdn_stat.data.sent_nagg),
+             SDN_STAT(sdn_stat.data.sent_nagg_bytes),
+             SDN_STAT(sdn_stat.cp.adv),
+             SDN_STAT(sdn_stat.cp.adv_bytes),
+             SDN_STAT(sdn_stat.cp.nc),
+             SDN_STAT(sdn_stat.cp.nc_bytes),
+             SDN_STAT(sdn_stat.nd.sent),
+             SDN_STAT(sdn_stat.nd.sent_bytes),
+             SDN_STAT(sdn_stat.nodes.dead));
 }
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(sdn_node_process, ev, data)
@@ -117,7 +117,7 @@ PROCESS_THREAD(sdn_node_process, ev, data)
 #endif */
     /* set controller address assuming is a Z1 mote */
     ctrl_addr.u8[0] = 1;
-    ctrl_addr.u8[1] = 1;
+    ctrl_addr.u8[1] = 0;
 
     LOG_INFO("Setting controller addr ");
     LOG_INFO_LLADDR((linkaddr_t *)&ctrl_addr);

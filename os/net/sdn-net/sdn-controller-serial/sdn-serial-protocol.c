@@ -39,7 +39,9 @@
 
 #include "sdn-serial-protocol.h"
 #include "sdn-serial.h"
+#if !CONTIKI_TARGET_COOJA
 #include "dev/uart1.h"
+#endif
 #include <stdio.h>
 
 /* Log configuration */
@@ -107,10 +109,14 @@ PROCESS_THREAD(sdn_serial_protocol_process, ev, data)
     PROCESS_BEGIN();
 
     /* This is platform dependent */
-#ifndef CC26XX_UART_H_
-    uart1_init(BAUD2UBR(115200)); //set the baud rate as necessary
-#endif
+#ifdef CC26XX_UART_H_
+    uart1_init(BAUD2UBR(115200));            //set the baud rate as necessary
     uart1_set_input(&sdn_serial_input_byte); //set the callback function
+#endif
+#ifdef UART0_ARCH_H_
+    uart0_init(BAUD2UBR(115200));               //set the baud rate as necessary
+    uart0_set_callback(&sdn_serial_input_byte); //set the callback function
+#endif
 
     /* Send a packet */
     /* SDN_SERIAL_PACKET_BUF->addr.u8[0] = 0x01;
