@@ -146,8 +146,6 @@
  *
  * \param addr0 The first octet of the IP address.
  * \param addr1 The second octet of the IP address.
- * \param addr2 The third octet of the IP address.
- * \param addr3 The forth octet of the IP address.
  *
  * \hideinitializer
  */

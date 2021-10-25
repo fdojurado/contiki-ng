@@ -94,14 +94,13 @@ void sdn_ds_node_init(void);
 /**
  * Add a neighbor cache for a specified IPv6 address, which is
  *  associated with a specified link-layer address
- * \param ipaddr IPv6 address of a neighbor to add
- * \param lladdr Link-layer address to associate with ipaddr
- * \param isrouter Set 1 if the neighbor is a router
- * \param state Set the initial neighbor cache state (e.g.,
- * NBR_INCOMPLETE)
- * \param reason Set a reason of the addition (e.g.,
- * NBR_TABLE_REASON_RPL_DIO)
- * \param data Set data associated with the nbr cache
+ * \param addr the address of a node to add
+ * \param energy current energy of the node to add
+ * \param rank the rank of the node to add
+ * \param prev_ranks number of previous ranks of node to add
+ * \param next_ranks number of next ranks of node to add
+ * \param total_nb number of total neighbors of node to add
+ * \param alive flag to represent if the node still alive
  * \return the address of a newly added nbr cache on success, NULL on
  * failure
 */
@@ -114,7 +113,7 @@ sdn_ds_node_t *sdn_ds_node_add(const linkaddr_t *addr,
                                uint8_t alive);
 /**
  * Remove a neighbor cache
- * \param nbr the address of a neighbor cache to remove
+ * \param * the address of a neighbor cache to remove
  * \return 1 on success, 0 on failure (nothing was removed)
  */
 void sdn_ds_node_rm(linkaddr_t *);

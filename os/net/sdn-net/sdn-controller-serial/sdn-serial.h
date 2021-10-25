@@ -168,7 +168,6 @@ int sdn_serial_send(void);
 /**
  * \brief          Returns the value of the length field in the SDN serial buffer
  * \param hdr      The serial packet header
- * \retvel         The length value
  */
 uint8_t sdn_serial_get_len(struct sdn_serial_packet_hdr *hdr);
 
