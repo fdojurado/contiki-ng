@@ -99,7 +99,6 @@ uint8_t *sdnbuf_get_next_header(uint8_t *buffer, uint16_t size, uint8_t *protoco
  * \param buffer   A pointer to the buffer holding the IPv6 packet
  * \param size     The size of the data in the buffer
  * \param protocol A pointer to a variable where the protocol of the header will be stored
- * \param start    A flag that indicates if this is expected to be the IPv6 packet header or a later header (Extension header)
  * \retval         returns address of the next header, or NULL in case of insufficient buffer space
  *
  *                 This function moves to the next header in a IPv6 packet.
