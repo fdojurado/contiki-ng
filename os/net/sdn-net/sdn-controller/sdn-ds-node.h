@@ -120,7 +120,7 @@ void sdn_ds_node_rm(linkaddr_t *);
 
 /**
  * Get the neighbor cache associated with a specified IPv6 address
- * \param ipaddr an IPv6 address used as a search key
+ * \param addr address used as a search key
  * \return the pointer to a neighbor cache on success, NULL on failure
  */
 sdn_ds_node_t *sdn_ds_node_lookup(const linkaddr_t *addr);
@@ -161,18 +161,18 @@ int sdn_ds_node_max_rank(void);
 
 /**
  * Get the next neighbor cache of a specified one
- * \param nbr the pointer to a neighbor cache
+ * \param node the pointer to a node cache
  * \return the pointer to the next one on success, NULL on failure
  */
 sdn_ds_node_t *sdn_ds_node_next(sdn_ds_node_t *node);
 
-/**
+/* /**
  * The callback function to update link-layer stats in a neighbor
  * cache
  * \param status MAC return value defined in mac.h
  * \param numtx the number of transmissions happened for a packet
  */
-//void sdn_ds_link_callback(int status, int numtx);
+//void sdn_ds_link_callback(int status, int numtx); */
 
 /**
  * The housekeeping function called periodically

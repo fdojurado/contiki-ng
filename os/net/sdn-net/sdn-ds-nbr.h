@@ -111,13 +111,10 @@ void sdn_ds_neighbors_init(void);
 /**
  * Add a neighbor cache for a specified IPv6 address, which is
  *  associated with a specified link-layer address
- * \param ipaddr IPv6 address of a neighbor to add
- * \param lladdr Link-layer address to associate with ipaddr
- * \param isrouter Set 1 if the neighbor is a router
- * \param state Set the initial neighbor cache state (e.g.,
- * NBR_INCOMPLETE)
- * \param reason Set a reason of the addition (e.g.,
- * NBR_TABLE_REASON_RPL_DIO)
+ * \param from the address of a neighbor to add
+ * \param nbRank neighbour rank
+ * \param nbRssi neighbour RSSI
+ * \param rcv_rssi received RSSI
  * \param data Set data associated with the nbr cache
  * \return the address of a newly added nbr cache on success, NULL on
  * failure
@@ -142,7 +139,7 @@ const linkaddr_t *sdn_ds_nbr_get_ll(const sdn_ds_nbr_t *nbr);
 
 /**
  * Get the neighbor cache associated with a specified IPv6 address
- * \param ipaddr an IPv6 address used as a search key
+ * \param addr address used as a search key
  * \return the pointer to a neighbor cache on success, NULL on failure
  */
 sdn_ds_nbr_t *sdn_ds_nbr_lookup(const linkaddr_t *addr);
@@ -166,13 +163,13 @@ sdn_ds_nbr_t *sdn_ds_nbr_head(void);
  */
 sdn_ds_nbr_t *sdn_ds_nbr_next(sdn_ds_nbr_t *nbr);
 
-/**
+/* /**
  * The callback function to update link-layer stats in a neighbor
  * cache
  * \param status MAC return value defined in mac.h
  * \param numtx the number of transmissions happened for a packet
  */
-//void sdn_ds_link_callback(int status, int numtx);
+//void sdn_ds_link_callback(int status, int numtx); */
 
 /**
  * The housekeeping function called periodically

@@ -66,21 +66,21 @@ bool sdnbuf_set_len(uint16_t len);
 
 /**
  * \brief          Updates the length field in the uIP buffer
- * \param buffer   The IPv6 header
+ * \param hdr      The header
  * \param len      The new length value
  */
 void sdnbuf_set_len_field(struct sdn_ip_hdr *hdr, uint16_t len);
 
 /**
  * \brief          Returns the value of the length field in the uIP buffer
- * \param buffer   The IPv6 header
- * \retvel         The length value
+ * \param hdr      The header
+ * \retval         The length value
  */
 uint8_t sdnbuf_get_len_field(struct sdn_ip_hdr *hdr);
 /**
  * \brief          Returns the value of the length field in the uIP buffer
- * \param buffer   The IPv6 header
- * \retvel         The length value
+ * \param hdr      The header
+ * \retval         The length value
  */
 uint8_t cpbuf_get_len_field(struct sdn_cp_hdr *hdr);
 
@@ -89,7 +89,6 @@ uint8_t cpbuf_get_len_field(struct sdn_cp_hdr *hdr);
  * \param buffer   A pointer to the buffer holding the IPv6 packet
  * \param size     The size of the data in the buffer
  * \param protocol A pointer to a variable where the protocol of the header will be stored
- * \param start    A flag that indicates if this is expected to be the IPv6 packet header or a later header (Extension header)
  * \retval         returns address of the next header, or NULL in case of insufficient buffer space
  *
  *                 This function moves to the next header in a IPv6 packet.
