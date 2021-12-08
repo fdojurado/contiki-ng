@@ -163,14 +163,6 @@ sdn_ds_nbr_t *sdn_ds_nbr_head(void);
  */
 sdn_ds_nbr_t *sdn_ds_nbr_next(sdn_ds_nbr_t *nbr);
 
-/* /**
- * The callback function to update link-layer stats in a neighbor
- * cache
- * \param status MAC return value defined in mac.h
- * \param numtx the number of transmissions happened for a packet
- */
-//void sdn_ds_link_callback(int status, int numtx); */
-
 /**
  * The housekeeping function called periodically
  */
