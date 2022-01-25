@@ -150,7 +150,7 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 #if FLOCKLAB_DEPLOYMENT
     node_id = FLOCKLAB_NODE_ID;
     ctrl_addr.u8[0] = node_id;
-    ctrl_addr.u8[1] = node_id;
+    ctrl_addr.u8[1] = 0;
     linkaddr_set_node_addr(&ctrl_addr);
 #endif
 
