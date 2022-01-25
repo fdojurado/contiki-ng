@@ -39,6 +39,8 @@
 
 #include "sdn-serial-protocol.h"
 #include "sdn-serial.h"
+#include "sd-wsn.h"
+#include "sdn.h"
 #if !CONTIKI_TARGET_COOJA
 #include "dev/uart1.h"
 #endif /* !CONTIKI_TARGET_COOJA */
@@ -87,10 +89,27 @@ static void serial_packet_input(void)
     if (sdn_serial_len > 0)
     {
         PRINTF("input_serial: received %u bytes\n", sdn_serial_len);
-        // sdn_input();
+        /* We need to copy the serial data to the IP packet first */
+        // Payload size
+        int8_t payload_size = SDN_SERIAL_PACKET_BUF->payload_len;
+        // Version, aggregation flag, and header lenght
+        SDN_IP_BUF->vahl = (0x01 << 5) | SDN_IPH_LEN;
+        // Total length
+        sdn_len = SDN_IPH_LEN + SDN_CPH_LEN + payload_size;
+        // Set lenght in the IP buffer
+        SDN_IP_BUF->len = sdn_len;
+        // Set time to live
+        SDN_IP_BUF->ttl = 0x40;
+        // Set upper layer protocol
+        SDN_IP_BUF->proto = SDN_PROTO_CP;
+        // Set source address
+        SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
+        // Set destination address
+        SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
+        sdn_input();
         if (sdn_serial_len > 0)
         {
-            // sdn_output();
+            sdn_output();
         }
     }
 }
