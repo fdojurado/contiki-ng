@@ -38,6 +38,7 @@
  */
 
 #include "sdn-serial-protocol.h"
+#include "net/sdn-net/sdn-net.h"
 #include "sdn-serial.h"
 #include "sd-wsn.h"
 #include "sdn.h"
@@ -50,6 +51,7 @@
 #endif /* Z1_DEF_H_ */
 
 #include <stdio.h>
+#include <string.h> // needed for memcpy
 
 /* Log configuration */
 #define DEBUG 1
@@ -89,8 +91,31 @@ static void serial_packet_input(void)
     if (sdn_serial_len > 0)
     {
         PRINTF("input_serial: received %u bytes\n", sdn_serial_len);
-        /* We need to copy the serial data to the IP packet first */
-        // Payload size
+        /* Inspect the received serial packet */
+        /* 
+        * If the reported length in the serial header doesnot match the packet size,
+        * then we drop the packet.
+        */
+        if (sdn_serial_len < sdn_serial_get_len(SDN_SERIAL_PACKET_BUF))
+        {
+            // SDN_STAT(++sdn_stat.ip.drop); // no stats for now
+            PRINTF(" serial line packet shorter than reported in the packet header\n");
+            goto drop;
+        }
+        /* Check that the serial packet length is acceptable given our IP buffer size. */
+        if (sdn_serial_len > sizeof(sdn_buf))
+        {
+            // SDN_STAT(++sdn_stat.ip.drop); // no stats for now
+            PRINTF("dropping serial line packet with length %d > %d\n",
+                   (int)sdn_serial_len, (int)sizeof(sdn_buf));
+            goto drop;
+        }
+        /* 
+        * Here, we assume that we are receiveing Network Configuration (NC) packets
+        * (do we expect any other type of packets? not for now) from the serial controller 
+        */
+        /* We need to copy the serial data to the IP/layer 3 packet first */
+        // Payload size - is this always the address to configure?
         int8_t payload_size = SDN_SERIAL_PACKET_BUF->payload_len;
         // Version, aggregation flag, and header lenght
         SDN_IP_BUF->vahl = (0x01 << 5) | SDN_IPH_LEN;
@@ -105,12 +130,36 @@ static void serial_packet_input(void)
         // Set source address
         SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
         // Set destination address
-        SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
+        SDN_IP_BUF->dest.u16 = sdnip_htons(SDN_SERIAL_PACKET_BUF->addr.u16);
+        // Checksum
+        SDN_IP_BUF->ipchksum = 0;
+        SDN_IP_BUF->ipchksum = ~sdn_ipchksum();
+        /* Set the control packet */
+        // Set the protocol travelling in this CP packet
+        SDN_CP_BUF->type = SDN_PROTO_NC;
+        // Set payload size in the control packet
+        SDN_CP_BUF->len = payload_size;
+        // The rank of the controlller is always 0
+        SDN_CP_BUF->rank = 0;
+        // The controller is connected to the main powers
+        SDN_CP_BUF->energy = 0xFFFF;
+        // The controller doesnot need this field
+#if SDN_WITH_TABLE_CHKSUM
+        SDN_CP_BUF->rt_chksum = 0;
+#endif
+        // Set first the payload before the chksum. Copy the NC packet in the payload of the CP packet
+        memcpy(SDN_CP_PAYLOAD(0), SDN_SERIAL_PACKET_PAYLOAD_BUF(0), payload_size);
+        // Set the checksum of the header plus the payload
+        SDN_CP_BUF->nachksum = 0;
+        SDN_CP_BUF->nachksum = ~sdn_nachksum(SDN_CP_BUF->len);
         sdn_input();
-        if (sdn_serial_len > 0)
+        if (sdn_len > 0)
         {
             sdn_output();
+            return;
         }
+    drop:
+        PRINTF("Dropping serial line packet.\n");
     }
 }
 /*---------------------------------------------------------------------------*/
