@@ -232,8 +232,7 @@ void sdn_data_input(void)
     This needs to be done instantenously to avoid incoming/outcoming packets
     erase the content of the sdn_ip buffer */
     sdn_serial_len = SDN_SERIAL_PACKETH_LEN + (SDN_DATAH_LEN + SDN_DATA_HDR_BUF->len);
-    SDN_SERIAL_PACKET_BUF->addr.u8[0] = sender.u8[0];
-    SDN_SERIAL_PACKET_BUF->addr.u8[1] = sender.u8[1];
+    SDN_SERIAL_PACKET_BUF->addr = sender;
     SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_DP;
     SDN_SERIAL_PACKET_BUF->payload_len = SDN_DATAH_LEN + SDN_DATA_HDR_BUF->len;
     SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
@@ -286,7 +285,10 @@ static void send_data_output(void)
 
         SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
 
+        PRINTF("Sending data packet with surce address: %d.%d\n", SDN_IP_BUF->scr.u8[0], SDN_IP_BUF->scr.u8[1]);
+
         SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
+        PRINTF("Sending data packet with dest address: %d.%d\n", SDN_IP_BUF->dest.u8[0], SDN_IP_BUF->dest.u8[1]);
 
         /* Data packet */
         seq++;
