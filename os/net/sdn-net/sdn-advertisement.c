@@ -238,8 +238,7 @@ void sdn_na_input(void)
     This needs to be done instantenously to avoid incoming/outcoming packets
     erase the content of the sdn_ip buffer */
     sdn_serial_len = SDN_SERIAL_PACKETH_LEN + (SDN_CPH_LEN + SDN_CP_BUF->len);
-    SDN_SERIAL_PACKET_BUF->addr.u8[0] = from.u8[0];
-    SDN_SERIAL_PACKET_BUF->addr.u8[1] = from.u8[1];
+    SDN_SERIAL_PACKET_BUF->addr = from;
     SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_CP;
     SDN_SERIAL_PACKET_BUF->payload_len = SDN_CPH_LEN + SDN_CP_BUF->len;
     SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
