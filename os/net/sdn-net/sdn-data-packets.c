@@ -285,10 +285,7 @@ static void send_data_output(void)
 
         SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
 
-        PRINTF("Sending data packet with surce address: %d.%d\n", SDN_IP_BUF->scr.u8[0], SDN_IP_BUF->scr.u8[1]);
-
         SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
-        PRINTF("Sending data packet with dest address: %d.%d\n", SDN_IP_BUF->dest.u8[0], SDN_IP_BUF->dest.u8[1]);
 
         /* Data packet */
         seq++;
