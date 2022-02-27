@@ -331,13 +331,11 @@ void sdnip_process(uint8_t flag)
             /* ND input */
             goto nd_input;
         case SDN_PROTO_CP:
-            /* ND input */
+            /* CP input */
             goto cp_input;
-            // goto nd_input;
         case SDN_PROTO_DATA:
-            /* ND input */
+            /* Data input */
             goto data_input;
-            // goto nd_input;
             break;
         }
         PRINTF("Protocol not found.\n");
@@ -380,10 +378,10 @@ cp_input:
             /* ND input */
             goto na_input;
         case SDN_PROTO_NC:
-            /* ND input */
+            /* NC input */
             goto nc_input;
         case SDN_PROTO_NC_ACK:
-            /* ND input */
+            /* NC_ACK input */
             goto nc_ack_input;
         }
         PRINTF("Protocol not found.\n");

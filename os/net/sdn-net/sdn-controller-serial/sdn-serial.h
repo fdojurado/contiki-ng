@@ -85,19 +85,6 @@ struct sdn_serial_packet_hdr
     uint8_t reserved[2];
 };
 
-struct sdn_serial_node
-{
-    // linkaddr_t addr;        // Node's ID
-    int16_t energy;      // remaing energy of node
-    uint8_t rank;        // Node's rank
-    uint8_t prev_ranks;  // # of previous rank nodes
-    uint8_t next_ranks;  // # of following rank nodes
-    uint8_t total_ranks; // total node of other rank
-    uint8_t total_nb;    // total neighbors
-    uint8_t alive;       // Flag to check whether the node still alive
-    // struct stimer lifetime; //node lifetime
-} sdn_ds_node_t;
-
 /**
  * The SDN serial packet buffer.
  *
