@@ -247,10 +247,8 @@ void sdn_na_input(void)
     memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_CP_BUF, sdn_serial_len);
     // send serial packet
     serial_packet_output();
-#endif /* SERIAL_SDN_CONTROLLER */
-
-    uint8_t prev_ranks = 0,
-            i;
+#else
+    uint8_t prev_ranks = 0, i;
     linkaddr_t neighbor_addr;
     uint8_t nxt_ranks = 0;
     int16_t sender_rank, sender_energy, neighbor_rssi, neighbor_rank;
@@ -286,6 +284,7 @@ void sdn_na_input(void)
 #if SDN_WITH_TABLE_CHKSUM
     sdn_ds_config_routes_chksum(&from, sdnip_htons(SDN_CP_BUF->rt_chksum));
 #endif /* SDN_WITH_TABLE_CHKSUM */
+#endif /* SERIAL_SDN_CONTROLLER */
 }
 #endif
 /*---------------------------------------------------------------------------*/
