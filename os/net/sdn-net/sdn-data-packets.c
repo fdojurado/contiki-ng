@@ -221,8 +221,10 @@ void sdn_data_init(void)
 void sdn_data_input(void)
 {
     linkaddr_t sender;
+#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
     uint16_t seq;
     uint8_t num;
+#endif /* SERIAL_SDN_CONTROLLER */
 
     /* Get the sender node address */
     sender.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
@@ -241,7 +243,7 @@ void sdn_data_input(void)
     memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_DATA_HDR_BUF, sdn_serial_len);
     // send serial packet
     serial_packet_output();
-#endif /* SERIAL_SDN_CONTROLLER */
+#else /* SERIAL_SDN_CONTROLLER */
 
     num = SDN_DATA_HDR_BUF->len / SDN_DATA_LEN;
 
@@ -266,6 +268,8 @@ void sdn_data_input(void)
         seq = sdnip_htons(SDN_DATA_BUF(i)->seq);
         sdn_data_pdr_add(&sender, seq);
     }
+
+#endif /* SERIAL_SDN_CONTROLLER */
 
     return;
 }

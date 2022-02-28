@@ -166,9 +166,10 @@
  * packets. The device driver should place incoming data into this
  * buffer. When sending data, the device driver should read the
  * outgoing data from this buffer.
-*/
+ */
 
-typedef union {
+typedef union
+{
     uint32_t u32[(SDN_BUFSIZE + 3) / 4];
     uint8_t u8[SDN_BUFSIZE];
 } sdn_buf_t;
@@ -246,7 +247,7 @@ extern uint16_t sdn_len;
 extern void *sdn_appdata;
 
 /** The final protocol after IPv6 extension headers:
-  * UIP_PROTO_TCP, UIP_PROTO_UDP or UIP_PROTO_ICMP6 */
+ * UIP_PROTO_TCP, UIP_PROTO_UDP or UIP_PROTO_ICMP6 */
 extern uint8_t sdn_last_proto;
 
 /**
@@ -458,7 +459,7 @@ struct sdn_cp_hdr
 #if SDN_WITH_TABLE_CHKSUM
         rt_chksum,
 #endif
-        nachksum;
+        cpchksum;
 };
 /* NA message structure */
 struct sdn_na_hdr
@@ -540,11 +541,11 @@ uint16_t sdn_ipchksum(void);
  */
 uint16_t sdn_ndchksum(void);
 /**
- * Calculate the ICMP checksum of the packet in uip_buf.
+ * Calculate the checksum of the entire control packet.
  *
  * \return The ICMP checksum of the ICMP packet in uip_buf
  */
-uint16_t sdn_nachksum(uint8_t len);
+uint16_t sdn_cpchksum(uint8_t len);
 
 /** \brief Periodic processing of data structures */
 extern struct etimer sdn_ds_timer_periodic;

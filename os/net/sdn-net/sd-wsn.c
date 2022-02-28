@@ -176,12 +176,12 @@ uint16_t sdn_ndchksum(void)
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
-uint16_t sdn_nachksum(uint8_t len)
+uint16_t sdn_cpchksum(uint8_t len)
 {
     uint16_t sum;
 
     sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_CPH_LEN + len);
-    PRINTF("sdn_nachksum: sum 0x%04x\n", sum);
+    PRINTF("sdn_cpchksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
@@ -389,7 +389,7 @@ cp_input:
     }
 na_input:
 #if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
-    if (sdn_nachksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
+    if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
     {
         // SDN_STAT(++sdn_stat.nd.drop);
         // SDN_STAT(++sdn_stat.nd.chkerr);
@@ -402,7 +402,7 @@ na_input:
     goto drop;
 nc_input:
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
-    if (sdn_nachksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
+    if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
     {
         // SDN_STAT(++sdn_stat.nd.drop);
         // SDN_STAT(++sdn_stat.nd.chkerr);
@@ -414,7 +414,7 @@ nc_input:
 #endif
 nc_ack_input:
 #if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
-    if (sdn_nachksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
+    if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
     {
         // SDN_STAT(++sdn_stat.nd.drop);
         // SDN_STAT(++sdn_stat.nd.chkerr);

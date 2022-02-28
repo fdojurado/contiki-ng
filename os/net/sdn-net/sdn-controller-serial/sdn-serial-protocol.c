@@ -150,8 +150,8 @@ static void serial_packet_input(void)
         // Set first the payload before the chksum. Copy the NC packet in the payload of the CP packet
         memcpy(SDN_CP_PAYLOAD(0), SDN_SERIAL_PACKET_PAYLOAD_BUF(0), payload_size);
         // Set the checksum of the header plus the payload
-        SDN_CP_BUF->nachksum = 0;
-        SDN_CP_BUF->nachksum = ~sdn_nachksum(SDN_CP_BUF->len);
+        SDN_CP_BUF->cpchksum = 0;
+        SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
         sdn_input();
         if (sdn_len > 0)
         {

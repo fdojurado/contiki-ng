@@ -142,7 +142,7 @@ void sdn_nd_input(void)
            ndRssi);
 
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
-    /* Check whether tthe ND message is
+    /* Check whether the ND message is
  * from the gateway. If it is, we need
  * to update the rank 
  * */

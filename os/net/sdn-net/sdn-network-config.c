@@ -262,8 +262,8 @@ void send_ack(uint16_t ack)
 
         SDN_NC_ACK_BUF->ack = sdnip_htons(ack + 1);
 
-        SDN_CP_BUF->nachksum = 0;
-        SDN_CP_BUF->nachksum = ~sdn_nachksum(SDN_CP_BUF->len);
+        SDN_CP_BUF->cpchksum = 0;
+        SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
 
         print_buff(sdn_buf, sdn_len, true);
 
@@ -510,8 +510,8 @@ static PT_THREAD(send_nc_output(linkaddr_t *addr))
                     count++;
                 }
 
-                SDN_CP_BUF->nachksum = 0;
-                SDN_CP_BUF->nachksum = ~sdn_nachksum(SDN_CP_BUF->len);
+                SDN_CP_BUF->cpchksum = 0;
+                SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
 
                 /* Update statistics */
                 SDN_STAT(++sdn_stat.ip.sent);

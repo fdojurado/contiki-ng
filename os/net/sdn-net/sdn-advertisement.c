@@ -328,6 +328,7 @@ static void send_na_output(void)
         SDN_CP_BUF->rank = sdnip_htons(my_rank.rank);
 
         SDN_CP_BUF->energy = sdnip_htons((int16_t)energy);
+        
 #if SDN_WITH_TABLE_CHKSUM
         SDN_CP_BUF->rt_chksum = ~calculate_table_chksum();
 #endif
@@ -344,8 +345,8 @@ static void send_na_output(void)
             count++;
         }
 
-        SDN_CP_BUF->nachksum = 0;
-        SDN_CP_BUF->nachksum = ~sdn_nachksum(SDN_CP_BUF->len);
+        SDN_CP_BUF->cpchksum = 0;
+        SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
 
         /* Update statistics */
         SDN_STAT(++sdn_stat.ip.sent);
