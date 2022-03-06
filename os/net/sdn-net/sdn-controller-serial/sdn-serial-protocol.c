@@ -92,10 +92,12 @@ static void serial_packet_input(void)
     {
         PRINTF("input_serial: received %u bytes\n", sdn_serial_len);
         /* Inspect the received serial packet */
-        /* 
-        * If the reported length in the serial header doesnot match the packet size,
-        * then we drop the packet.
-        */
+        // As this is a serial interface, we assume this is a reliable connection;
+        // Therefore, we don't include a checksum field in the header of the serial pkt
+        /*
+         * If the reported length in the serial header doesnot match the packet size,
+         * then we drop the packet.
+         */
         if (sdn_serial_len < sdn_serial_get_len(SDN_SERIAL_PACKET_BUF))
         {
             // SDN_STAT(++sdn_stat.ip.drop); // no stats for now
@@ -110,10 +112,10 @@ static void serial_packet_input(void)
                    (int)sdn_serial_len, (int)sizeof(sdn_buf));
             goto drop;
         }
-        /* 
-        * Here, we assume that we are receiveing Network Configuration (NC) packets
-        * (do we expect any other type of packets? not for now) from the serial controller 
-        */
+        /*
+         * Here, we assume that we are receiveing Network Configuration (NC) packets
+         * (do we expect any other type of packets? not for now) from the serial controller
+         */
         /* We need to copy the serial data to the IP/layer 3 packet first */
         // Payload size - is this always the address to configure?
         int8_t payload_size = SDN_SERIAL_PACKET_BUF->payload_len;

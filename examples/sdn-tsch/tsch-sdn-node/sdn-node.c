@@ -184,7 +184,7 @@ PROCESS_THREAD(sdn_node_process, ev, data)
 #endif */
     /* set controller address assuming is a Z1 mote */
     ctrl_addr.u8[0] = 1;
-    ctrl_addr.u8[1] = 0;
+    ctrl_addr.u8[1] = 1;
 
     LOG_INFO("Setting controller addr ");
     LOG_INFO_LLADDR((linkaddr_t *)&ctrl_addr);

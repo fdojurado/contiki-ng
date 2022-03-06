@@ -48,6 +48,12 @@
 #include "sdn-network-config.h"
 #include "sdn-data-packets.h"
 
+#if SERIAL_SDN_CONTROLLER
+#include "sdn-controller-serial/sdn-serial.h"
+#include "sdn-controller-serial/sdn-serial-protocol.h"
+#include <string.h>
+#endif /* SERIAL_SDN_CONTROLLER */
+
 /* Log configuration */
 #define DEBUG 1
 #if DEBUG
@@ -89,7 +95,7 @@ void sdn_output()
     }
 
     /* We first check if the destination address is one of ours. There is no
-   * loopback interface -- instead, process this directly as incoming. */
+     * loopback interface -- instead, process this directly as incoming. */
     if (linkaddr_cmp(&SDN_IP_BUF->dest, &linkaddr_node_addr))
     {
         PRINTF("output: sending to ourself\n");
@@ -103,6 +109,15 @@ void sdn_output()
     // nexthop = NULL;
     if (nexthop == NULL)
     {
+#if SERIAL_SDN_CONTROLLER
+        // Check if this packet needs to be forwarded to the serial controller
+        if (linkaddr_cmp(&ctrl_addr, &dest))
+        {
+            // Forward packet to serial interface
+            PRINTF("Forwarding packet to serial interface\n");
+            serial_ip_output();
+        }
+#endif /* SERIAL_SDN_CONTROLLER */
         goto exit;
     }
     PRINTF("output: sending to %d.%d\n",
@@ -111,7 +126,7 @@ void sdn_output()
     sdn_ip_output(nexthop);
 
 exit:
-    // PRINTF("output: packet not forwarded\n");
+    PRINTF("output: packet not forwarded\n");
     sdnbuf_clear();
     return;
 }
@@ -139,6 +154,24 @@ void sdn_ip_input(void)
     } /* else - do nothing and drop */
     sdnbuf_clear();
 }
+/*---------------------------------------------------------------------------*/
+#if SERIAL_SDN_CONTROLLER
+void serial_ip_output()
+{
+    linkaddr_t from;
+    /* Get the sender node address */
+    from.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
+    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_IP_BUF->len;
+    SDN_SERIAL_PACKET_BUF->addr = from;
+    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_CP;
+    SDN_SERIAL_PACKET_BUF->payload_len = sdn_serial_len;
+    SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
+    SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
+    // copy payload to send serial buffer
+    memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_IP_BUF, sdn_serial_len);
+    serial_packet_output();
+}
+#endif /* SERIAL_SDN_CONTROLLER */
 /*---------------------------------------------------------------------------*/
 uint8_t sdn_ip_output(const linkaddr_t *dest)
 {
@@ -174,7 +207,7 @@ eventhandler(process_event_t ev, process_data_t data)
                 etimer_expired(&nd_timer_periodic))
             {
                 sdn_nd_periodic();
-                //tcpip_ipv6_output();
+                // tcpip_ipv6_output();
             }
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
             if (data == &data_timer_periodic &&
@@ -187,7 +220,7 @@ eventhandler(process_event_t ev, process_data_t data)
                 etimer_expired(&na_timer_periodic))
             {
                 sdn_na_periodic();
-                //tcpip_ipv6_output();
+                // tcpip_ipv6_output();
             }
 #if SDN_CONTROLLER
             if (data == &nc_timer_periodic &&

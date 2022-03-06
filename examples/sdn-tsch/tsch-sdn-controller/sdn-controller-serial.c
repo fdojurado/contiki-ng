@@ -76,7 +76,7 @@ volatile uint16_t node_id;          // must be volatile
 PROCESS(serial_sdn_controller_process, "serial-sdn-controller example");
 // AUTOSTART_PROCESSES(&serial_sdn_controller_process, &sdn_process);
 AUTOSTART_PROCESSES(&serial_sdn_controller_process);
-//process_start(&sdn_process, NULL);
+// process_start(&sdn_process, NULL);
 /*-------------------------------TSCH configuration---------------------------*/
 /* Put all cells on the same slotframe */
 #define APP_SLOTFRAME_HANDLE 1
@@ -125,7 +125,7 @@ initialize_tsch_schedule(void)
         slot_offset = APP_UNICAST_TIMESLOT;
         channel_offset = i;
         /* Warning: LINK_OPTION_SHARED cannot be configured, as with this schedule
-     * backoff windows will not be reset correctly! */
+         * backoff windows will not be reset correctly! */
         link_options = remote_id == node_id ? LINK_OPTION_RX : LINK_OPTION_TX;
 
         tsch_schedule_add_link(sf_common,
@@ -154,7 +154,10 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     linkaddr_set_node_addr(&ctrl_addr);
 #endif
 
-    linkaddr_copy(&ctrl_addr, &linkaddr_node_addr);
+    // Set the controller address as 1.1 where the sink takes the 1.0 address
+    ctrl_addr.u8[0] = 1;
+    ctrl_addr.u8[1] = 1;
+    // linkaddr_copy(&ctrl_addr, &linkaddr_node_addr);
 
 #if MAC_CONF_WITH_TSCH
     initialize_tsch_schedule();
@@ -175,11 +178,11 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     /* start the sdn serial interface */
     sdn_serial_protocol_init();
     /* Initialize NullNet */
-    //sdn_net_buf = (uint8_t *)&count;
-    //sdn_net_len = sizeof(count);
-    // sdn_net_set_input_callback(input_callback);
+    // sdn_net_buf = (uint8_t *)&count;
+    // sdn_net_len = sizeof(count);
+    //  sdn_net_set_input_callback(input_callback);
 
-    //etimer_set(&periodic_timer, SEND_INTERVAL);
+    // etimer_set(&periodic_timer, SEND_INTERVAL);
     while (1)
     {
         PROCESS_YIELD();

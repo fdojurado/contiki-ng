@@ -51,7 +51,7 @@ extern linkaddr_t ctrl_addr;
  *
  * This event is posted to a process whenever a ND event has occurred.
  */
-//extern process_event_t tcpip_icmp6_event;
+// extern process_event_t tcpip_icmp6_event;
 
 /**
  * \brief register an ICMPv6 callback
@@ -65,14 +65,14 @@ extern linkaddr_t ctrl_addr;
  * If an application registers here, it will be polled with a
  * process_post_synch every time an ICMPv6 packet is received.
  */
-//uint8_t icmp6_new(void *appstate);
+// uint8_t icmp6_new(void *appstate);
 
 /**
  * This function is called at reception of an ICMPv6 packet
  * If an application registered as an ICMPv6 listener (with
  * icmp6_new), it will be called through a process_post_synch()
  */
-//void tcpip_icmp6_call(uint8_t type);
+// void tcpip_icmp6_call(uint8_t type);
 
 /** @} */
 /**
@@ -92,6 +92,19 @@ extern process_event_t sdn_event;
  *             uip_len variable.
  */
 void sdn_ip_input(void);
+
+#if SERIAL_SDN_CONTROLLER
+/**
+ * \brief      Deliver an incoming packet to the serial interface
+ *
+ *             This function is called by network device drivers to
+ *             deliver an incoming packet to serial interface. The
+ *             incoming packet must be present in the uip_buf buffer,
+ *             and the length of the packet must be in the global
+ *             uip_len variable.
+ */
+void serial_ip_output(void);
+#endif /* SERIAL_SDN_CONTROLLER */
 
 /**
  * \brief Output packet to layer 2
