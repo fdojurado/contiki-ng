@@ -118,42 +118,11 @@ static void serial_packet_input(void)
          */
         /* We need to copy the serial data to the IP/layer 3 packet first */
         // Payload size - is this always the address to configure?
-        int8_t payload_size = SDN_SERIAL_PACKET_BUF->payload_len;
-        // Version, aggregation flag, and header lenght
-        SDN_IP_BUF->vahl = (0x01 << 5) | SDN_IPH_LEN;
-        // Total length
-        sdn_len = SDN_IPH_LEN + SDN_CPH_LEN + payload_size;
-        // Set lenght in the IP buffer
-        SDN_IP_BUF->len = sdn_len;
-        // Set time to live
-        SDN_IP_BUF->ttl = 0x40;
-        // Set upper layer protocol
-        SDN_IP_BUF->proto = SDN_PROTO_CP;
-        // Set source address
-        SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
-        // Set destination address
-        SDN_IP_BUF->dest.u16 = sdnip_htons(SDN_SERIAL_PACKET_BUF->addr.u16);
-        // Checksum
-        SDN_IP_BUF->ipchksum = 0;
-        SDN_IP_BUF->ipchksum = ~sdn_ipchksum();
-        /* Set the control packet */
-        // Set the protocol travelling in this CP packet
-        SDN_CP_BUF->type = SDN_PROTO_NC;
-        // Set payload size in the control packet
-        SDN_CP_BUF->len = payload_size;
-        // The rank of the controlller is always 0
-        SDN_CP_BUF->rank = 0;
-        // The controller is connected to the main powers
-        SDN_CP_BUF->energy = 0xFFFF;
-        // The controller doesnot need this field
-#if SDN_WITH_TABLE_CHKSUM
-        SDN_CP_BUF->rt_chksum = 0;
-#endif
+        uint8_t *buffer;
+        buffer = (uint8_t *)SDN_IP_BUF;
         // Set first the payload before the chksum. Copy the NC packet in the payload of the CP packet
-        memcpy(SDN_CP_PAYLOAD(0), SDN_SERIAL_PACKET_PAYLOAD_BUF(0), payload_size);
-        // Set the checksum of the header plus the payload
-        SDN_CP_BUF->cpchksum = 0;
-        SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
+        memcpy(buffer, sdn_serial_packet_buf + SDN_SERIAL_PACKETH_LEN, SDN_SERIAL_PACKET_BUF->payload_len);
+        sdn_len = SDN_SERIAL_PACKET_BUF->payload_len;
         sdn_input();
         if (sdn_len > 0)
         {
