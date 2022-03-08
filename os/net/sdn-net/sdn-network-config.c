@@ -226,6 +226,7 @@ void send_ack(uint16_t ack)
 {
     const linkaddr_t *nxthop;
 
+    /* TODO: nexthop for serial interface will return null */
     nxthop = NETSTACK_ROUTING.nexthop(&ctrl_addr);
     if (nxthop != NULL)
     {
@@ -266,7 +267,7 @@ void send_ack(uint16_t ack)
         SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
 
         print_buff(sdn_buf, sdn_len, true);
-
+        /* For the serial controller, the nxthop should be different */
         sdn_ip_output(nxthop);
     }
 }

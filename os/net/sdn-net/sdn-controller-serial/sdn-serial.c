@@ -224,18 +224,18 @@ static int copy_to_tx_buffer()
 
     /* Copy payload */
     uint16_t size = sdn_serial_len - SDN_SERIAL_PACKETH_LEN; //payload size
-    PRINTF("payload size %d\n", size);
+    // PRINTF("payload size %d\n", size);
     uint8_t i = 0;
     uint8_t *ptr;
     while (size)
     {
         ptr = SDN_SERIAL_PACKET_PAYLOAD_BUF(i);
-        PRINTF("in payload %d\n", *ptr);
+        // PRINTF("in payload %d\n", *ptr);
         if (ringbuf_put(&txbuf, *ptr) == 0)
             return 1;
         size--;
         i++;
-        PRINTF("payload data %d\n", size);
+        // PRINTF("payload data %d\n", size);
     }
     return 0;
 }
@@ -335,7 +335,7 @@ int sdn_serial_input_byte(unsigned char data)
     if (frame_length < (SDN_SERIAL_MAX_PACKET_SIZE + 2))
     { // Adding 2 bytes from serial communication
         /* copy SDN_SERIAL_BUF into outgoing txbuf_data  */
-        PRINTF("data rcv:0x%X\n", data);
+        // PRINTF("data rcv:0x%X\n", data);
         if (ringbuf_put(&rxbuf, (uint8_t)data) == 0)
             return 1;
         // currentSerialPacket[frame_length] = data;

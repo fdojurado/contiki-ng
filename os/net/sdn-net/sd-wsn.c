@@ -401,7 +401,7 @@ na_input:
 #endif
     goto drop;
 nc_input:
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+// #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
     if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
     {
         // SDN_STAT(++sdn_stat.nd.drop);
@@ -411,7 +411,7 @@ nc_input:
     }
     /* This is NC processing. */
     sdn_nc_input();
-#endif
+// #endif
 nc_ack_input:
 #if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
     if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)

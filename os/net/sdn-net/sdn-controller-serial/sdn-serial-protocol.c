@@ -123,7 +123,7 @@ static void serial_packet_input(void)
         // Set first the payload before the chksum. Copy the NC packet in the payload of the CP packet
         memcpy(buffer, sdn_serial_packet_buf + SDN_SERIAL_PACKETH_LEN, SDN_SERIAL_PACKET_BUF->payload_len);
         sdn_len = SDN_SERIAL_PACKET_BUF->payload_len;
-        sdn_input();
+        sdn_ip_input();
         if (sdn_len > 0)
         {
             sdn_output();
@@ -154,6 +154,7 @@ PROCESS_THREAD(sdn_serial_protocol_process, ev, data)
 
     /* This is platform dependent */
 #ifdef Z1_DEF_H_
+    uart0_init(BAUD2UBR(115200));            // set the baud rate as necessary
     uart0_set_input(&sdn_serial_input_byte);
 #endif /* Z1_DEF_H_ */
 #ifdef CC26XX_UART_H_
