@@ -158,6 +158,10 @@ void sdn_ip_input(void)
 #if SERIAL_SDN_CONTROLLER
 void serial_ip_output()
 {
+    if (sdn_len == 0)
+    {
+        return;
+    }
     linkaddr_t from;
     /* Get the sender node address */
     from.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
@@ -168,7 +172,7 @@ void serial_ip_output()
     SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
     SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
     // copy payload to send serial buffer
-    memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_IP_BUF, sdn_serial_len);
+    memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_IP_BUF, SDN_IP_BUF->len);
     serial_packet_output();
 }
 #endif /* SERIAL_SDN_CONTROLLER */

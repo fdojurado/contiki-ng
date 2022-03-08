@@ -217,33 +217,17 @@ void sdn_data_init(void)
     return;
 }
 /*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER
 void sdn_data_input(void)
 {
     linkaddr_t sender;
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !SDN_CONTROLLER
     uint16_t seq;
     uint8_t num;
-#endif /* SERIAL_SDN_CONTROLLER */
+#endif /* !SDN_CONTROLLER */
 
     /* Get the sender node address */
     sender.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
-
-#if SERIAL_SDN_CONTROLLER
-    /* We want to forward the entire data packet to the serial controller.
-    This needs to be done instantenously to avoid incoming/outcoming packets
-    erase the content of the sdn_ip buffer */
-    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + (SDN_DATAH_LEN + SDN_DATA_HDR_BUF->len);
-    SDN_SERIAL_PACKET_BUF->addr = sender;
-    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_DP;
-    SDN_SERIAL_PACKET_BUF->payload_len = SDN_DATAH_LEN + SDN_DATA_HDR_BUF->len;
-    SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
-    SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
-    // copy payload to send serial buffer
-    memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_DATA_HDR_BUF, sdn_serial_len);
-    // send serial packet
-    serial_packet_output();
-#else /* SERIAL_SDN_CONTROLLER */
 
     num = SDN_DATA_HDR_BUF->len / SDN_DATA_LEN;
 
@@ -268,8 +252,6 @@ void sdn_data_input(void)
         seq = sdnip_htons(SDN_DATA_BUF(i)->seq);
         sdn_data_pdr_add(&sender, seq);
     }
-
-#endif /* SERIAL_SDN_CONTROLLER */
 
     return;
 }

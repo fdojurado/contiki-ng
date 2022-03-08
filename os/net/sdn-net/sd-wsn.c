@@ -99,7 +99,7 @@ void sdn_wsn_init(void)
 /*---------------------------------------------------------------------------*/
 void print_buff(uint8_t *buf, size_t buflen, int8_t bare)
 {
-    //PRINTF("sof dump.\n");
+    // PRINTF("sof dump.\n");
     if (bare)
     {
         while (buflen--)
@@ -235,10 +235,10 @@ void sdnip_process(uint8_t flag)
         goto drop;
     }
 
-    /* 
-    * If the reported length in the ip header doesnot match the packet size,
-    * then we drop the packet.
-    */
+    /*
+     * If the reported length in the ip header doesnot match the packet size,
+     * then we drop the packet.
+     */
     if (sdn_len < sdnbuf_get_len_field(SDN_IP_BUF))
     {
         SDN_STAT(++sdn_stat.ip.drop);
@@ -256,16 +256,16 @@ void sdnip_process(uint8_t flag)
     }
 
     /*
-   * Process Packets with a routable multicast destination:
-   * - We invoke the multicast engine and let it do its thing
-   *   (cache, forward etc).
-   * - We never execute the datagram forwarding logic in this file here. When
-   *   the engine returns, forwarding has been handled if and as required.
-   * - Depending on the return value, we either discard or deliver up the stack
-   *
-   * All multicast engines must hook in here. After this function returns, we
-   * expect UIP_BUF to be unmodified
-   */
+     * Process Packets with a routable multicast destination:
+     * - We invoke the multicast engine and let it do its thing
+     *   (cache, forward etc).
+     * - We never execute the datagram forwarding logic in this file here. When
+     *   the engine returns, forwarding has been handled if and as required.
+     * - Depending on the return value, we either discard or deliver up the stack
+     *
+     * All multicast engines must hook in here. After this function returns, we
+     * expect UIP_BUF to be unmodified
+     */
 
     dest.u16 = sdnip_htons(SDN_IP_BUF->dest.u16);
 
@@ -358,7 +358,7 @@ nd_input:
     PRINTF("ND input length %d\n", sdn_len);
     goto drop;
 data_input:
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER
     /* Process incoming data packet */
     sdn_data_input();
     // SDN_STAT(++sdn_stat.data.recv);
@@ -388,7 +388,7 @@ cp_input:
         goto drop;
     }
 na_input:
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER
     if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
     {
         // SDN_STAT(++sdn_stat.nd.drop);
@@ -401,7 +401,7 @@ na_input:
 #endif
     goto drop;
 nc_input:
-// #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
     if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
     {
         // SDN_STAT(++sdn_stat.nd.drop);
@@ -411,7 +411,9 @@ nc_input:
     }
     /* This is NC processing. */
     sdn_nc_input();
-// #endif
+    // At this stage, we have already built our ACK packet
+    goto send;
+#endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
 nc_ack_input:
 #if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
     if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)

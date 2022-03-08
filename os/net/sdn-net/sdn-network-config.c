@@ -53,6 +53,12 @@
 #include "net/sdn-net/sdnbuf.h"
 #endif
 #include "net/routing/routing.h"
+
+#if SERIAL_SDN_CONTROLLER
+#include "sdn-controller-serial/sdn-serial.h"
+#include "sdn-controller-serial/sdn-serial-protocol.h"
+#include <string.h> // needed for memcpy
+#endif              /* SERIAL_SDN_CONTROLLER */
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "SDN-NC"
@@ -161,7 +167,7 @@ chksum(uint16_t sum, const uint8_t *data, uint16_t len)
     }
 
     LOG_INFO("chksum, sum 0x%04x\n",
-           sum);
+             sum);
 
     /* Return sum in host byte order. */
     return sum;
@@ -174,7 +180,8 @@ static uint16_t calculate_node_chksum(sdn_ds_config_route_t *rt)
     sdn_ds_config_route_list_t *list_rt;
     uint16_t sum = 0;
 
-    typedef union {
+    typedef union
+    {
         uint16_t u16[2];
         uint8_t u8[4];
     } data_t;
@@ -189,25 +196,25 @@ static uint16_t calculate_node_chksum(sdn_ds_config_route_t *rt)
          list_rt = list_item_next(list_rt))
     {
         LOG_INFO("calculate_table_chksum: %d.%d - %d.%d\n",
-               list_rt->dest.u8[0], list_rt->dest.u8[1],
-               list_rt->via.u8[0], list_rt->via.u8[1]);
+                 list_rt->dest.u8[0], list_rt->dest.u8[1],
+                 list_rt->via.u8[0], list_rt->via.u8[1]);
         data.u16[0] = list_rt->dest.u16;
         data.u16[1] = list_rt->via.u16;
         sum = chksum(sum, &data.u8[0], 4);
         LOG_INFO("sum 0x%04x\n",
-               sum);
+                 sum);
     }
     LOG_INFO("routing table chksum: sum 0x%04x\n",
-           sum);
+             sum);
     data.u16[0] = sum;
     data.u16[1] = rt->recv_chksum;
     LOG_INFO("rcv chksum of node %d.%d: 0x%04x\n",
-           rt->scr.u8[0], rt->scr.u8[1],
-           rt->recv_chksum);
+             rt->scr.u8[0], rt->scr.u8[1],
+             rt->recv_chksum);
     sum = chksum(0, &data.u8[0], 4);
 
     LOG_INFO("sum with rcv chksum 0x%04x\n",
-           sum);
+             sum);
 
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
@@ -221,59 +228,50 @@ void sdn_nc_ack_input()
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if !SDN_CONTROLLER
+#if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
 void send_ack(uint16_t ack)
 {
-    const linkaddr_t *nxthop;
+    LOG_INFO("Sending ACK (%u) to %d.%dn",
+             ack + 1,
+             ctrl_addr.u8[0], ctrl_addr.u8[1]);
+    /* layer 3 packet */
+    SDN_IP_BUF->vahl = (0x01 << 5) | SDN_IPH_LEN;
+    /* Total length */
+    sdn_len = SDN_IPH_LEN + SDN_CPH_LEN + SDN_NC_ACK_LEN;
 
-    /* TODO: nexthop for serial interface will return null */
-    nxthop = NETSTACK_ROUTING.nexthop(&ctrl_addr);
-    if (nxthop != NULL)
-    {
-        LOG_INFO("Sending ACK (%u) to %d.%d via %d.%d\n",
-               ack + 1,
-               ctrl_addr.u8[0], ctrl_addr.u8[1],
-               nxthop->u8[0], nxthop->u8[1]);
-        /* layer 3 packet */
-        SDN_IP_BUF->vahl = (0x01 << 5) | SDN_IPH_LEN;
-        /* Total length */
-        sdn_len = SDN_IPH_LEN + SDN_CPH_LEN + SDN_NC_ACK_LEN;
+    SDN_IP_BUF->len = sdn_len;
 
-        SDN_IP_BUF->len = sdn_len;
+    SDN_IP_BUF->ttl = 0x40;
 
-        SDN_IP_BUF->ttl = 0x40;
+    SDN_IP_BUF->proto = SDN_PROTO_CP;
 
-        SDN_IP_BUF->proto = SDN_PROTO_CP;
+    SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
 
-        SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
+    SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
 
-        SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
+    SDN_IP_BUF->ipchksum = 0;
 
-        SDN_IP_BUF->ipchksum = 0;
-        SDN_IP_BUF->ipchksum = ~sdn_ipchksum();
+    /* Control packet */
+    SDN_CP_BUF->type = SDN_PROTO_NC_ACK;
 
-        /* Control packet */
-        SDN_CP_BUF->type = SDN_PROTO_NC_ACK;
+    SDN_CP_BUF->len = SDN_NC_ACK_LEN;
 
-        SDN_CP_BUF->len = SDN_NC_ACK_LEN;
+    SDN_CP_BUF->rank = 0;
 
-        SDN_CP_BUF->rank = 0;
+    SDN_CP_BUF->energy = 0;
 
-        SDN_CP_BUF->energy = 0;
+    SDN_NC_ACK_BUF->ack = sdnip_htons(ack + 1);
 
-        SDN_NC_ACK_BUF->ack = sdnip_htons(ack + 1);
+    SDN_CP_BUF->cpchksum = 0;
+    SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
 
-        SDN_CP_BUF->cpchksum = 0;
-        SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
-
-        print_buff(sdn_buf, sdn_len, true);
-        /* For the serial controller, the nxthop should be different */
-        sdn_ip_output(nxthop);
-    }
+    print_buff(sdn_buf, sdn_len, true);
+    /* For the serial controller, the nxthop should be different */
+    return;
 }
-#endif
+#endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
 /*---------------------------------------------------------------------------*/
-#if !SDN_CONTROLLER
+#if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
 void sdn_nc_input(void)
 {
     linkaddr_t via, dest, ch_addr;
@@ -302,8 +300,9 @@ void sdn_nc_input(void)
 
     /* Send ACK */
     send_ack(ack);
+    return;
 }
-#endif
+#endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
 /*---------------------------------------------------------------------------*/
 #if SDN_CONTROLLER
 static void ack_list_flush(void)
@@ -342,7 +341,7 @@ static struct ack_num *ack_lookup(uint16_t *ack)
     if (found != NULL)
     {
         LOG_INFO("Ack found: %u\n",
-               found->ack);
+                 found->ack);
     }
     return found;
 }
@@ -403,7 +402,7 @@ static struct ack_num *ack_add(uint16_t *ack)
     ack_ptr->ack = *ack;
     list_add(ack_list, ack_ptr);
     LOG_INFO("adding ack: %u\n",
-           ack_ptr->ack);
+             ack_ptr->ack);
 
     return ack_ptr;
 }
@@ -473,10 +472,10 @@ static PT_THREAD(send_nc_output(linkaddr_t *addr))
                 SDN_CP_BUF->rank = sdnip_htons(ack);
 
                 LOG_INFO("Sending NC to %d.%d via %d.%d with ACK %u (%d)\n",
-                       addr->u8[0], addr->u8[1],
-                       nxthop->u8[0], nxthop->u8[1],
-                       ack,
-                       rtx);
+                         addr->u8[0], addr->u8[1],
+                         nxthop->u8[0], nxthop->u8[1],
+                         ack,
+                         rtx);
 
                 /* Add ack to ack list */
                 ack_add(&ack);
@@ -562,7 +561,7 @@ static PT_THREAD(send_nc_pkt(void))
         if (addr != NULL)
         {
             LOG_INFO("New config packet to send (%d.%d)\n",
-                   addr->u8[0], addr->u8[1]);
+                     addr->u8[0], addr->u8[1]);
             PT_SPAWN(&send_pt, &output_pt, send_nc_output(addr));
         }
     } while (addr != NULL);
@@ -576,7 +575,7 @@ static void clean_nodes(const uint8_t *n, uint8_t *discovered)
     // uint8_t i = 0;
     // uint8_t *ptr = NULL;
     /* For every node, we do... */
-    dfs_node_flush_all(); //remove every node in added nodes
+    dfs_node_flush_all(); // remove every node in added nodes
     // for (ptr = buff; ptr < buff + n; ptr++) //initialize data to zero for each node
     // {
     //     *ptr = 0;
@@ -595,13 +594,13 @@ static PT_THREAD(sdn_nc_build(void))
     static struct nodes_ids *controller_id;
     controller_id = ctrl_node_id();
     static uint8_t num_vx;
-    sdn_ds_node_num(&num_vx); //number of vertices
+    sdn_ds_node_num(&num_vx); // number of vertices
     // num_vx = sdn_ds_node_num();
     // uint8_t j;
     // LOG_INFO("NODE_CACHES=%d size of visited_buff=%d (%d,%d)\n", NODE_BUFF,
     //        sizeof(visited_buff), NELEMS(visited_buff), sizeof(visited_buff[0]));
     // uint8_t *visited = visited_buff; //this allows to reuse the sdn buffer
-    uint8_t discovered = 0; //flag used for discovering nodes
+    uint8_t discovered = 0; // flag used for discovering nodes
     // uint8_t neighbor_to_ctr;  // Neighbor to the SDN controller
     // uint8_t neighbor_node; // Neighbor to the SDN node
     // uint8_t neighbor_to_node; // Neighbor to the SDN node
@@ -632,33 +631,33 @@ static PT_THREAD(sdn_nc_build(void))
             /* map adress */
             id = nodes_ids_lookup(&node->addr);
             LOG_INFO("node to test: %d.%d rank %d (name=%d)\n",
-                   id->addr.u8[0],
-                   id->addr.u8[1],
-                   node->rank,
-                   id->name);
+                     id->addr.u8[0],
+                     id->addr.u8[1],
+                     node->rank,
+                     id->name);
             neighbor_to_ctr = id;
             do
             {
                 id = neighbor_to_ctr;
                 LOG_INFO("j=%d (%d.%d) neighbor_to_ctr=%d (%d.%d)\n",
-                       id->name,
-                       id->addr.u8[0], id->addr.u8[1],
-                       neighbor_to_ctr->name,
-                       neighbor_to_ctr->addr.u8[0], neighbor_to_ctr->addr.u8[1]);
+                         id->name,
+                         id->addr.u8[0], id->addr.u8[1],
+                         neighbor_to_ctr->name,
+                         neighbor_to_ctr->addr.u8[0], neighbor_to_ctr->addr.u8[1]);
                 // LOG_INFO("no. elems in array=%d\n", NELEMS(visited_buff));
                 clean_nodes(&num_vx, &discovered);
                 scr = new_node(&id->addr);
                 LOG_INFO("source data: %d.%d (j=%d) (%d.%d)\n",
-                       scr->addr.u8[0],
-                       scr->addr.u8[1],
-                       id->name,
-                       id->addr.u8[0], id->addr.u8[1]);
+                         scr->addr.u8[0],
+                         scr->addr.u8[1],
+                         id->name,
+                         id->addr.u8[0], id->addr.u8[1]);
                 neighbor_to_ctr = dfs(scr, &controller_id->addr, &num_vx, neighbor_to_ctr, &discovered);
                 LOG_INFO("neighbor node to ctr of node %d (%d.%d) is %d (%d.%d)\n",
-                       id->name,
-                       id->addr.u8[0], id->addr.u8[1],
-                       neighbor_to_ctr->name,
-                       neighbor_to_ctr->addr.u8[0], neighbor_to_ctr->addr.u8[1]);
+                         id->name,
+                         id->addr.u8[0], id->addr.u8[1],
+                         neighbor_to_ctr->name,
+                         neighbor_to_ctr->addr.u8[0], neighbor_to_ctr->addr.u8[1]);
                 // addr.u8[0] = j;
                 // addr.u8[1] = 0;
                 // addr_nb.u8[0] = neighbor_to_ctr;
@@ -685,10 +684,10 @@ static PT_THREAD(sdn_nc_build(void))
             depth = 0;
             neighbor_to_node = controller_id;
             LOG_INFO("Finding path %d (%d.%d) to %d (%d.%d)\n",
-                   neighbor_to_node->name,
-                   neighbor_to_node->addr.u8[0], neighbor_to_node->addr.u8[1],
-                   id->name,
-                   id->addr.u8[0], id->addr.u8[1]);
+                     neighbor_to_node->name,
+                     neighbor_to_node->addr.u8[0], neighbor_to_node->addr.u8[1],
+                     id->name,
+                     id->addr.u8[0], id->addr.u8[1]);
             do
             {
                 neighbor_node = neighbor_to_node;
@@ -698,10 +697,10 @@ static PT_THREAD(sdn_nc_build(void))
 
                 neighbor_to_node = dfs(scr, &id->addr, &num_vx, neighbor_to_node, &discovered);
                 LOG_INFO("dest %d (%d.%d) via %d (%d.%d)\n",
-                       id->name,
-                       id->addr.u8[0], id->addr.u8[1],
-                       neighbor_to_node->name,
-                       neighbor_to_node->addr.u8[0], neighbor_to_node->addr.u8[1]);
+                         id->name,
+                         id->addr.u8[0], id->addr.u8[1],
+                         neighbor_to_node->name,
+                         neighbor_to_node->addr.u8[0], neighbor_to_node->addr.u8[1]);
 
                 if (neighbor_node->name == controller_id->name)
                     sdn_ds_route_add(&id->addr, 0, &neighbor_to_node->addr, CONTROLLER);

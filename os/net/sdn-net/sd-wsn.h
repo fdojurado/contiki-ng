@@ -503,7 +503,7 @@ struct sdn_nc_ack_hdr
 #define SDN_PROTO_PI 4     /* Packet-in */
 #define SDN_PROTO_PO 5     /* Packet-out */
 #define SDN_PROTO_NC 6     /* Network configuration */
-#define SDN_PROTO_NC_ACK 7 /* Neighbor advertisement */
+#define SDN_PROTO_NC_ACK 7 /* NC acknowledgement */
 #define SDN_PROTO_DATA 8   /* Data packet */
 
 /**

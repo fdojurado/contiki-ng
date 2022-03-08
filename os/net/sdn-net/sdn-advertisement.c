@@ -225,7 +225,7 @@ void sdn_na_init(void)
     return;
 }
 /*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER
 void sdn_na_input(void)
 {
     linkaddr_t from;
@@ -233,21 +233,6 @@ void sdn_na_input(void)
     from.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
     PRINTF("NA processing rcv from %d.%d\n",
            from.u8[0], from.u8[1]);
-#if SERIAL_SDN_CONTROLLER
-    /* We want to forward the entire CP packet to the serial controller.
-    This needs to be done instantenously to avoid incoming/outcoming packets
-    erase the content of the sdn_ip buffer */
-    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + (SDN_CPH_LEN + SDN_CP_BUF->len);
-    SDN_SERIAL_PACKET_BUF->addr = from;
-    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_CP;
-    SDN_SERIAL_PACKET_BUF->payload_len = SDN_CPH_LEN + SDN_CP_BUF->len;
-    SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
-    SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
-    // copy payload to send serial buffer
-    memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_CP_BUF, sdn_serial_len);
-    // send serial packet
-    serial_packet_output();
-#else
     uint8_t prev_ranks = 0, i;
     linkaddr_t neighbor_addr;
     uint8_t nxt_ranks = 0;
@@ -284,7 +269,6 @@ void sdn_na_input(void)
 #if SDN_WITH_TABLE_CHKSUM
     sdn_ds_config_routes_chksum(&from, sdnip_htons(SDN_CP_BUF->rt_chksum));
 #endif /* SDN_WITH_TABLE_CHKSUM */
-#endif /* SERIAL_SDN_CONTROLLER */
 }
 #endif
 /*---------------------------------------------------------------------------*/
@@ -328,7 +312,7 @@ static void send_na_output(void)
         SDN_CP_BUF->rank = sdnip_htons(my_rank.rank);
 
         SDN_CP_BUF->energy = sdnip_htons((int16_t)energy);
-        
+
 #if SDN_WITH_TABLE_CHKSUM
         SDN_CP_BUF->rt_chksum = ~calculate_table_chksum();
 #endif
