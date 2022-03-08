@@ -415,7 +415,7 @@ nc_input:
     goto send;
 #endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
 nc_ack_input:
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER
     if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
     {
         // SDN_STAT(++sdn_stat.nd.drop);
