@@ -35,7 +35,7 @@
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
 /* Num of max routing routes */
-// #define SDN_CONF_MAX_ROUTES 30
+#define SDN_CONF_MAX_ROUTES 30
 #define NBR_TABLE_CONF_MAX_NEIGHBORS 10
 /* Flocklab deployment? */
 /* Number of sdn nodes information */
@@ -75,7 +75,7 @@
 #define LOG_CONF_LEVEL_RPL LOG_LEVEL_NONE     /* Controller logs */
 #define LOG_CONF_LEVEL_IPV6 LOG_LEVEL_NONE     /* sdn-ds-route, sdn-ds-nbr, nb discovery, sdn-routing */
 #define LOG_CONF_LEVEL_6LOWPAN LOG_LEVEL_NONE /* sd-net */
-#define LOG_CONF_LEVEL_TCPIP LOG_LEVEL_NONE    /* sdn, advertisement, sd-wsn */
+#define LOG_CONF_LEVEL_TCPIP LOG_LEVEL_DBG    /* sdn, advertisement, sd-wsn */
 #define LOG_CONF_LEVEL_MAC LOG_LEVEL_DBG     /* MAC, TSCH */
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */
