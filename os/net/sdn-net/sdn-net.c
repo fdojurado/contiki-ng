@@ -80,6 +80,29 @@ static uint8_t packetbuf_hdr_len;
 // static int packetbuf_payload_len;
 
 static int last_rssi;
+/*-------------------------------------------------------------------------*/
+/* Basic netstack sniffer */
+/*-------------------------------------------------------------------------*/
+static struct netstack_sniffer *callback = NULL;
+
+void netstack_sniffer_add(struct netstack_sniffer *s)
+{
+  LOG_INFO("adding netstack packet sniffer\n");
+  callback = s;
+}
+
+void netstack_sniffer_remove(struct netstack_sniffer *s)
+{
+  callback = NULL;
+}
+
+static void
+set_packet_attrs(void)
+{
+  /* set protocol in NETWORK_ID */
+  packetbuf_set_attr(PACKETBUF_ATTR_NETWORK_ID, SDN_IP_BUF->proto);
+}
+
 /*--------------------------------------------------------------------*/
 static void
 init(void)
@@ -118,8 +141,14 @@ input(void)
 
   sdn_len = packetbuf_datalen();
 
-  /* Put uncompressed IP header in sicslowpan_buf. */
+  /* Put uncompressed IP header in sdn_buf. */
   memcpy(buffer, packetbuf_ptr, sdn_len);
+
+  if (callback)
+  {
+    set_packet_attrs();
+    callback->input_callback();
+  }
 
   // if (current_callback != NULL)
   // {
@@ -183,6 +212,11 @@ output(const linkaddr_t *localdest)
   //   // linkaddr_copy(&dest, localdest);
   //   packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, dest);
   // }
+  /* if callback is set then set attributes and call */
+  if (callback)
+  {
+    set_packet_attrs();
+  }
   packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &dest);
   packetbuf_set_addr(PACKETBUF_ADDR_SENDER, &linkaddr_node_addr);
   /* copy over the retransmission count from uipbuf attributes */
@@ -209,7 +243,7 @@ output(const linkaddr_t *localdest)
   // LOG_PRINT_LLADDR(packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
   // PRINTF_("\n");
   // NETSTACK_MAC.send(NULL, NULL);
-   NETSTACK_MAC.send(NULL, NULL);
+  NETSTACK_MAC.send(NULL, NULL);
   /* If we are sending multiple packets in a row, we need to let the
      watchdog know that we are still alive. */
   watchdog_periodic();

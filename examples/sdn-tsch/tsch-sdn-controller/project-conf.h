@@ -74,7 +74,7 @@
 /* Logs */
 #define LOG_CONF_LEVEL_RPL LOG_LEVEL_NONE     /* Controller logs */
 #define LOG_CONF_LEVEL_IPV6 LOG_LEVEL_NONE     /* sdn-ds-route, sdn-ds-nbr, nb discovery, sdn-routing */
-#define LOG_CONF_LEVEL_6LOWPAN LOG_LEVEL_NONE /* sd-net */
+#define LOG_CONF_LEVEL_6LOWPAN LOG_LEVEL_DBG /* sd-net */
 #define LOG_CONF_LEVEL_TCPIP LOG_LEVEL_DBG    /* sdn, advertisement, sd-wsn */
 #define LOG_CONF_LEVEL_MAC LOG_LEVEL_DBG     /* MAC, TSCH */
 /*---------------------------------------------------------------------------*/

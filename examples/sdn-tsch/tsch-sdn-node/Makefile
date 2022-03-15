@@ -5,6 +5,9 @@ CONTIKI = ../../../
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 
+
+MODULES += os/services/orchestra-sdn
+
 MAKE_WITH_SECURITY ?= 0
 
 PLATFORMS_EXCLUDE = nrf52dk
