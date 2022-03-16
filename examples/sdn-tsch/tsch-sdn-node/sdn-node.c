@@ -74,72 +74,9 @@ PROCESS(sdn_node_process, "sdn-node example");
 // AUTOSTART_PROCESSES(&sdn_node_process, &sdn_process, &sdn_energy);
 AUTOSTART_PROCESSES(&sdn_node_process, &sdn_energy);
 // AUTOSTART_PROCESSES(&sdn_process);
-//process_start(&sdn_process, NULL);
+// process_start(&sdn_process, NULL);
 
 /*-------------------------------TSCH configuration---------------------------*/
-/* Put all cells on the same slotframe */
-#define APP_SLOTFRAME_HANDLE 1
-/* Put all unicast cells on the same timeslot (for demonstration purposes only) */
-#define APP_UNICAST_TIMESLOT 1
-static void
-initialize_tsch_schedule(void)
-{
-    int i, j;
-    printf("printing current schedule1\n");
-    tsch_schedule_print();
-    printf("end printing current schedule1\n");
-    struct tsch_slotframe *sf_common = tsch_schedule_add_slotframe(APP_SLOTFRAME_HANDLE, APP_SLOTFRAME_SIZE);
-    uint16_t slot_offset;
-    uint16_t channel_offset;
-
-    printf("printing current schedule2\n");
-    tsch_schedule_print();
-    printf("end printing current schedule2\n");
-
-    /* A "catch-all" cell at (0, 0) */
-    slot_offset = 0;
-    channel_offset = 0;
-    tsch_schedule_add_link(sf_common,
-                           LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED,
-                           LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
-                           slot_offset, channel_offset, 0);
-
-    printf("printing current schedule3\n");
-    tsch_schedule_print();
-    printf("end printing current schedule3\n");
-    for (i = 0; i < 5 - 1; ++i)
-    {
-        uint8_t link_options;
-        linkaddr_t addr;
-        uint16_t remote_id = i + 1;
-
-        for (j = 0; j < sizeof(addr); j += 2)
-        {
-            addr.u8[j + 1] = remote_id & 0xff;
-            addr.u8[j + 0] = remote_id >> 8;
-            LOG_INFO("Setting addr");
-            LOG_INFO_LLADDR((linkaddr_t *)&addr);
-            LOG_INFO_("\n");
-        }
-
-        /* Add a unicast cell for each potential neighbor (in Cooja) */
-        /* Use the same slot offset; the right link will be dynamically selected at runtime based on queue sizes */
-        slot_offset = APP_UNICAST_TIMESLOT;
-        channel_offset = i;
-        /* Warning: LINK_OPTION_SHARED cannot be configured, as with this schedule
-     * backoff windows will not be reset correctly! */
-        link_options = remote_id == node_id ? LINK_OPTION_RX : LINK_OPTION_TX;
-
-        tsch_schedule_add_link(sf_common,
-                               link_options,
-                               LINK_TYPE_NORMAL, &addr,
-                               slot_offset, channel_offset, 1);
-    }
-
-    printf("printing current schedule4\n");
-    tsch_schedule_print();
-    printf("end printing current schedule4\n");
-}
 /*---------------------------------------------------------------------------*/
 void static print_stats(void)
 {
@@ -161,6 +98,7 @@ void static print_stats(void)
 PROCESS_THREAD(sdn_node_process, ev, data)
 {
     static struct etimer stats_timer, alive_timer;
+    int is_coordinator;
 
     PROCESS_BEGIN();
 
@@ -190,19 +128,23 @@ PROCESS_THREAD(sdn_node_process, ev, data)
     LOG_INFO_LLADDR((linkaddr_t *)&ctrl_addr);
     LOG_INFO_("\n");
     /* Initialize NullNet */
-    //sdn_net_buf = (uint8_t *)&count;
-    //sdn_net_len = sizeof(count);
-    // sdn_net_set_input_callback(input_callback);
+    // sdn_net_buf = (uint8_t *)&count;
+    // sdn_net_len = sizeof(count);
+    //  sdn_net_set_input_callback(input_callback);
 
     // etimer_set(&periodic_timer, SEND_INTERVAL);
-#if MAC_CONF_WITH_TSCH
-    initialize_tsch_schedule();
-    if (node_id == 1)
-    { /* Running on the root? */
+    is_coordinator = 0;
+
+#if CONTIKI_TARGET_COOJA || CONTIKI_TARGET_Z1
+    is_coordinator = (node_id == 1);
+#endif
+
+    if (is_coordinator)
+    {
         LOG_INFO("Setting as the root\n");
         tsch_set_coordinator(1);
     }
-#endif
+    NETSTACK_MAC.on();
     process_start(&sdn_process, NULL);
     while (1)
     {

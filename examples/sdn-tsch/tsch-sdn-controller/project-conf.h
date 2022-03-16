@@ -55,14 +55,17 @@
 /*******************************************************/
 /******************* Configure TSCH ********************/
 /*******************************************************/
-/* Five nines reliability paper used the config below */
-#define TSCH_CONF_KEEPALIVE_TIMEOUT (30 * CLOCK_SECOND)
-#define TSCH_CONF_MAX_KEEPALIVE_TIMEOUT (60 * CLOCK_SECOND)
-/* Disable the 6TiSCH minimal schedule */
-#define TSCH_SCHEDULE_CONF_WITH_6TISCH_MINIMAL 0
+/* IEEE802.15.4 PANID */
+#define IEEE802154_CONF_PANID 0x81a5
 
-/* Size of the application-specific schedule; a number relatively prime to the hopseq length */
-#define APP_SLOTFRAME_SIZE 17
+/* Do not start TSCH at init, wait for NETSTACK_MAC.on() */
+#define TSCH_CONF_AUTOSTART 0
+
+#define TSCH_CALLBACK_PACKET_READY orchestra_callback_packet_ready
+#define TSCH_CALLBACK_NEW_TIME_SOURCE orchestra_callback_new_time_source
+#define NETSTACK_CONF_ROUTING_NEIGHBOR_ADDED_CALLBACK orchestra_callback_child_added
+#define NETSTACK_CONF_ROUTING_NEIGHBOR_REMOVED_CALLBACK orchestra_callback_child_removed
+#define TSCH_CALLBACK_ROOT_NODE_UPDATED orchestra_callback_root_node_updated
 
 #if WITH_SECURITY
 
@@ -72,10 +75,13 @@
 #endif /* WITH_SECURITY */
 
 /* Logs */
-#define LOG_CONF_LEVEL_RPL LOG_LEVEL_NONE     /* Controller logs */
-#define LOG_CONF_LEVEL_IPV6 LOG_LEVEL_NONE     /* sdn-ds-route, sdn-ds-nbr, nb discovery, sdn-routing */
-#define LOG_CONF_LEVEL_6LOWPAN LOG_LEVEL_DBG /* sd-net */
-#define LOG_CONF_LEVEL_TCPIP LOG_LEVEL_DBG    /* sdn, advertisement, sd-wsn */
-#define LOG_CONF_LEVEL_MAC LOG_LEVEL_DBG     /* MAC, TSCH */
+/* Logging */
+#define LOG_CONF_LEVEL_RPL                         LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_TCPIP                       LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_IPV6                        LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_6LOWPAN                     LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_MAC                         LOG_LEVEL_DBG
+#define LOG_CONF_LEVEL_FRAMER                      LOG_LEVEL_WARN
+#define TSCH_LOG_CONF_PER_SLOT                     1
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */

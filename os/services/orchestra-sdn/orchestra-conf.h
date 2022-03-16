@@ -98,7 +98,7 @@
 #ifdef ORCHESTRA_CONF_LINKADDR_HASH
 #define ORCHESTRA_LINKADDR_HASH                   ORCHESTRA_CONF_LINKADDR_HASH
 #else /* ORCHESTRA_CONF_LINKADDR_HASH */
-#define ORCHESTRA_LINKADDR_HASH(addr)             ((addr != NULL) ? (addr)->u8[LINKADDR_SIZE - 1] : -1)
+#define ORCHESTRA_LINKADDR_HASH(addr)             ((addr != NULL) ? (addr)->u8[0] : -1)
 #endif /* ORCHESTRA_CONF_LINKADDR_HASH */
 
 /* The hash function used to assign timeslot for a pair of given nodes.

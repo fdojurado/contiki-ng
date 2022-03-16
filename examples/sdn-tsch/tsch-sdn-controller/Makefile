@@ -9,7 +9,11 @@ MODULES += os/services/orchestra-sdn
 
 MAKE_WITH_SECURITY ?= 0
 
+MAKE_WITH_ORCHESTRA ?= 1
+
 PLATFORMS_EXCLUDE = nrf52dk
+
+include $(CONTIKI)/Makefile.dir-variables
 
 # Here, we want to select whether we want this node to be controller or not.
 # Serial controller connected
