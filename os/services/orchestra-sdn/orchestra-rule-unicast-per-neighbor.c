@@ -40,7 +40,6 @@
 
 #include "contiki.h"
 #include "orchestra.h"
-#include "net/ipv6/uip-ds6-route.h"
 #include "net/packetbuf.h"
 
 static uint16_t slotframe_handle = 0;
@@ -126,13 +125,13 @@ init(uint16_t sf_handle)
   }
 }
 /*---------------------------------------------------------------------------*/
-struct orchestra_rule unicast_per_neighbor_rpl_ns = {
+struct orchestra_rule unicast_per_neighbor = {
   init,
   new_time_source,
   select_packet,
   child_added,
   child_removed,
   NULL,
-  "unicast per neighbor non-storing",
+  "unicast per neighbor",
   ORCHESTRA_UNICAST_PERIOD,
 };

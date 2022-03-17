@@ -68,6 +68,8 @@
 /* IEEE802.15.4 PANID */
 #define IEEE802154_CONF_PANID 0x81a5
 
+#define TSCH_PACKET_CONF_EACK_WITH_SRC_ADDR 1
+
 /* Do not start TSCH at init, wait for NETSTACK_MAC.on() */
 #define TSCH_CONF_AUTOSTART 0
 
