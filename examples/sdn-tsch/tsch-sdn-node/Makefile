@@ -5,9 +5,16 @@ CONTIKI = ../../../
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 
+
+MODULES += os/services/orchestra-sdn
+
 MAKE_WITH_SECURITY ?= 0
 
+MAKE_WITH_ORCHESTRA ?= 1
+
 PLATFORMS_EXCLUDE = nrf52dk
+
+include $(CONTIKI)/Makefile.dir-variables
 
 MODULES += $(CONTIKI_NG_SERVICES_DIR)/sdn-energy
 

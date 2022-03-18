@@ -44,8 +44,13 @@
 #include "lib/memb.h"
 #include "net/nbr-table.h"
 
+#if BUILD_WITH_ORCHESTRA
+#include "sdn.h"
+#include "net/mac/tsch/tsch.h"
+#endif /* BUILD_WITH_ORCHESTRA */
+
 /* Log configuration */
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -121,7 +126,7 @@ rm_routelist_callback(nbr_table_item_t *ptr)
 /*---------------------------------------------------------------------------*/
 void sdn_ds_route_init(void)
 {
-    cluster_head = 0; //We set the node to non-CH.
+    cluster_head = 0; // We set the node to non-CH.
 #if (SDN_MAX_ROUTES != 0)
     memb_init(&routememb);
     list_init(routelist);
@@ -296,6 +301,18 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
         return NULL;
     }
 
+#ifdef BUILD_WITH_ORCHESTRA
+    if (linkaddr_cmp(dest, &ctrl_addr))
+    {
+        PRINTF("destination is ctrl.\n");
+        if (tsch_is_associated == 1)
+        {
+            PRINTF("tsch associated.\n");
+            tsch_queue_update_time_source(nexthop);
+        }
+    }
+#endif /* BUILD_WITH_ORCHESTRA */
+
     /* Get link-layer address of next hop, make sure it is in neighbor table */
     const linkaddr_t *nexthop_lladdr = nexthop;
     if (nexthop_lladdr == NULL)
@@ -426,8 +443,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
            dest->u8[0], dest->u8[1]);
     PRINTF(" via %d.%d\n",
            nexthop->u8[0], nexthop->u8[1]);
-
-//LOG_ANNOTATE("#L %u 1;blue\n", nexthop->u8[sizeof(uip_ipaddr_t) - 1]);
+// LOG_ANNOTATE("#L %u 1;blue\n", nexthop->u8[sizeof(uip_ipaddr_t) - 1]);
 
 // if (PRINTF_ENABLED)
 // {

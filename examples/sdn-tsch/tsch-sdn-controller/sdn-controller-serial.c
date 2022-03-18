@@ -78,70 +78,11 @@ PROCESS(serial_sdn_controller_process, "serial-sdn-controller example");
 AUTOSTART_PROCESSES(&serial_sdn_controller_process);
 // process_start(&sdn_process, NULL);
 /*-------------------------------TSCH configuration---------------------------*/
-/* Put all cells on the same slotframe */
-#define APP_SLOTFRAME_HANDLE 1
-/* Put all unicast cells on the same timeslot (for demonstration purposes only) */
-#define APP_UNICAST_TIMESLOT 1
-static void
-initialize_tsch_schedule(void)
-{
-    int i, j;
-    printf("printing current schedule1\n");
-    tsch_schedule_print();
-    printf("end printing current schedule1\n");
-    struct tsch_slotframe *sf_common = tsch_schedule_add_slotframe(APP_SLOTFRAME_HANDLE, APP_SLOTFRAME_SIZE);
-    uint16_t slot_offset;
-    uint16_t channel_offset;
-
-    printf("printing current schedule2\n");
-    tsch_schedule_print();
-    printf("end printing current schedule2\n");
-
-    /* A "catch-all" cell at (0, 0) */
-    slot_offset = 0;
-    channel_offset = 0;
-    tsch_schedule_add_link(sf_common,
-                           LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED,
-                           LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
-                           slot_offset, channel_offset, 0);
-
-    printf("printing current schedule3\n");
-    tsch_schedule_print();
-    printf("end printing current schedule3\n");
-    for (i = 0; i < 5 - 1; ++i)
-    {
-        uint8_t link_options;
-        linkaddr_t addr;
-        uint16_t remote_id = i + 1;
-
-        for (j = 0; j < sizeof(addr); j += 2)
-        {
-            addr.u8[j + 1] = remote_id & 0xff;
-            addr.u8[j + 0] = remote_id >> 8;
-        }
-
-        /* Add a unicast cell for each potential neighbor (in Cooja) */
-        /* Use the same slot offset; the right link will be dynamically selected at runtime based on queue sizes */
-        slot_offset = APP_UNICAST_TIMESLOT;
-        channel_offset = i;
-        /* Warning: LINK_OPTION_SHARED cannot be configured, as with this schedule
-         * backoff windows will not be reset correctly! */
-        link_options = remote_id == node_id ? LINK_OPTION_RX : LINK_OPTION_TX;
-
-        tsch_schedule_add_link(sf_common,
-                               link_options,
-                               LINK_TYPE_NORMAL, &addr,
-                               slot_offset, channel_offset, 1);
-    }
-
-    printf("printing current schedule4\n");
-    tsch_schedule_print();
-    printf("end printing current schedule4\n");
-}
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 {
     static struct etimer stats_timer;
+    int is_coordinator;
 
     PROCESS_BEGIN();
 
@@ -159,14 +100,18 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     ctrl_addr.u8[1] = 1;
     // linkaddr_copy(&ctrl_addr, &linkaddr_node_addr);
 
-#if MAC_CONF_WITH_TSCH
-    initialize_tsch_schedule();
-    if (node_id == 1)
-    { /* Running on the root? */
+    is_coordinator = 0;
+
+#if CONTIKI_TARGET_COOJA || CONTIKI_TARGET_Z1
+    is_coordinator = (node_id == 1);
+#endif
+
+    if (is_coordinator)
+    {
         LOG_INFO("Setting as the root\n");
         tsch_set_coordinator(1);
     }
-#endif /* MAC_CONF_WITH_TSCH */
+    NETSTACK_MAC.on();
 
 #if CONTIKI_TARGET_WISMOTE
     cc2520_set_txpower(0xF7);
