@@ -107,22 +107,16 @@ PROCESS_THREAD(sdn_node_process, ev, data)
     /* To check whether the node still alive or not. */
     etimer_set(&alive_timer, CLOCK_SECOND / 2);
 
-#if FLOCKLAB_DEPLOYMENT
-    linkaddr_t node_addr;
-    node_id = FLOCKLAB_NODE_ID;
-    node_addr.u8[0] = node_id;
-    node_addr.u8[1] = node_id;
-    linkaddr_set_node_addr(&node_addr);
-#endif
-
-    /* #if !FLOCKLAB_DEPLOYMENT
-    node_addr.u8[0] = linkaddr_node_addr.u8[1];
-    node_addr.u8[1] = linkaddr_node_addr.u8[1];
-    linkaddr_set_node_addr(&node_addr);
-#endif */
+#if CONTIKI_TARGET_IOTLAB_M3
+    // node id for the grenoble m-3-1 is 9044 in decimal, or 0x2354
+    // The controller address is obtained adding one to the address of the sink
+    ctrl_addr.u8[0] = 55;
+    ctrl_addr.u8[1] = 23;
+#else
     /* set controller address assuming is a Z1 mote */
     ctrl_addr.u8[0] = 1;
     ctrl_addr.u8[1] = 1;
+#endif /* CONTIKI_TARGET_IOTLAB_M3 */
 
     LOG_INFO("Setting controller addr ");
     LOG_INFO_LLADDR((linkaddr_t *)&ctrl_addr);
@@ -137,6 +131,10 @@ PROCESS_THREAD(sdn_node_process, ev, data)
 
 #if CONTIKI_TARGET_COOJA || CONTIKI_TARGET_Z1
     is_coordinator = (node_id == 1);
+#endif
+#if CONTIKI_TARGET_IOTLAB_M3
+    // node id for the grenoble m-3-1 is 9044 in decimal, or 0x2354
+    is_coordinator = (node_id == 9044);
 #endif
 
     if (is_coordinator)
