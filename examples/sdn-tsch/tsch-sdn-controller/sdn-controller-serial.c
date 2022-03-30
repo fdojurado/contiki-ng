@@ -88,7 +88,7 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 
     etimer_set(&stats_timer, CLOCK_SECOND * 10);
 
-#if CONTIKI_TARGET_IOTLAB_M3
+#if CONTIKI_TARGET_IOTLAB
     // node id for the grenoble m-3-1 is 9044 in decimal, or 0x2354
     // The controller address is obtained adding one to the address of the sink
     ctrl_addr.u8[0] = 55;
@@ -97,7 +97,7 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     // Set the controller address as 1.1 where the sink takes the 1.0 address
     ctrl_addr.u8[0] = 1;
     ctrl_addr.u8[1] = 1;
-#endif /* CONTIKI_TARGET_IOTLAB_M3 */
+#endif /* CONTIKI_TARGET_IOTLAB */
     // linkaddr_copy(&ctrl_addr, &linkaddr_node_addr);
 
     is_coordinator = 0;
@@ -105,7 +105,7 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 #if CONTIKI_TARGET_COOJA || CONTIKI_TARGET_Z1
     is_coordinator = (node_id == 1);
 #endif
-#if CONTIKI_TARGET_IOTLAB_M3
+#if CONTIKI_TARGET_IOTLAB
     // node id for the grenoble m-3-1 is 9044 in decimal, or 0x2354
     is_coordinator = (node_id == 9044);
 #endif
