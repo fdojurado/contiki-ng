@@ -91,8 +91,8 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 #if CONTIKI_TARGET_IOTLAB
     // node id for the grenoble m-3-1 is 9044 in decimal, or 0x2354
     // The controller address is obtained adding one to the address of the sink
-    ctrl_addr.u8[0] = 55;
-    ctrl_addr.u8[1] = 23;
+    ctrl_addr.u8[0] = 0x55;
+    ctrl_addr.u8[1] = 0x23;
 #else
     // Set the controller address as 1.1 where the sink takes the 1.0 address
     ctrl_addr.u8[0] = 1;
