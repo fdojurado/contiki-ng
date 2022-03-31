@@ -132,7 +132,7 @@ void sdn_nd_init(void)
 void sdn_nd_input(void)
 {
     int16_t ndRank, ndRssi, rssi;
-    rssi = sdn_net_get_last_rssi();
+    rssi = (int16_t)sdn_net_get_last_rssi();
     ndRank = sdn_ntohs(SDN_ND_BUF->rank);
     ndRssi = sdn_ntohs(SDN_ND_BUF->rssi);
 
