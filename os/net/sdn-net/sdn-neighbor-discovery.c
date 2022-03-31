@@ -65,7 +65,7 @@
 #endif
 
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
-sdn_rank_t my_rank; //Holds the rank value and the total rssi value to the controller
+sdn_rank_t my_rank; // Holds the rank value and the total rssi value to the controller
 #endif
 
 struct etimer nd_timer_periodic;
@@ -133,19 +133,28 @@ void sdn_nd_input(void)
 {
     int16_t ndRank, ndRssi, rssi;
     rssi = sdn_net_get_last_rssi();
-    ndRank = UIP_HTONS(SDN_ND_BUF->rank);
-    ndRssi = UIP_HTONS(SDN_ND_BUF->rssi);
+    ndRank = sdn_ntohs(SDN_ND_BUF->rank);
+    ndRssi = sdn_ntohs(SDN_ND_BUF->rssi);
 
     PRINTF("Processing ND packet with rcv rssi %d and rank %d and rssi to ctrl %d\n",
            rssi,
            ndRank,
            ndRssi);
 
+    PRINTF("received rank plain: %d, rssi: %d\n", SDN_ND_BUF->rank, SDN_ND_BUF->rssi);
+    PRINTF("received rank coverted (hex): %04x, rssi: %04x\n", ndRank, ndRssi);
+    int16_t recv_rank = sdnip_htons(SDN_ND_BUF->rank);
+    int16_t recv_rssi = sdnip_htons(SDN_ND_BUF->rssi);
+    PRINTF("received rank 2: %04x, rssi 2: %04x\n", recv_rank, recv_rssi);
+    recv_rank = UIP_HTONS(SDN_ND_BUF->rank);
+    recv_rssi = UIP_HTONS(SDN_ND_BUF->rssi);
+    PRINTF("received rank 3: %04x, rssi 3: %04x\n", recv_rank, recv_rssi);
+
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
     /* Check whether the ND message is
- * from the gateway. If it is, we need
- * to update the rank 
- * */
+     * from the gateway. If it is, we need
+     * to update the rank
+     * */
     if (linkaddr_cmp((linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER),
                      &my_rank.addr))
     {
@@ -198,7 +207,7 @@ static void send_nd_output(void)
     SDN_IP_BUF->dest.u16 = sdnip_htons(linkaddr_null.u16);
 
     // memcpy(&SDN_IP_BUF->scr, &linkaddr_node_addr, sizeof(linkaddr_node_addr));
-    //sdn_create_broadcast_addr(&SDN_IP_BUF->dest);
+    // sdn_create_broadcast_addr(&SDN_IP_BUF->dest);
     // linkaddr_copy(&SDN_IP_BUF->dest, &linkaddr_null);
 
     SDN_IP_BUF->ipchksum = 0;
@@ -208,6 +217,14 @@ static void send_nd_output(void)
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
     SDN_ND_BUF->rank = sdnip_htons(my_rank.rank);
     SDN_ND_BUF->rssi = sdnip_htons(my_rank.rssi);
+    PRINTF("my rank: %d, rssi: %d\n", my_rank.rank, my_rank.rssi);
+    PRINTF("my rank (hex): %04x, rssi: %04x\n", my_rank.rank, my_rank.rssi);
+    int16_t rank = sdnip_htons(my_rank.rank);
+    int16_t rssi = sdnip_htons(my_rank.rssi);
+    PRINTF("my rank 2: %04x, rssi 2: %04x\n", rank, rssi);
+    rank = UIP_HTONS(my_rank.rank);
+    rssi = UIP_HTONS(my_rank.rssi);
+    PRINTF("my rank 3: %04x, rssi 3: %04x\n", rank, rssi);
 #else
     SDN_ND_BUF->rank = 0;
     SDN_ND_BUF->rssi = 0;
