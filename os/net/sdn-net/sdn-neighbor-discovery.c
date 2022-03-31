@@ -141,16 +141,6 @@ void sdn_nd_input(void)
            ndRank,
            ndRssi);
 
-    PRINTF("received rank plain: %d, rssi: %d\n", SDN_ND_BUF->rank, SDN_ND_BUF->rssi);
-    PRINTF("received rank plain (hex): %04x, rssi: %04x\n", SDN_ND_BUF->rank, SDN_ND_BUF->rssi);
-    PRINTF("received rank coverted (hex): %04x, rssi: %04x\n", ndRank, ndRssi);
-    int16_t recv_rank = sdnip_htons(SDN_ND_BUF->rank);
-    int16_t recv_rssi = sdnip_htons(SDN_ND_BUF->rssi);
-    PRINTF("received rank 2: %04x, rssi 2: %04x\n", recv_rank, recv_rssi);
-    recv_rank = UIP_HTONS(SDN_ND_BUF->rank);
-    recv_rssi = UIP_HTONS(SDN_ND_BUF->rssi);
-    PRINTF("received rank 3: %04x, rssi 3: %04x\n", recv_rank, recv_rssi);
-
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
     /* Check whether the ND message is
      * from the gateway. If it is, we need
@@ -218,14 +208,6 @@ static void send_nd_output(void)
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
     SDN_ND_BUF->rank = sdnip_htons(my_rank.rank);
     SDN_ND_BUF->rssi = sdnip_htons(my_rank.rssi);
-    PRINTF("my rank: %d, rssi: %d\n", my_rank.rank, my_rank.rssi);
-    PRINTF("my rank (hex): %04x, rssi: %04x\n", my_rank.rank, my_rank.rssi);
-    int16_t rank = sdnip_htons(my_rank.rank);
-    int16_t rssi = sdnip_htons(my_rank.rssi);
-    PRINTF("my rank 2: %04x, rssi 2: %04x\n", rank, rssi);
-    rank = UIP_HTONS(my_rank.rank);
-    rssi = UIP_HTONS(my_rank.rssi);
-    PRINTF("my rank 3: %04x, rssi 3: %04x\n", rank, rssi);
 #else
     SDN_ND_BUF->rank = 0;
     SDN_ND_BUF->rssi = 0;
