@@ -142,6 +142,7 @@ void sdn_nd_input(void)
            ndRssi);
 
     PRINTF("received rank plain: %d, rssi: %d\n", SDN_ND_BUF->rank, SDN_ND_BUF->rssi);
+    PRINTF("received rank plain (hex): %04x, rssi: %04x\n", SDN_ND_BUF->rank, SDN_ND_BUF->rssi);
     PRINTF("received rank coverted (hex): %04x, rssi: %04x\n", ndRank, ndRssi);
     int16_t recv_rank = sdnip_htons(SDN_ND_BUF->rank);
     int16_t recv_rssi = sdnip_htons(SDN_ND_BUF->rssi);
