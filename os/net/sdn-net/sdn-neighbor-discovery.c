@@ -237,8 +237,8 @@ static void send_nd_output(void)
     print_buff(sdn_buf, sdn_len, true);
 
     PRINTF("Sending ND packet (rank: %d, rssi: %d)\n",
-           UIP_HTONS(SDN_ND_BUF->rank),
-           UIP_HTONS(SDN_ND_BUF->rssi));
+           sdn_ntohs(SDN_ND_BUF->rank),
+           sdn_ntohs(SDN_ND_BUF->rssi));
 
     /* Update statistics */
     SDN_STAT(++sdn_stat.ip.sent);
