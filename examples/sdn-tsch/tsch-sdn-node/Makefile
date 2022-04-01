@@ -5,7 +5,6 @@ CONTIKI = ../../../
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 
-
 MODULES += os/services/orchestra-sdn
 
 MAKE_WITH_SECURITY ?= 0
@@ -13,6 +12,10 @@ MAKE_WITH_SECURITY ?= 0
 MAKE_WITH_ORCHESTRA ?= 1
 
 PLATFORMS_EXCLUDE = nrf52dk
+
+ifdef NODE_ID
+CFLAGS += -DNODE_ID=$(NODE_ID)
+endif
 
 include $(CONTIKI)/Makefile.dir-variables
 

@@ -13,6 +13,10 @@ MAKE_WITH_ORCHESTRA ?= 1
 
 PLATFORMS_EXCLUDE = nrf52dk
 
+ifdef NODE_ID
+CFLAGS += -DNODE_ID=$(NODE_ID)
+endif
+
 include $(CONTIKI)/Makefile.dir-variables
 
 # Here, we want to select whether we want this node to be controller or not.
