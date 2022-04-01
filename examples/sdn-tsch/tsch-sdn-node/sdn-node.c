@@ -143,6 +143,12 @@ PROCESS_THREAD(sdn_node_process, ev, data)
         tsch_set_coordinator(1);
     }
     NETSTACK_MAC.on();
+#if CONTIKI_TARGET_IOTLAB
+    // Possible values for M3 radio 3, 2.8, 2.3, 1.8, 1.3, 0.7, 0.0, -1,
+    // -2, -3, -4, -5, -7, -9, -12, -17
+    // see phy.h for correct value to use
+    NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, PHY_POWER_0dBm);
+#endif
     process_start(&sdn_process, NULL);
     while (1)
     {
