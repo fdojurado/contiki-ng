@@ -256,9 +256,9 @@ sdn_ds_route_lookup(const linkaddr_t *addr)
     if (found_route != NULL)
     {
         PRINTF("Found route: %d.%d",
-               addr->u8[0], addr->u8[1]);
+               addr->u8[1], addr->u8[0]);
         PRINTF(" via %d.%d\n",
-               sdn_ds_route_nexthop(found_route)->u8[0], sdn_ds_route_nexthop(found_route)->u8[1]);
+               sdn_ds_route_nexthop(found_route)->u8[1], sdn_ds_route_nexthop(found_route)->u8[0]);
     }
     else
     {
