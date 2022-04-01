@@ -50,6 +50,10 @@
 #include <string.h>
 #include <stdio.h> /* For printf() */
 
+#if CONTIKI_TARGET_IOTLAB
+#include "platform.h"
+#endif /* CONTIKI_TARGET_IOTLAB */
+
 #if CONTIKI_TARGET_WISMOTE
 #include "dev/cc2520/cc2520.h"
 #endif
@@ -126,7 +130,7 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     // -2, -3, -4, -5, -7, -9, -12, -17
     // see phy.h for correct value to use
     NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, PHY_POWER_0dBm);
-#endif
+#endif /* CONTIKI_TARGET_IOTLAB */
 
     NETSTACK_MAC.on();
 

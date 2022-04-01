@@ -50,6 +50,10 @@
 #include <stdio.h> /* For printf() */
 #include "services/sdn-energy/sdn-energy.h"
 
+#if CONTIKI_TARGET_IOTLAB
+#include "platform.h"
+#endif /* CONTIKI_TARGET_IOTLAB */
+
 #if MAC_CONF_WITH_TSCH
 #include "net/mac/tsch/tsch.h"
 #endif
@@ -148,7 +152,7 @@ PROCESS_THREAD(sdn_node_process, ev, data)
     // -2, -3, -4, -5, -7, -9, -12, -17
     // see phy.h for correct value to use
     NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, PHY_POWER_0dBm);
-#endif
+#endif /* CONTIKI_TARGET_IOTLAB */
     process_start(&sdn_process, NULL);
     while (1)
     {
