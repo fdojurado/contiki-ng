@@ -121,7 +121,7 @@ void sdn_output()
         goto exit;
     }
     PRINTF("output: sending to %d.%d\n",
-           nexthop->u8[0], nexthop->u8[1]);
+           nexthop->u8[1], nexthop->u8[0]);
 
     sdn_ip_output(nexthop);
 
