@@ -227,7 +227,7 @@ sdn_ds_route_lookup(const linkaddr_t *addr)
     // uint8_t longestmatch;
 
     PRINTF("Looking up route for %d.%d\n",
-           addr->u8[0], addr->u8[1]);
+           addr->u8[1], addr->u8[0]);
 
     if (addr == NULL)
     {
