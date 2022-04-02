@@ -440,9 +440,9 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
     r->user = user;
 
     PRINTF("Add: adding route: %d.%d",
-           dest->u8[0], dest->u8[1]);
+           dest->u8[1], dest->u8[0]);
     PRINTF(" via %d.%d\n",
-           nexthop->u8[0], nexthop->u8[1]);
+           nexthop->u8[1], nexthop->u8[0]);
 // LOG_ANNOTATE("#L %u 1;blue\n", nexthop->u8[sizeof(uip_ipaddr_t) - 1]);
 
 // if (PRINTF_ENABLED)
