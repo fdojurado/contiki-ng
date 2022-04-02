@@ -107,7 +107,7 @@ static void update_rank(int16_t rssi, uint8_t rank, const linkaddr_t *from)
     my_rank.rssi = rssi;
     linkaddr_copy(&my_rank.addr, from);
     PRINTF("rank updated: rank %d total rssi %d\n", my_rank.rank, my_rank.rssi);
-    PRINTF(" gw address = %d.%d\n", my_rank.addr.u8[0], my_rank.addr.u8[1]);
+    PRINTF(" gw address = %d.%d\n", my_rank.addr.u8[1], my_rank.addr.u8[0]);
     // }
 }
 #endif

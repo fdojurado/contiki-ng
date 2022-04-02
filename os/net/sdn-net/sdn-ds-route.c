@@ -715,8 +715,8 @@ static void sdn_ds_route_print(void)
     {
         via = sdn_ds_route_nexthop(r);
         PRINTF(" dest %d.%d via %d.%d cost %d \n",
-               r->addr.u8[0], r->addr.u8[1],
-               via->u8[0], via->u8[1],
+               r->addr.u8[1], r->addr.u8[0],
+               via->u8[1], via->u8[0],
                r->cost);
         /* PRINTF(" dest ");
             log_lladdr(&r->addr);
