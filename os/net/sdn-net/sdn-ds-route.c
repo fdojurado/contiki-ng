@@ -227,7 +227,7 @@ sdn_ds_route_lookup(const linkaddr_t *addr)
     // uint8_t longestmatch;
 
     PRINTF("Looking up route for %d.%d\n",
-           addr->u8[1], addr->u8[0]);
+           addr->u8[0], addr->u8[1]);
 
     if (addr == NULL)
     {
@@ -256,9 +256,9 @@ sdn_ds_route_lookup(const linkaddr_t *addr)
     if (found_route != NULL)
     {
         PRINTF("Found route: %d.%d",
-               addr->u8[1], addr->u8[0]);
+               addr->u8[0], addr->u8[1]);
         PRINTF(" via %d.%d\n",
-               sdn_ds_route_nexthop(found_route)->u8[1], sdn_ds_route_nexthop(found_route)->u8[0]);
+               sdn_ds_route_nexthop(found_route)->u8[0], sdn_ds_route_nexthop(found_route)->u8[1]);
     }
     else
     {
@@ -440,9 +440,9 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
     r->user = user;
 
     PRINTF("Add: adding route: %d.%d",
-           dest->u8[1], dest->u8[0]);
+           dest->u8[0], dest->u8[1]);
     PRINTF(" via %d.%d\n",
-           nexthop->u8[1], nexthop->u8[0]);
+           nexthop->u8[0], nexthop->u8[1]);
 // LOG_ANNOTATE("#L %u 1;blue\n", nexthop->u8[sizeof(uip_ipaddr_t) - 1]);
 
 // if (PRINTF_ENABLED)
@@ -715,8 +715,8 @@ static void sdn_ds_route_print(void)
     {
         via = sdn_ds_route_nexthop(r);
         PRINTF(" dest %d.%d via %d.%d cost %d \n",
-               r->addr.u8[1], r->addr.u8[0],
-               via->u8[1], via->u8[0],
+               r->addr.u8[0], r->addr.u8[1],
+               via->u8[0], via->u8[1],
                r->cost);
         /* PRINTF(" dest ");
             log_lladdr(&r->addr);

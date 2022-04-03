@@ -274,7 +274,7 @@ void sdnip_process(uint8_t flag)
     {
 #if DEBUG
         scr.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
-        PRINTF("sdn ip packet Not for us from %d.%d\n", scr.u8[1], scr.u8[0]);
+        PRINTF("sdn ip packet Not for us from %d.%d\n", scr.u8[0], scr.u8[1]);
 #endif
 
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
@@ -317,7 +317,7 @@ void sdnip_process(uint8_t flag)
 #if DEBUG
     scr.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
     PRINTF("sdn ip packet for us from %d.%d\n",
-           scr.u8[1], scr.u8[0]);
+           scr.u8[0], scr.u8[1]);
 #endif
 
     next_header = sdnbuf_get_next_header(sdn_buf, sdn_len, &protocol);
