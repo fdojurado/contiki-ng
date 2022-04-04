@@ -98,8 +98,8 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 
     is_coordinator = 0;
 
-#if CONTIKI_TARGET_COOJA || CONTIKI_TARGET_Z1 | CONTIKI_TARGET_IOTLAB
-    is_coordinator = (node_id == 1);
+#if SERIAL_SDN_CONTROLLER || SDN_CONTROLLER
+    is_coordinator = 1;
 #endif
 
     if (is_coordinator)
