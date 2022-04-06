@@ -168,7 +168,7 @@ void serial_ip_output()
     sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_IP_BUF->len;
     SDN_SERIAL_PACKET_BUF->addr = from;
     SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_CP;
-    SDN_SERIAL_PACKET_BUF->payload_len = sdn_serial_len;
+    SDN_SERIAL_PACKET_BUF->payload_len = sdn_serial_len - SDN_SERIAL_PACKETH_LEN;
     SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
     SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
     // copy payload to send serial buffer

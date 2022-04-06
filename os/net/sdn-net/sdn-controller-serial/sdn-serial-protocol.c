@@ -154,7 +154,7 @@ PROCESS_THREAD(sdn_serial_protocol_process, ev, data)
 
     /* This is platform dependent */
 #ifdef Z1_DEF_H_
-    uart0_init(BAUD2UBR(115200));            // set the baud rate as necessary
+    uart0_init(BAUD2UBR(115200)); // set the baud rate as necessary
     uart0_set_input(&sdn_serial_input_byte);
 #endif /* Z1_DEF_H_ */
 #ifdef CC26XX_UART_H_

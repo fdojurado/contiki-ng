@@ -121,7 +121,7 @@ static int copy_to_serial_buff()
     else
     {
         PRINTF("error rx buffer empty");
-        return 1; //error buffer empty
+        return 1; // error buffer empty
     }
     // get addr[1]
     data = ringbuf_get(&rxbuf);
@@ -132,7 +132,7 @@ static int copy_to_serial_buff()
     else
     {
         PRINTF("error rx buffer empty");
-        return 1; //error buffer empty
+        return 1; // error buffer empty
     }
     // type
     data = ringbuf_get(&rxbuf);
@@ -143,7 +143,7 @@ static int copy_to_serial_buff()
     else
     {
         PRINTF("error rx buffer empty");
-        return 1; //error buffer empty
+        return 1; // error buffer empty
     }
     // payload len
     data = ringbuf_get(&rxbuf);
@@ -154,7 +154,7 @@ static int copy_to_serial_buff()
     else
     {
         PRINTF("error rx buffer empty");
-        return 1; //error buffer empty
+        return 1; // error buffer empty
     }
     // reserve[0]
     data = ringbuf_get(&rxbuf);
@@ -165,7 +165,7 @@ static int copy_to_serial_buff()
     else
     {
         PRINTF("error rx buffer empty");
-        return 1; //error buffer empty
+        return 1; // error buffer empty
     }
     // reserve[1]
     data = ringbuf_get(&rxbuf);
@@ -176,11 +176,11 @@ static int copy_to_serial_buff()
     else
     {
         PRINTF("error rx buffer empty");
-        return 1; //error buffer empty
+        return 1; // error buffer empty
     }
 
     /* Copy payload */
-    uint16_t size = SDN_SERIAL_PACKET_BUF->payload_len; //payload size
+    uint16_t size = SDN_SERIAL_PACKET_BUF->payload_len; // payload size
     PRINTF("payload size %d\n", size);
     uint8_t i = 0;
     uint8_t *ptr;
@@ -195,7 +195,7 @@ static int copy_to_serial_buff()
         else
         {
             PRINTF("error rx buffer empty");
-            return 1; //error buffer empty
+            return 1; // error buffer empty
         }
         size--;
         i++;
@@ -223,7 +223,7 @@ static int copy_to_tx_buffer()
         return 1;
 
     /* Copy payload */
-    uint16_t size = sdn_serial_len - SDN_SERIAL_PACKETH_LEN; //payload size
+    uint16_t size = sdn_serial_len - SDN_SERIAL_PACKETH_LEN; // payload size
     // PRINTF("payload size %d\n", size);
     uint8_t i = 0;
     uint8_t *ptr;
