@@ -165,6 +165,9 @@ PROCESS_THREAD(sdn_serial_protocol_process, ev, data)
     uart0_init(BAUD2UBR(115200));               // set the baud rate as necessary
     uart0_set_callback(&sdn_serial_input_byte); // set the callback function
 #endif
+#ifdef CONTIKI_TARGET_IOTLAB
+    uart1_set_input(&sdn_serial_input_byte); // set the callback function
+#endif
 
     /* Send a packet */
     /* SDN_SERIAL_PACKET_BUF->addr.u8[0] = 0x01;
