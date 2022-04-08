@@ -44,6 +44,17 @@
 #include "linkaddr.h"
 #include "lib/ringbuf.h"
 
+/* HDLC Asynchronous framing */
+/* The frame boundary octet is 01111110, (7E in hexadecimal notation) */
+#define FRAME_BOUNDARY_OCTET 0x7E
+
+/* A "control escape octet", has the bit sequence '01111101', (7D hexadecimal) */
+#define CONTROL_ESCAPE_OCTET 0x7D
+
+/* If either of these two octets appears in the transmitted data, an escape octet is sent, */
+/* followed by the original data octet with bit 5 inverted */
+#define INVERT_OCTET 0x20
+
 /* Ringbuffer for inconming and outgoing interfaces */
 #ifndef SDN_SERIAL_CONF_BUFFER_SIZE
 #define SDN_SERIAL_BUFSIZE 128 /* 1,2,4,8,16,32,64,128 or 256 bytes */

@@ -58,17 +58,6 @@
 #error Change SERIAL_LINE_CONF_BUFSIZE in contiki-conf.h.
 #endif
 
-/* HDLC Asynchronous framing */
-/* The frame boundary octet is 01111110, (7E in hexadecimal notation) */
-#define FRAME_BOUNDARY_OCTET 0x7E
-
-/* A "control escape octet", has the bit sequence '01111101', (7D hexadecimal) */
-#define CONTROL_ESCAPE_OCTET 0x7D
-
-/* If either of these two octets appears in the transmitted data, an escape octet is sent, */
-/* followed by the original data octet with bit 5 inverted */
-#define INVERT_OCTET 0x20
-
 uint16_t sdn_serial_len;
 
 static uint8_t rxbuf_data[SDN_SERIAL_BUFSIZE];
@@ -80,24 +69,6 @@ sdn_serial_send_char sdn_send_serial_function = NULL;
 PROCESS(sdn_serial_process, "SDN serial driver");
 
 process_event_t sdn_serial_ev;
-
-/*---------------------------------------------------------------------------*/
-#if DEBUG
-static void sdn_serial_print_packet()
-{
-    /* Print header */
-    PRINTF("---------SDN-SERIAL-PACKET--------------\n");
-    PRINTF("addr: %d.%d\n", SDN_SERIAL_PACKET_BUF->addr.u8[0], SDN_SERIAL_PACKET_BUF->addr.u8[1]);
-    PRINTF("type: %d\n", SDN_SERIAL_PACKET_BUF->type);
-    PRINTF("payload lenght: %d\n", SDN_SERIAL_PACKET_BUF->payload_len);
-    PRINTF("reserved 0: %d\n", SDN_SERIAL_PACKET_BUF->reserved[0]);
-    PRINTF("reserved 1: %d\n", SDN_SERIAL_PACKET_BUF->reserved[1]);
-
-    /* Print payload */
-    print_buff(sdn_serial_packet_buf + SDN_SERIAL_PACKETH_LEN, SDN_SERIAL_PACKET_BUF->payload_len, 0);
-    PRINTF("----------------------------------------\n");
-}
-#endif
 /*---------------------------------------------------------------------------*/
 /* Function to send a byte through Serial*/
 static void sdn_serial_putchar(char data)
@@ -106,104 +77,6 @@ static void sdn_serial_putchar(char data)
     {
         (*sdn_send_serial_function)((int)data);
     }
-}
-/*---------------------------------------------------------------------------*/
-static int copy_to_serial_buff()
-{
-    uint8_t data;
-    /* Copy header */
-    // get addr[0]
-    data = ringbuf_get(&rxbuf);
-    if (data != -1)
-    {
-        SDN_SERIAL_PACKET_BUF->addr.u8[0] = data;
-    }
-    else
-    {
-        PRINTF("error rx buffer empty");
-        return 1; // error buffer empty
-    }
-    // get addr[1]
-    data = ringbuf_get(&rxbuf);
-    if (data != -1)
-    {
-        SDN_SERIAL_PACKET_BUF->addr.u8[1] = data;
-    }
-    else
-    {
-        PRINTF("error rx buffer empty");
-        return 1; // error buffer empty
-    }
-    // type
-    data = ringbuf_get(&rxbuf);
-    if (data != -1)
-    {
-        SDN_SERIAL_PACKET_BUF->type = data;
-    }
-    else
-    {
-        PRINTF("error rx buffer empty");
-        return 1; // error buffer empty
-    }
-    // payload len
-    data = ringbuf_get(&rxbuf);
-    if (data != -1)
-    {
-        SDN_SERIAL_PACKET_BUF->payload_len = data;
-    }
-    else
-    {
-        PRINTF("error rx buffer empty");
-        return 1; // error buffer empty
-    }
-    // reserve[0]
-    data = ringbuf_get(&rxbuf);
-    if (data != -1)
-    {
-        SDN_SERIAL_PACKET_BUF->reserved[0] = data;
-    }
-    else
-    {
-        PRINTF("error rx buffer empty");
-        return 1; // error buffer empty
-    }
-    // reserve[1]
-    data = ringbuf_get(&rxbuf);
-    if (data != -1)
-    {
-        SDN_SERIAL_PACKET_BUF->reserved[1] = data;
-    }
-    else
-    {
-        PRINTF("error rx buffer empty");
-        return 1; // error buffer empty
-    }
-
-    /* Copy payload */
-    uint16_t size = SDN_SERIAL_PACKET_BUF->payload_len; // payload size
-    PRINTF("payload size %d\n", size);
-    uint8_t i = 0;
-    uint8_t *ptr;
-    while (size)
-    {
-        data = ringbuf_get(&rxbuf);
-        ptr = SDN_SERIAL_PACKET_PAYLOAD_BUF(i);
-        if (data != -1)
-        {
-            *ptr = data;
-        }
-        else
-        {
-            PRINTF("error rx buffer empty");
-            return 1; // error buffer empty
-        }
-        size--;
-        i++;
-    }
-
-    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_SERIAL_PACKET_BUF->payload_len;
-
-    return 0;
 }
 /*---------------------------------------------------------------------------*/
 static int copy_to_tx_buffer()
@@ -281,99 +154,119 @@ int sdn_serial_send(void)
     return 0;
 }
 /*---------------------------------------------------------------------------*/
-int sdn_serial_input_byte(unsigned char data)
+int sdn_serial_input_byte(unsigned char c)
 {
     static uint8_t overflow = 0; /* Buffer overflow: ignore until END */
-    static uint8_t escape_character = 0;
-    static int frame_length = 0;
 
-    /* FRAME FLAG */
-    if (data == FRAME_BOUNDARY_OCTET)
+    if (!overflow)
     {
-        if (escape_character == 1)
+        /* Add character */
+        if (ringbuf_put(&rxbuf, c) == 0)
         {
-            PRINTF("serial: escape_character == true\n");
-            escape_character = 0;
+            /* Buffer overflow: ignore the rest of the line */
+            overflow = 1;
         }
-        else if (overflow)
-        { /* We lost consistence, begin again */
-            /* Clear Buffer */
-            PRINTF("serial overflow\n");
-            overflow = 0;
-            frame_length = 0;
-        } /* If a valid frame is detected> FRAME_BOUNDARY + PACKET MINIMUM SIZE (HEADER), otherwise discard. */
-        else if (frame_length >= SDN_SERIAL_PACKETH_LEN)
-        {
-            /* Wake up consumer process */
-            frame_length = 0;
-            PRINTF("Call process\n");
-            process_post(&sdn_serial_process, sdn_serial_ev, NULL);
-            return 0;
-        }
-        else
-        {
-            /* re-synchronization. Start over*/
-            PRINTF("serial re-synchronization\n");
-            frame_length = 0;
-            return 1;
-        }
-        return 0;
-    }
-    if (escape_character)
-    {
-
-        escape_character = 0;
-        data ^= INVERT_OCTET;
-    }
-    else if (data == CONTROL_ESCAPE_OCTET)
-    {
-
-        escape_character = 1;
-        return 0;
-    }
-
-    if (frame_length < (SDN_SERIAL_MAX_PACKET_SIZE + 2))
-    { // Adding 2 bytes from serial communication
-        /* copy SDN_SERIAL_BUF into outgoing txbuf_data  */
-        // PRINTF("data rcv:0x%X\n", data);
-        if (ringbuf_put(&rxbuf, (uint8_t)data) == 0)
-            return 1;
-        // currentSerialPacket[frame_length] = data;
-        frame_length++;
     }
     else
     {
-        overflow = 1;
-        PRINTF("Packet size overflow: %u bytes\n", frame_length);
+        /* Buffer overflowed:
+         * Only (try to) add terminator characters, otherwise skip */
+        if ((c == FRAME_BOUNDARY_OCTET) && ringbuf_put(&rxbuf, c) != 0)
+        {
+            overflow = 0;
+        }
     }
-    return 0;
+
+    /* Wake up consumer process */
+    process_poll(&sdn_serial_process);
+    return 1;
 }
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(sdn_serial_process, ev, data)
 {
+
+    static char buf[SDN_SERIAL_BUFSIZE];
+    static int ptr;
+    static uint8_t overflow = 0; /* Buffer overflow: ignore until END */
+    static uint8_t escape_character = 0;
     PROCESS_BEGIN();
 
     sdn_serial_ev = process_alloc_event();
 
+    ptr = 0;
+
     while (1)
     {
-        PROCESS_WAIT_EVENT_UNTIL(ev == sdn_serial_ev);
+        /* Fill application buffer until newline or empty */
+        int c = ringbuf_get(&rxbuf);
 
-        PRINTF("new packet\n");
-        /* Copy rx ring buffer to SDN_SERIAL_PACKET_BUF */
-        if (!copy_to_serial_buff())
+        if (c == -1)
         {
-            // packet = (sdn_serial_packet_t *)data;
-#if DEBUG
-            sdn_serial_print_packet();
-#endif
-            process_post(&sdn_serial_protocol_process, SERIAL_PACKET_INPUT, NULL);
-
-            /* Wait until all processes have handled the serial event */
-            if (PROCESS_ERR_OK == process_post(PROCESS_CURRENT(), PROCESS_EVENT_CONTINUE, NULL))
+            /* Buffer empty, wait for poll */
+            PROCESS_YIELD();
+        }
+        else
+        {
+            if ((c != FRAME_BOUNDARY_OCTET))
             {
-                PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_CONTINUE);
+                if (escape_character)
+                {
+                    escape_character = 0;
+                    c ^= INVERT_OCTET;
+                }
+                else if (c == CONTROL_ESCAPE_OCTET)
+                {
+                    escape_character = 1;
+                    goto exit;
+                }
+
+                if (ptr < (SDN_SERIAL_MAX_PACKET_SIZE + 2))
+                { // Adding 2 bytes from serial communication
+                    buf[ptr++] = (uint8_t)c;
+                    goto exit;
+                }
+                else
+                {
+                    overflow = 1;
+                    PRINTF("Packet size overflow: %u bytes\n", ptr);
+                    goto exit;
+                }
             }
+            else
+            {
+                if (escape_character == 1)
+                {
+                    PRINTF("serial: escape_character == true\n");
+                    escape_character = 0;
+                }
+                else if (overflow)
+                { /* We lost consistence, begin again */
+                    /* Clear Buffer */
+                    PRINTF("serial overflow\n");
+                    overflow = 0;
+                    ptr = 0;
+                } /* If a valid frame is detected> FRAME_BOUNDARY + PACKET MINIMUM SIZE (HEADER), otherwise discard. */
+                else if (ptr >= SDN_SERIAL_PACKETH_LEN)
+                {
+                    /* Wake up consumer process */
+                    process_post(&sdn_serial_protocol_process, SERIAL_PACKET_INPUT, buf);
+                    /* Wait until all processes have handled the serial line event */
+                    if (PROCESS_ERR_OK ==
+                        process_post(PROCESS_CURRENT(), PROCESS_EVENT_CONTINUE, NULL))
+                    {
+                        PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_CONTINUE);
+                    }
+                    ptr = 0;
+                }
+                else
+                {
+                    /* re-synchronization. Start over*/
+                    PRINTF("serial re-synchronization\n");
+                    ptr = 0;
+                }
+            }
+        exit:
+            continue;
         }
     }
 
