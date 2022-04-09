@@ -48,6 +48,7 @@
 #include "net/netstack.h"
 #include "net/sdn-net/sdn-net.h"
 #include "net/sdn-net/sdn.h"
+#include "net/link-stats.h"
 #include "net/sdn-net/sdnbuf.h"
 #include <string.h>
 /* Log configuration */
@@ -120,6 +121,9 @@ input(void)
   /* init */
   packetbuf_hdr_len = 0;
 
+  /* Update link statistics */
+  link_stats_input_callback(packetbuf_addr(PACKETBUF_ADDR_SENDER));
+
   /* The MAC puts the 15.4 payload inside the packetbuf data buffer */
   packetbuf_ptr = packetbuf_dataptr();
 
@@ -165,6 +169,34 @@ input(void)
 // {
 //   current_callback = callback;
 // }
+/*--------------------------------------------------------------------*/
+/**
+ * Callback function for the MAC packet sent callback
+ */
+static void
+packet_sent(void *ptr, int status, int transmissions)
+{
+  const linkaddr_t *dest;
+
+  if(callback != NULL) {
+    callback->output_callback(status);
+  }
+
+  /* What follows only applies to unicast */
+  dest = packetbuf_addr(PACKETBUF_ADDR_RECEIVER);
+  if(linkaddr_cmp(dest, &linkaddr_null)) {
+    return;
+  }
+
+  /* Update neighbor link statistics */
+  link_stats_packet_sent(dest, status, transmissions);
+
+  /* Call routing protocol link callback */
+  // NETSTACK_ROUTING.link_callback(dest, status, transmissions);
+
+  /* DS6 callback, used for UIP_DS6_LL_NUD */
+  // uip_ds6_link_callback(status, transmissions);
+}
 /*--------------------------------------------------------------------*/
 static uint8_t
 output(const linkaddr_t *localdest)
