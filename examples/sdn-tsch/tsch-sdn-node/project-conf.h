@@ -86,6 +86,9 @@
 
 #endif /* WITH_SECURITY */
 
+/* Enable printing of packet counters */
+#define LINK_STATS_CONF_PACKET_COUNTERS          1
+
 /* Logs */
 /* Logging */
 #define LOG_CONF_LEVEL_RPL                         LOG_LEVEL_NONE

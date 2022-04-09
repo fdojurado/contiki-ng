@@ -275,7 +275,9 @@ output(const linkaddr_t *localdest)
   // LOG_PRINT_LLADDR(packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
   // PRINTF_("\n");
   // NETSTACK_MAC.send(NULL, NULL);
-  NETSTACK_MAC.send(NULL, NULL);
+  /* Provide a callback function to receive the result of
+     a packet transmission. */
+  NETSTACK_MAC.send(&packet_sent, NULL);
   /* If we are sending multiple packets in a row, we need to let the
      watchdog know that we are still alive. */
   watchdog_periodic();
