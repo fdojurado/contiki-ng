@@ -237,6 +237,12 @@ link_stats_input_callback(const linkaddr_t *lladdr)
     return;
   }
 
+/* We may need this as NB added during link_stats_packet_sent is not set, as rssi=0
+does not exist.  */
+if(stats->rssi==0){
+  stats->rssi = packet_rssi;
+}
+
   /* Update RSSI EWMA */
   stats->rssi = ((int32_t)stats->rssi * (EWMA_SCALE - EWMA_ALPHA) +
       (int32_t)packet_rssi * EWMA_ALPHA) / EWMA_SCALE;

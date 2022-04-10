@@ -65,7 +65,7 @@
 #endif
 
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
-sdn_rank_t my_rank; //Holds the rank value and the total rssi value to the controller
+sdn_rank_t my_rank; // Holds the rank value and the total rssi value to the controller
 #endif
 
 struct etimer nd_timer_periodic;
@@ -132,9 +132,9 @@ void sdn_nd_init(void)
 void sdn_nd_input(void)
 {
     int16_t ndRank, ndRssi, rssi;
-    rssi = sdn_net_get_last_rssi();
-    ndRank = UIP_HTONS(SDN_ND_BUF->rank);
-    ndRssi = UIP_HTONS(SDN_ND_BUF->rssi);
+    rssi = (int16_t)sdn_net_get_last_rssi();
+    ndRank = sdn_ntohs(SDN_ND_BUF->rank);
+    ndRssi = sdn_ntohs(SDN_ND_BUF->rssi);
 
     PRINTF("Processing ND packet with rcv rssi %d and rank %d and rssi to ctrl %d\n",
            rssi,
@@ -143,9 +143,9 @@ void sdn_nd_input(void)
 
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
     /* Check whether the ND message is
- * from the gateway. If it is, we need
- * to update the rank 
- * */
+     * from the gateway. If it is, we need
+     * to update the rank
+     * */
     if (linkaddr_cmp((linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER),
                      &my_rank.addr))
     {
@@ -198,7 +198,7 @@ static void send_nd_output(void)
     SDN_IP_BUF->dest.u16 = sdnip_htons(linkaddr_null.u16);
 
     // memcpy(&SDN_IP_BUF->scr, &linkaddr_node_addr, sizeof(linkaddr_node_addr));
-    //sdn_create_broadcast_addr(&SDN_IP_BUF->dest);
+    // sdn_create_broadcast_addr(&SDN_IP_BUF->dest);
     // linkaddr_copy(&SDN_IP_BUF->dest, &linkaddr_null);
 
     SDN_IP_BUF->ipchksum = 0;
@@ -219,8 +219,8 @@ static void send_nd_output(void)
     print_buff(sdn_buf, sdn_len, true);
 
     PRINTF("Sending ND packet (rank: %d, rssi: %d)\n",
-           UIP_HTONS(SDN_ND_BUF->rank),
-           UIP_HTONS(SDN_ND_BUF->rssi));
+           sdn_ntohs(SDN_ND_BUF->rank),
+           sdn_ntohs(SDN_ND_BUF->rssi));
 
     /* Update statistics */
     SDN_STAT(++sdn_stat.ip.sent);

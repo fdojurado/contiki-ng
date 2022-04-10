@@ -32,6 +32,10 @@
 #ifndef PROJECT_CONF_H_
 #define PROJECT_CONF_H_
 /*---------------------------------------------------------------------------*/
+/* Set neighbour discovery period */
+#define SDN_CONF_MAX_ND_INTERVAL 30
+/* Set neighbour advertisement period */
+#define SDN_CONF_MAX_NA_INTERVAL 45
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
 /* Num of max routing routes */
@@ -75,6 +79,9 @@
 #define LLSEC802154_CONF_ENABLED 1
 
 #endif /* WITH_SECURITY */
+
+/* Enable printing of packet counters */
+#define LINK_STATS_CONF_PACKET_COUNTERS          1
 
 /* Logs */
 /* Logging */

@@ -67,6 +67,23 @@ sdn_serial_packet_buf_t sdn_serial_aligned_buf;
 PROCESS(sdn_serial_protocol_process, "SDN serial protocol");
 
 /*---------------------------------------------------------------------------*/
+#if DEBUG
+static void sdn_serial_print_packet()
+{
+    /* Print header */
+    PRINTF("---------SDN-SERIAL-PACKET--------------\n");
+    PRINTF("addr: %d.%d\n", SDN_SERIAL_PACKET_BUF->addr.u8[0], SDN_SERIAL_PACKET_BUF->addr.u8[1]);
+    PRINTF("type: %d\n", SDN_SERIAL_PACKET_BUF->type);
+    PRINTF("payload lenght: %d\n", SDN_SERIAL_PACKET_BUF->payload_len);
+    PRINTF("reserved 0: %d\n", SDN_SERIAL_PACKET_BUF->reserved[0]);
+    PRINTF("reserved 1: %d\n", SDN_SERIAL_PACKET_BUF->reserved[1]);
+
+    /* Print payload */
+    print_buff(sdn_serial_packet_buf + SDN_SERIAL_PACKETH_LEN, SDN_SERIAL_PACKET_BUF->payload_len, 0);
+    PRINTF("----------------------------------------\n");
+}
+#endif
+/*---------------------------------------------------------------------------*/
 uint8_t serial_packet_output(void)
 {
     if (sdn_serial_len == 0)
@@ -86,8 +103,38 @@ uint8_t serial_packet_output(void)
     }
 }
 /*---------------------------------------------------------------------------*/
-static void serial_packet_input(void)
+static void copy_to_serial_buff(uint8_t *data)
 {
+    SDN_SERIAL_PACKET_BUF->addr.u8[0] = *data;
+    data++;
+    SDN_SERIAL_PACKET_BUF->addr.u8[1] = *data;
+    data++;
+    SDN_SERIAL_PACKET_BUF->type = *data;
+    data++;
+    SDN_SERIAL_PACKET_BUF->payload_len = *data;
+    data++;
+    SDN_SERIAL_PACKET_BUF->reserved[0] = *data;
+    data++;
+    SDN_SERIAL_PACKET_BUF->reserved[1] = *data;
+    /* Copy payload */
+    uint16_t size = SDN_SERIAL_PACKET_BUF->payload_len; // payload size
+    uint8_t i = 0;
+    uint8_t *ptr;
+    while (size)
+    {
+        data++;
+        ptr = SDN_SERIAL_PACKET_PAYLOAD_BUF(i);
+        *ptr = *data;
+        size--;
+        i++;
+    }
+}
+/*---------------------------------------------------------------------------*/
+static void serial_packet_input(uint8_t *data)
+{
+    /* Lets process the serial data */
+    copy_to_serial_buff(data);
+    sdn_serial_print_packet();
     if (sdn_serial_len > 0)
     {
         PRINTF("input_serial: received %u bytes\n", sdn_serial_len);
@@ -140,7 +187,7 @@ static void eventhandler(process_event_t ev, process_data_t data)
     {
     case SERIAL_PACKET_INPUT:
         PRINTF("New serial packet received.\n");
-        serial_packet_input();
+        serial_packet_input(data);
         break;
 
     default:
@@ -154,7 +201,7 @@ PROCESS_THREAD(sdn_serial_protocol_process, ev, data)
 
     /* This is platform dependent */
 #ifdef Z1_DEF_H_
-    uart0_init(BAUD2UBR(115200));            // set the baud rate as necessary
+    uart0_init(BAUD2UBR(115200)); // set the baud rate as necessary
     uart0_set_input(&sdn_serial_input_byte);
 #endif /* Z1_DEF_H_ */
 #ifdef CC26XX_UART_H_
@@ -165,21 +212,9 @@ PROCESS_THREAD(sdn_serial_protocol_process, ev, data)
     uart0_init(BAUD2UBR(115200));               // set the baud rate as necessary
     uart0_set_callback(&sdn_serial_input_byte); // set the callback function
 #endif
-
-    /* Send a packet */
-    /* SDN_SERIAL_PACKET_BUF->addr.u8[0] = 0x01;
-    SDN_SERIAL_PACKET_BUF->addr.u8[1] = 0x7E;
-    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_EMPTY;
-    SDN_SERIAL_PACKET_BUF->payload_len = SDN_SERIAL_PACKETH_LEN;
-    struct sdn_serial_packet_hdr *ptr;
-    ptr = (struct sdn_serial_packet_hdr *)SDN_SERIAL_PACKET_PAYLOAD_BUF(0);
-    ptr->addr.u8[0] = 3;
-    ptr->addr.u8[1] = 4;
-    ptr->type = 2;
-    ptr->payload_len = 0;
-    ptr->reserved[0] = 9;
-    ptr->reserved[1] = 15;
-    sdn_serial_send(); */
+#ifdef CONTIKI_TARGET_IOTLAB
+    uart1_set_input(&sdn_serial_input_byte); // set the callback function
+#endif
 
     while (1)
     {

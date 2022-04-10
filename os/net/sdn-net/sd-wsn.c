@@ -267,13 +267,13 @@ void sdnip_process(uint8_t flag)
      * expect UIP_BUF to be unmodified
      */
 
-    dest.u16 = sdnip_htons(SDN_IP_BUF->dest.u16);
+    dest.u16 = sdn_ntohs(SDN_IP_BUF->dest.u16);
 
     if (!linkaddr_cmp(&dest, &linkaddr_node_addr) &&
         !linkaddr_cmp(&dest, &linkaddr_null))
     {
 #if DEBUG
-        scr.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
+        scr.u16 = sdn_ntohs(SDN_IP_BUF->scr.u16);
         PRINTF("sdn ip packet Not for us from %d.%d\n", scr.u8[0], scr.u8[1]);
 #endif
 

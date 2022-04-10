@@ -50,6 +50,10 @@
 #include <stdio.h> /* For printf() */
 #include "services/sdn-energy/sdn-energy.h"
 
+#if CONTIKI_TARGET_IOTLAB
+#include "platform.h"
+#endif /* CONTIKI_TARGET_IOTLAB */
+
 #if MAC_CONF_WITH_TSCH
 #include "net/mac/tsch/tsch.h"
 #endif
@@ -107,16 +111,9 @@ PROCESS_THREAD(sdn_node_process, ev, data)
     /* To check whether the node still alive or not. */
     etimer_set(&alive_timer, CLOCK_SECOND / 2);
 
-#if CONTIKI_TARGET_IOTLAB
-    // node id for the grenoble m-3-1 is 9044 in decimal, or 0x2354
-    // The controller address is obtained adding one to the address of the sink
-    ctrl_addr.u8[0] = 0x55;
-    ctrl_addr.u8[1] = 0x23;
-#else
-    /* set controller address assuming is a Z1 mote */
+    // Set the controller address as 1.1 where the sink takes the 1.0 address
     ctrl_addr.u8[0] = 1;
     ctrl_addr.u8[1] = 1;
-#endif /* CONTIKI_TARGET_IOTLAB */
 
     LOG_INFO("Setting controller addr ");
     LOG_INFO_LLADDR((linkaddr_t *)&ctrl_addr);
@@ -129,12 +126,8 @@ PROCESS_THREAD(sdn_node_process, ev, data)
     // etimer_set(&periodic_timer, SEND_INTERVAL);
     is_coordinator = 0;
 
-#if CONTIKI_TARGET_COOJA || CONTIKI_TARGET_Z1
+#if CONTIKI_TARGET_COOJA || CONTIKI_TARGET_Z1 | CONTIKI_TARGET_IOTLAB
     is_coordinator = (node_id == 1);
-#endif
-#if CONTIKI_TARGET_IOTLAB
-    // node id for the grenoble m-3-1 is 9044 in decimal, or 0x2354
-    is_coordinator = (node_id == 9044);
 #endif
 
     if (is_coordinator)
@@ -143,6 +136,12 @@ PROCESS_THREAD(sdn_node_process, ev, data)
         tsch_set_coordinator(1);
     }
     NETSTACK_MAC.on();
+#if CONTIKI_TARGET_IOTLAB
+    // Possible values for M3 radio 3, 2.8, 2.3, 1.8, 1.3, 0.7, 0.0, -1,
+    // -2, -3, -4, -5, -7, -9, -12, -17
+    // see phy.h for correct value to use
+    NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, PHY_POWER_0dBm);
+#endif /* CONTIKI_TARGET_IOTLAB */
     process_start(&sdn_process, NULL);
     while (1)
     {

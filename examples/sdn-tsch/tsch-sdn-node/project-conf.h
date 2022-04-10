@@ -32,12 +32,12 @@
 #ifndef PROJECT_CONF_H_
 #define PROJECT_CONF_H_
 /*---------------------------------------------------------------------------*/
+/* Set neighbour discovery period */
+#define SDN_CONF_MAX_ND_INTERVAL 30
+/* Set neighbour advertisement period */
+#define SDN_CONF_MAX_NA_INTERVAL 45
 /* Energy tracking */
 #define ENERGEST_CONF_ON 1
-/* Neighbbor discovery period */
-#define SDN_CONF_MAX_ND_INTERVAL 60 * 3
-/* Neighbbor advertisement period */
-#define SDN_CONF_MAX_NA_INTERVAL 60 * 4
 /* Network configuration period */
 #define SDN_CONF_MIN_NC_INTERVAL 60 * 14
 /* Initial emergy */
@@ -85,6 +85,9 @@
 #define LLSEC802154_CONF_ENABLED 1
 
 #endif /* WITH_SECURITY */
+
+/* Enable printing of packet counters */
+#define LINK_STATS_CONF_PACKET_COUNTERS          1
 
 /* Logs */
 /* Logging */

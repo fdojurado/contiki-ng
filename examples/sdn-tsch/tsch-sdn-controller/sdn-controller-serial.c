@@ -50,6 +50,10 @@
 #include <string.h>
 #include <stdio.h> /* For printf() */
 
+#if CONTIKI_TARGET_IOTLAB
+#include "platform.h"
+#endif /* CONTIKI_TARGET_IOTLAB */
+
 #if CONTIKI_TARGET_WISMOTE
 #include "dev/cc2520/cc2520.h"
 #endif
@@ -88,26 +92,14 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 
     etimer_set(&stats_timer, CLOCK_SECOND * 10);
 
-#if CONTIKI_TARGET_IOTLAB
-    // node id for the grenoble m-3-1 is 9044 in decimal, or 0x2354
-    // The controller address is obtained adding one to the address of the sink
-    ctrl_addr.u8[0] = 0x55;
-    ctrl_addr.u8[1] = 0x23;
-#else
     // Set the controller address as 1.1 where the sink takes the 1.0 address
     ctrl_addr.u8[0] = 1;
     ctrl_addr.u8[1] = 1;
-#endif /* CONTIKI_TARGET_IOTLAB */
-    // linkaddr_copy(&ctrl_addr, &linkaddr_node_addr);
 
     is_coordinator = 0;
 
-#if CONTIKI_TARGET_COOJA || CONTIKI_TARGET_Z1
-    is_coordinator = (node_id == 1);
-#endif
-#if CONTIKI_TARGET_IOTLAB
-    // node id for the grenoble m-3-1 is 9044 in decimal, or 0x2354
-    is_coordinator = (node_id == 9044);
+#if SERIAL_SDN_CONTROLLER || SDN_CONTROLLER
+    is_coordinator = 1;
 #endif
 
     if (is_coordinator)
@@ -120,6 +112,13 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 #if CONTIKI_TARGET_WISMOTE
     cc2520_set_txpower(0xF7);
 #endif
+
+#if CONTIKI_TARGET_IOTLAB
+    // Possible values for M3 radio 3, 2.8, 2.3, 1.8, 1.3, 0.7, 0.0, -1,
+    // -2, -3, -4, -5, -7, -9, -12, -17
+    // see phy.h for correct value to use
+    NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, PHY_POWER_0dBm);
+#endif /* CONTIKI_TARGET_IOTLAB */
 
     NETSTACK_MAC.on();
 
