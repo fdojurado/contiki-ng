@@ -466,7 +466,8 @@ struct sdn_na_hdr
 {
     /* The ->addr field holds the Rime address of gateway to controller. */
     linkaddr_t addr;
-    int16_t rssi, rank;
+    int16_t rssi;
+    uint16_t etx;
 };
 /* NC message structure */
 struct sdn_nc_hdr

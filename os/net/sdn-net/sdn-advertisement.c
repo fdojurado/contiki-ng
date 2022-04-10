@@ -43,6 +43,7 @@
 #include "lib/random.h"
 #include "net/sdn-net/sd-wsn.h"
 #include "net/sdn-net/sdn.h"
+#include "net/link-stats.h"
 #include <string.h>
 #include "net/sdn-net/sdn-ds-nbr.h"
 #include "net/sdn-net/sdn-ds-route.h"
@@ -276,6 +277,7 @@ void sdn_na_input(void)
 static void send_na_output(void)
 {
     const linkaddr_t *nxthop;
+    const struct link_stats *stats;
     nxthop = NETSTACK_ROUTING.nexthop(&ctrl_addr);
     if (nxthop != NULL)
     {
@@ -324,8 +326,18 @@ static void send_na_output(void)
         for (nbr = sdn_ds_nbr_head(); nbr != NULL; nbr = sdn_ds_nbr_next(nbr))
         {
             SDN_NA_BUF(count)->addr.u16 = sdnip_htons(nbr->addr.u16);
-            SDN_NA_BUF(count)->rssi = sdnip_htons(nbr->rssi);
-            SDN_NA_BUF(count)->rank = sdnip_htons(nbr->rank);
+            // We get the ETX, RSSI values from link-stats.c
+            stats = link_stats_from_lladdr(&nbr->addr);
+            if (stats != NULL)
+            {
+                SDN_NA_BUF(count)->rssi = sdnip_htons(stats->rssi);
+                SDN_NA_BUF(count)->etx = sdnip_htons(stats->etx);
+            }
+            else
+            {
+                SDN_NA_BUF(count)->rssi = sdnip_htons(0);
+                SDN_NA_BUF(count)->etx = sdnip_htons(0);
+            }
             count++;
         }
 
