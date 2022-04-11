@@ -282,42 +282,27 @@ static void send_na_output(void)
     if (nxthop != NULL)
     {
         /* payload size */
-        int8_t payload_size = SDN_NA_LEN * sdn_ds_nbr_num();
+        int8_t payload_size = SDN_NAPL_LEN * sdn_ds_nbr_num();
         PRINTF("Sending NA packet\n");
         /* IP packet */
-        SDN_IP_BUF->vahl = (0x01 << 5) | SDN_IPH_LEN;
+        SDN_IP_BUF->vap = (0x01 << 5) | SDN_PROTO_NA;
         /* Total length */
-        sdn_len = SDN_IPH_LEN + SDN_CPH_LEN + payload_size;
-
-        SDN_IP_BUF->len = sdn_len;
-
+        sdn_len = SDN_IPH_LEN + SDN_NAH_LEN + payload_size;
+        SDN_IP_BUF->tlen = sdn_len;
         SDN_IP_BUF->ttl = 0x40;
-
-        SDN_IP_BUF->proto = SDN_PROTO_CP;
-
         SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
-
+        PRINTF("Ctrl addr %d.%d\n", ctrl_addr.u8[0], ctrl_addr.u8[1]);
         SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
+        PRINTF("Ctrl addr2 %d.%d\n", SDN_IP_BUF->dest.u8[0], SDN_IP_BUF->dest.u8[1]);
+        SDN_IP_BUF->hdr_chksum = 0;
+        SDN_IP_BUF->hdr_chksum = ~sdn_ipchksum();
 
-        // memcpy(&SDN_IP_BUF->scr, &linkaddr_node_addr, sizeof(linkaddr_node_addr));
+        PRINTF("Checksum %04X\n", SDN_IP_BUF->hdr_chksum);
 
-        // memcpy(&SDN_IP_BUF->dest, &ctrl_addr, sizeof(ctrl_addr));
-
-        SDN_IP_BUF->ipchksum = 0;
-        SDN_IP_BUF->ipchksum = ~sdn_ipchksum();
-
-        /* Control packet */
-        SDN_CP_BUF->type = SDN_PROTO_NA;
-
-        SDN_CP_BUF->len = payload_size;
-
-        SDN_CP_BUF->rank = sdnip_htons(my_rank.rank);
-
-        SDN_CP_BUF->energy = sdnip_htons((int16_t)energy);
-
-#if SDN_WITH_TABLE_CHKSUM
-        SDN_CP_BUF->rt_chksum = ~calculate_table_chksum();
-#endif
+        /* NA packet */
+        SDN_NA_BUF->payload_len = payload_size;
+        SDN_NA_BUF->rank = sdnip_htons(my_rank.rank);
+        SDN_NA_BUF->energy = sdnip_htons((int16_t)energy);
 
         /* Put neighbor's info in payload */
         sdn_ds_nbr_t *nbr;
@@ -325,24 +310,24 @@ static void send_na_output(void)
 
         for (nbr = sdn_ds_nbr_head(); nbr != NULL; nbr = sdn_ds_nbr_next(nbr))
         {
-            SDN_NA_BUF(count)->addr.u16 = sdnip_htons(nbr->addr.u16);
+            SDN_NA_PAYLOAD(count)->nb_addr.u16 = sdnip_htons(nbr->addr.u16);
             // We get the ETX, RSSI values from link-stats.c
             stats = link_stats_from_lladdr(&nbr->addr);
             if (stats != NULL)
             {
-                SDN_NA_BUF(count)->rssi = sdnip_htons(stats->rssi);
-                SDN_NA_BUF(count)->etx = sdnip_htons(stats->etx);
+                SDN_NA_PAYLOAD(count)->rssi = sdnip_htons(stats->rssi);
+                SDN_NA_PAYLOAD(count)->etx = sdnip_htons(stats->etx);
             }
             else
             {
-                SDN_NA_BUF(count)->rssi = sdnip_htons(0);
-                SDN_NA_BUF(count)->etx = sdnip_htons(0);
+                SDN_NA_PAYLOAD(count)->rssi = sdnip_htons(0);
+                SDN_NA_PAYLOAD(count)->etx = sdnip_htons(0);
             }
             count++;
         }
 
-        SDN_CP_BUF->cpchksum = 0;
-        SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
+        SDN_NA_BUF->pkt_chksum = 0;
+        SDN_NA_BUF->pkt_chksum = ~sdn_nachksum(payload_size);
 
         /* Update statistics */
         SDN_STAT(++sdn_stat.ip.sent);

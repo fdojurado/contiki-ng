@@ -165,14 +165,14 @@ void serial_ip_output()
     linkaddr_t from;
     /* Get the sender node address */
     from.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
-    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_IP_BUF->len;
+    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_IP_BUF->tlen;
     SDN_SERIAL_PACKET_BUF->addr = from;
     SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_CP;
     SDN_SERIAL_PACKET_BUF->payload_len = sdn_serial_len - SDN_SERIAL_PACKETH_LEN;
     SDN_SERIAL_PACKET_BUF->reserved[0] = 0;
     SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
     // copy payload to send serial buffer
-    memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_IP_BUF, SDN_IP_BUF->len);
+    memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_IP_BUF, SDN_IP_BUF->tlen);
     serial_packet_output();
 }
 #endif /* SERIAL_SDN_CONTROLLER */

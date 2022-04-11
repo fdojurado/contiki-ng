@@ -34,7 +34,7 @@ uint8_t *sdnbuf_get_next_header(uint8_t *buffer, uint16_t size, uint8_t *protoco
 
   /* protocol in the IP buffer */
   sdnbuf = (struct sdn_ip_hdr *)buffer;
-  *protocol = sdnbuf->proto;
+  *protocol = sdnbuf->vap & 0x0F;
   curr_hdr_len = SDN_IPH_LEN;
 
   /* Check first if enough space for current header */
@@ -47,9 +47,17 @@ uint8_t *sdnbuf_get_next_header(uint8_t *buffer, uint16_t size, uint8_t *protoco
   {
     next_hdr_len = SDN_NDH_LEN;
   }
-  else if (*protocol == SDN_PROTO_CP)
+  else if (*protocol == SDN_PROTO_NA)
   {
-    next_hdr_len = SDN_CPH_LEN;
+    next_hdr_len = SDN_NAH_LEN;
+  }
+  else if (*protocol == SDN_PROTO_NC_ROUTE)
+  {
+    next_hdr_len = SDN_NCH_LEN;
+  }
+  else if (*protocol == SDN_PROTO_NC_SCHEDULES)
+  {
+    next_hdr_len = SDN_NCH_LEN;
   }
   else if (*protocol == SDN_PROTO_DATA)
   {
@@ -66,42 +74,9 @@ uint8_t *sdnbuf_get_next_header(uint8_t *buffer, uint16_t size, uint8_t *protoco
   return next_header;
 }
 /*---------------------------------------------------------------------------*/
-uint8_t *cpbuf_get_next_header(uint8_t *buffer, uint16_t size, uint8_t *protocol)
-{
-  int curr_hdr_len = 0;
-  int next_hdr_len = 0;
-  uint8_t *next_header = NULL;
-  struct sdn_cp_hdr *cpbuf = NULL;
-
-  /* protocol in the IP buffer */
-  cpbuf = (struct sdn_cp_hdr *)buffer;
-  *protocol = cpbuf->type;
-  curr_hdr_len = SDN_CPH_LEN;
-
-  /* Check first if enough space for current header */
-  if (curr_hdr_len > size)
-  {
-    return NULL;
-  }
-
-  if ((*protocol == SDN_PROTO_NA) || (*protocol == SDN_PROTO_NC) || (*protocol == SDN_PROTO_NC_ACK))
-  {
-    next_hdr_len = cpbuf->len;
-  }
-
-  next_header = buffer + curr_hdr_len;
-
-  /* Size must be enough to hold both the current and next header */
-  if (next_hdr_len == 0 || curr_hdr_len + next_hdr_len > size)
-  {
-    return NULL;
-  }
-  return next_header;
-}
-/*---------------------------------------------------------------------------*/
 void sdnbuf_set_len_field(struct sdn_ip_hdr *hdr, uint16_t len)
 {
-  hdr->len = len;
+  hdr->tlen = len;
   //hdr->len[0] = (len >> 8);
   //hdr->len[1] = (len & 0xff);
 }
@@ -109,13 +84,19 @@ void sdnbuf_set_len_field(struct sdn_ip_hdr *hdr, uint16_t len)
 uint8_t
 sdnbuf_get_len_field(struct sdn_ip_hdr *hdr)
 {
-  return hdr->len;
+  return hdr->tlen;
   // return ((uint16_t)(hdr->len[0]) << 8) + hdr->len[1];
 }
 /*---------------------------------------------------------------------------*/
-uint8_t cpbuf_get_len_field(struct sdn_cp_hdr *hdr)
+uint8_t nabuf_get_len_field(struct sdn_na_hdr *hdr)
 {
-  return hdr->len;
+  return hdr->payload_len;
+  // return ((uint16_t)(hdr->len[0]) << 8) + hdr->len[1];
+}
+/*---------------------------------------------------------------------------*/
+uint8_t ncbuf_get_len_field(struct sdn_nc_routing_hdr *hdr)
+{
+  return hdr->payload_len;
   // return ((uint16_t)(hdr->len[0]) << 8) + hdr->len[1];
 }
 /*---------------------------------------------------------------------------*/

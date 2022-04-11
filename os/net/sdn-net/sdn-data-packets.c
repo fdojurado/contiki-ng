@@ -267,8 +267,6 @@ static void send_data_output(void)
     {
         SDN_IP_BUF->ttl = 0x40;
 
-        SDN_IP_BUF->proto = SDN_PROTO_DATA;
-
         SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
 
         SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
@@ -277,7 +275,7 @@ static void send_data_output(void)
         seq++;
         if (!cluster_head || (sdn_data_aggregation_num_packets() == 0))
         {
-            SDN_IP_BUF->vahl = (0x03 << 4) | SDN_IPH_LEN;
+            SDN_IP_BUF->vap = (0x03 << 4) | SDN_PROTO_DATA;
 
             SDN_DATA_HDR_BUF->len = SDN_DATA_LEN;
             SDN_DATA_BUF(0)->addr.u16 = sdnip_htons(linkaddr_node_addr.u16);
@@ -292,7 +290,7 @@ static void send_data_output(void)
         }
         else
         {
-            SDN_IP_BUF->vahl = (0x01 << 5) | SDN_IPH_LEN;
+            SDN_IP_BUF->vap = (0x01 << 5) | SDN_PROTO_DATA;
             /* aggregate data available at the time */
             SDN_DATA_HDR_BUF->len = SDN_DATA_LEN * (sdn_data_aggregation_num_packets() + 1);
             SDN_DATA_BUF(0)->addr.u16 = sdnip_htons(linkaddr_node_addr.u16);
@@ -334,10 +332,10 @@ static void send_data_output(void)
 
         /* Total length */
         sdn_len = SDN_IPH_LEN + SDN_DATAH_LEN + SDN_DATA_HDR_BUF->len;
-        SDN_IP_BUF->len = sdn_len;
+        SDN_IP_BUF->tlen = sdn_len;
 
-        SDN_IP_BUF->ipchksum = 0;
-        SDN_IP_BUF->ipchksum = ~sdn_ipchksum();
+        SDN_IP_BUF->hdr_chksum = 0;
+        SDN_IP_BUF->hdr_chksum = ~sdn_ipchksum();
 
         /* Update statistics */
         SDN_STAT(++sdn_stat.ip.sent);

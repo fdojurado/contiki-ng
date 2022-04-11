@@ -78,11 +78,18 @@ void sdnbuf_set_len_field(struct sdn_ip_hdr *hdr, uint16_t len);
  */
 uint8_t sdnbuf_get_len_field(struct sdn_ip_hdr *hdr);
 /**
- * \brief          Returns the value of the length field in the uIP buffer
+ * \brief          Returns the value of the length field in the SDN_IP buffer
  * \param hdr      The header
  * \retval         The length value
  */
-uint8_t cpbuf_get_len_field(struct sdn_cp_hdr *hdr);
+uint8_t nabuf_get_len_field(struct sdn_na_hdr *hdr);
+
+/**
+ * \brief          Returns the value of the length field in the NC buffer
+ * \param hdr      The header
+ * \retval         The length value
+ */
+uint8_t ncbuf_get_len_field(struct sdn_nc_routing_hdr *hdr);
 
 /**
  * \brief          Get the next IPv6 header.
@@ -102,15 +109,6 @@ uint8_t *sdnbuf_get_next_header(uint8_t *buffer, uint16_t size, uint8_t *protoco
  * \retval         returns address of the next header, or NULL in case of insufficient buffer space
  *
  *                 This function moves to the next header in a IPv6 packet.
- */
-uint8_t *cpbuf_get_next_header(uint8_t *buffer, uint16_t size, uint8_t *protocol);
-
-/**
- * \brief          Get the value of the attribute
- * \param type     The attribute to get the value of
- * \retval         the value of the attribute
- *
- *                 This function gets the value of a specific uipbuf attribute.
  */
 uint16_t sdnbuf_get_attr(uint8_t type);
 

@@ -176,11 +176,20 @@ uint16_t sdn_ndchksum(void)
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
-uint16_t sdn_cpchksum(uint8_t len)
+uint16_t sdn_nachksum(uint8_t len)
 {
     uint16_t sum;
 
-    sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_CPH_LEN + len);
+    sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_NAH_LEN + len);
+    PRINTF("sdn_cpchksum: sum 0x%04x\n", sum);
+    return (sum == 0) ? 0xffff : sdnip_htons(sum);
+}
+/*---------------------------------------------------------------------------*/
+uint16_t sdn_ncchksum(uint8_t len)
+{
+    uint16_t sum;
+
+    sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_NCH_LEN + len);
     PRINTF("sdn_cpchksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
@@ -280,8 +289,8 @@ void sdnip_process(uint8_t flag)
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
         /* Aggregate? */
         if (cluster_head &&
-            SDN_IP_BUF->proto == SDN_PROTO_DATA &&
-            ((SDN_IP_BUF->vahl >> 4) & 0x01))
+            (SDN_IP_BUF->vap & 0x0F) == SDN_PROTO_DATA &&
+            ((SDN_IP_BUF->vap >> 4) & 0x01))
         {
             sdn_seq_list_t hdr;
             // sdn_data_aggregation_t *rt;
@@ -330,9 +339,15 @@ void sdnip_process(uint8_t flag)
         case SDN_PROTO_ND:
             /* ND input */
             goto nd_input;
-        case SDN_PROTO_CP:
+        case SDN_PROTO_NA:
             /* CP input */
-            goto cp_input;
+            goto na_input;
+        case SDN_PROTO_NC_ROUTE:
+            /* CP input */
+            goto nc_route_input;
+        // case SDN_PROTO_NC_SCHEDULES:
+        //     /* CP input */
+        //     goto nc_schedules_input;
         case SDN_PROTO_DATA:
             /* Data input */
             goto data_input;
@@ -365,31 +380,9 @@ data_input:
     PRINTF("Data input length %d\n", sdn_len);
     goto drop;
 #endif
-cp_input:
-    /* Compute control packet */
-    next_header = cpbuf_get_next_header(next_header, sdn_len, &protocol);
-
-    /* Process upper-layer input */
-    if (next_header != NULL)
-    {
-        switch (protocol)
-        {
-        case SDN_PROTO_NA:
-            /* ND input */
-            goto na_input;
-        case SDN_PROTO_NC:
-            /* NC input */
-            goto nc_input;
-        case SDN_PROTO_NC_ACK:
-            /* NC_ACK input */
-            goto nc_ack_input;
-        }
-        PRINTF("Protocol not found.\n");
-        goto drop;
-    }
 na_input:
 #if SDN_CONTROLLER
-    if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
+    if (sdn_nachksum(nabuf_get_len_field(SDN_NA_BUF)) != 0xffff)
     {
         // SDN_STAT(++sdn_stat.nd.drop);
         // SDN_STAT(++sdn_stat.nd.chkerr);
@@ -400,9 +393,9 @@ na_input:
     sdn_na_input();
 #endif
     goto drop;
-nc_input:
+nc_route_input:
 #if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
-    if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
+    if (sdn_ncchksum(ncbuf_get_len_field(SDN_NC_ROUTE_BUF)) != 0xffff)
     {
         // SDN_STAT(++sdn_stat.nd.drop);
         // SDN_STAT(++sdn_stat.nd.chkerr);
@@ -414,25 +407,11 @@ nc_input:
     // At this stage, we have already built our ACK packet
     goto send;
 #endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
-nc_ack_input:
-#if SDN_CONTROLLER
-    if (sdn_cpchksum(cpbuf_get_len_field(SDN_CP_BUF)) != 0xffff)
-    {
-        // SDN_STAT(++sdn_stat.nd.drop);
-        // SDN_STAT(++sdn_stat.nd.chkerr);
-        PRINTF("nc ack bad checksum\n");
-        goto drop;
-    }
-#if SDN_CONTROLLER
-    /* NC ack processing */
-    sdn_nc_ack_input();
-#endif
-#endif
     goto drop;
 send:
     /* Recalculate the checksum */
-    SDN_IP_BUF->ipchksum = 0;
-    SDN_IP_BUF->ipchksum = ~sdn_ipchksum();
+    SDN_IP_BUF->hdr_chksum = 0;
+    SDN_IP_BUF->hdr_chksum = ~sdn_ipchksum();
     PRINTF("Forwarding packet with length %d (%d)\n", sdn_len, sdnbuf_get_len_field(SDN_IP_BUF));
 
     SDN_STAT(++sdn_stat.ip.sent);
