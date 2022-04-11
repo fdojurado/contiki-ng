@@ -28,6 +28,7 @@
  *
  *
  * Authors: Simon Duquennoy <simonduq@sics.se>
+ *          Atis Elsts <atis.elsts@edi.lv>
  */
 
 #include "contiki.h"
@@ -101,7 +102,7 @@ uint16_t
 guess_etx_from_rssi(const struct link_stats *stats)
 {
   if(stats != NULL) {
-    if(stats->rssi == 0) {
+    if(stats->rssi == LINK_STATS_RSSI_UNKNOWN) {
       return ETX_DEFAULT * ETX_DIVISOR;
     } else {
       /* A rough estimate of PRR from RSSI, as a linear function where:
@@ -137,7 +138,7 @@ link_stats_packet_sent(const linkaddr_t *lladdr, int status, int numtx)
   uint8_t ewma_alpha;
 #endif /* !LINK_STATS_ETX_FROM_PACKET_COUNT */
 
-  if(status != MAC_TX_OK && status != MAC_TX_NOACK) {
+  if(status != MAC_TX_OK && status != MAC_TX_NOACK && status != MAC_TX_QUEUE_FULL) {
     /* Do not penalize the ETX when collisions or transmission errors occur. */
     return;
   }
@@ -151,15 +152,18 @@ link_stats_packet_sent(const linkaddr_t *lladdr, int status, int numtx)
 
     /* Add the neighbor */
     stats = nbr_table_add_lladdr(link_stats, lladdr, NBR_TABLE_REASON_LINK_STATS, NULL);
-    if(stats != NULL) {
-#if LINK_STATS_INIT_ETX_FROM_RSSI
-      stats->etx = guess_etx_from_rssi(stats);
-#else /* LINK_STATS_INIT_ETX_FROM_RSSI */
-      stats->etx = ETX_DEFAULT * ETX_DIVISOR;
-#endif /* LINK_STATS_INIT_ETX_FROM_RSSI */
-    } else {
+    if(stats == NULL) {
       return; /* No space left, return */
     }
+    stats->rssi = LINK_STATS_RSSI_UNKNOWN;
+  }
+
+  if(status == MAC_TX_QUEUE_FULL) {
+#if LINK_STATS_PACKET_COUNTERS
+    stats->cnt_current.num_queue_drops += 1;
+#endif
+    /* Do not penalize the ETX when the packet is dropped due to a full queue */
+    return;
   }
 
   /* Update last timestamp and freshness */
@@ -205,9 +209,14 @@ link_stats_packet_sent(const linkaddr_t *lladdr, int status, int numtx)
   /* ETX alpha used for this update */
   ewma_alpha = link_stats_is_fresh(stats) ? EWMA_ALPHA : EWMA_BOOTSTRAP_ALPHA;
 
-  /* Compute EWMA and update ETX */
-  stats->etx = ((uint32_t)stats->etx * (EWMA_SCALE - ewma_alpha) +
-      (uint32_t)packet_etx * ewma_alpha) / EWMA_SCALE;
+  if(stats->etx == 0) {
+    /* Initialize ETX */
+    stats->etx = packet_etx;
+  } else {
+    /* Compute EWMA and update ETX */
+    stats->etx = ((uint32_t)stats->etx * (EWMA_SCALE - ewma_alpha) +
+        (uint32_t)packet_etx * ewma_alpha) / EWMA_SCALE;
+  }
 #endif /* LINK_STATS_ETX_FROM_PACKET_COUNT */
 }
 /*---------------------------------------------------------------------------*/
@@ -222,30 +231,29 @@ link_stats_input_callback(const linkaddr_t *lladdr)
   if(stats == NULL) {
     /* Add the neighbor */
     stats = nbr_table_add_lladdr(link_stats, lladdr, NBR_TABLE_REASON_LINK_STATS, NULL);
-    if(stats != NULL) {
-      /* Initialize */
-      stats->rssi = packet_rssi;
-#if LINK_STATS_INIT_ETX_FROM_RSSI
-      stats->etx = guess_etx_from_rssi(stats);
-#else /* LINK_STATS_INIT_ETX_FROM_RSSI */
-      stats->etx = ETX_DEFAULT * ETX_DIVISOR;
-#endif /* LINK_STATS_INIT_ETX_FROM_RSSI */
-#if LINK_STATS_PACKET_COUNTERS
-      stats->cnt_current.num_packets_rx = 1;
-#endif
+    if(stats == NULL) {
+      return; /* No space left, return */
     }
-    return;
+    stats->rssi = LINK_STATS_RSSI_UNKNOWN;
   }
 
-/* We may need this as NB added during link_stats_packet_sent is not set, as rssi=0
-does not exist.  */
-if(stats->rssi==0){
-  stats->rssi = packet_rssi;
-}
+  if(stats->rssi == LINK_STATS_RSSI_UNKNOWN) {
+    /* Initialize RSSI */
+    stats->rssi = packet_rssi;
+  } else {
+    /* Update RSSI EWMA */
+    stats->rssi = ((int32_t)stats->rssi * (EWMA_SCALE - EWMA_ALPHA) +
+        (int32_t)packet_rssi * EWMA_ALPHA) / EWMA_SCALE;
+  }
 
-  /* Update RSSI EWMA */
-  stats->rssi = ((int32_t)stats->rssi * (EWMA_SCALE - EWMA_ALPHA) +
-      (int32_t)packet_rssi * EWMA_ALPHA) / EWMA_SCALE;
+  if(stats->etx == 0) {
+    /* Initialize ETX */
+#if LINK_STATS_INIT_ETX_FROM_RSSI
+    stats->etx = guess_etx_from_rssi(stats);
+#else /* LINK_STATS_INIT_ETX_FROM_RSSI */
+    stats->etx = ETX_DEFAULT * ETX_DIVISOR;
+#endif /* LINK_STATS_INIT_ETX_FROM_RSSI */
+  }
 
 #if LINK_STATS_PACKET_COUNTERS
   stats->cnt_current.num_packets_rx++;
@@ -264,14 +272,16 @@ print_and_update_counters(void)
 
     struct link_packet_counter *c = &stats->cnt_current;
 
-    LOG_INFO("num packets: tx=%u ack=%u rx=%u to=",
-             c->num_packets_tx, c->num_packets_acked, c->num_packets_rx);
+    LOG_INFO("num packets: tx=%u ack=%u rx=%u queue_drops=%u to=",
+             c->num_packets_tx, c->num_packets_acked,
+             c->num_packets_rx, c->num_queue_drops);
     LOG_INFO_LLADDR(link_stats_get_lladdr(stats));
     LOG_INFO_("\n");
 
     stats->cnt_total.num_packets_tx += stats->cnt_current.num_packets_tx;
     stats->cnt_total.num_packets_acked += stats->cnt_current.num_packets_acked;
     stats->cnt_total.num_packets_rx += stats->cnt_current.num_packets_rx;
+    stats->cnt_total.num_queue_drops += stats->cnt_current.num_queue_drops;
     memset(&stats->cnt_current, 0, sizeof(stats->cnt_current));
   }
 }
