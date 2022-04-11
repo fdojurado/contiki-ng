@@ -291,17 +291,12 @@ static void send_na_output(void)
         SDN_IP_BUF->tlen = sdn_len;
         SDN_IP_BUF->ttl = 0x40;
         SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
-        PRINTF("Ctrl addr %d.%d\n", ctrl_addr.u8[0], ctrl_addr.u8[1]);
         SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
-        PRINTF("Ctrl addr2 %d.%d\n", SDN_IP_BUF->dest.u8[0], SDN_IP_BUF->dest.u8[1]);
         SDN_IP_BUF->hdr_chksum = 0;
         SDN_IP_BUF->hdr_chksum = ~sdn_ipchksum();
-
-        PRINTF("Checksum %04X\n", SDN_IP_BUF->hdr_chksum);
-
         /* NA packet */
         SDN_NA_BUF->payload_len = payload_size;
-        SDN_NA_BUF->rank = sdnip_htons(my_rank.rank);
+        SDN_NA_BUF->rank = my_rank.rank;
         SDN_NA_BUF->energy = sdnip_htons((int16_t)energy);
 
         /* Put neighbor's info in payload */

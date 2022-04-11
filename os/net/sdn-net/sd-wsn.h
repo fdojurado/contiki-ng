@@ -80,7 +80,7 @@
  * Direct access to neighbor advertisement pkts
  */
 #define SDN_NA_BUF ((struct sdn_na_hdr *)SDN_IP_PAYLOAD(0))
-#define SDN_NA_PAYLOAD(ext) ((struct sdn_na_payload *)SDN_IP_PAYLOAD(0) + SDN_NAH_LEN + (ext))
+#define SDN_NA_PAYLOAD(ext) ((struct sdn_na_payload *)(SDN_IP_PAYLOAD(0) + SDN_NAH_LEN) + (ext))
 
 /**
  * Direct access to network configuration routing packet
