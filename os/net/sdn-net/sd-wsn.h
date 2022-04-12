@@ -43,13 +43,13 @@
 /* Header sizes. */
 #define SDN_IPH_LEN sizeof(struct sdn_ip_hdr)
 
-#define SDN_NDH_LEN 6   /* Size of neighbor discovery header */
-#define SDN_NAH_LEN 6   /* Size of neighbor advertisment packet header */
-#define SDN_NAPL_LEN 6  /* Size of neighbor advertisment payload size */
-#define SDN_NCH_LEN 6   /* Size of network configuration routing and schedules packet header */
-#define SDN_NCR_LEN 4   /* Size of NC routing packet*/
-#define SDN_DATAH_LEN 1 /* Size of data header*/
-#define SDN_DATA_LEN 8  /* Size of data packet */
+#define SDN_NDH_LEN 6  /* Size of neighbor discovery header */
+#define SDN_NAH_LEN 6  /* Size of neighbor advertisment packet header */
+#define SDN_NAPL_LEN 6 /* Size of neighbor advertisment payload size */
+#define SDN_NCH_LEN 6  /* Size of network configuration routing and schedules packet header */
+#define SDN_NCR_LEN 4  /* Size of NC routing packet*/
+// #define SDN_DATAH_LEN 1 /* Size of data header*/
+#define SDN_DATA_LEN 8 /* Size of data packet */
 
 // #define sdn_l3_nd_hdr_len (SDN_IPH_LEN + SDN_NDH_LEN)
 // #define sdn_l3_cp_hdr_len (SDN_IPH_LEN + SDN_CPH_LEN)
@@ -63,13 +63,13 @@
 /**
  * Direct access to SDN Data packets
  */
-#define SDN_DATA_HDR_BUF ((struct sdn_data_hdr *)SDN_IP_PAYLOAD(0))
-#define SDN_DATA_HDR_PAYLOAD(ext) ((unsigned char *)SDN_IP_PAYLOAD(0) + SDN_DATAH_LEN + (ext))
+// #define SDN_DATA_HDR_BUF ((struct sdn_data_hdr *)SDN_IP_PAYLOAD(0))
+// #define SDN_DATA_HDR_PAYLOAD(ext) ((unsigned char *)SDN_IP_PAYLOAD(0) + SDN_DATAH_LEN + (ext))
 
 /**
  * Direct access to SDN Data packets
  */
-#define SDN_DATA_BUF(ext) ((struct sdn_data *)SDN_DATA_HDR_PAYLOAD(0) + (ext))
+#define SDN_DATA_BUF ((struct sdn_data *)SDN_IP_PAYLOAD(0))
 
 /**
  * Direct access to neighbor discovery
@@ -424,19 +424,20 @@ struct sdn_ip_hdr
     linkaddr_t scr, dest;
 };
 
-struct sdn_data_hdr
-{
-    uint8_t len;
-};
+// struct sdn_data_hdr
+// {
+//     uint8_t len;
+// };
 
 struct sdn_data
 {
     /* SDN Data header */
-    linkaddr_t addr;
+    // linkaddr_t addr;
     uint16_t seq,
         temp,
-        humidty;
-} __attribute__((packed));
+        humidty,
+        light;
+};
 
 /* The ND headers. */
 struct sdn_nd_hdr

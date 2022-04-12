@@ -261,10 +261,15 @@ void sdn_data_input(void)
 static void send_data_output(void)
 {
     const linkaddr_t *nxthop;
-    uint8_t aggregate = 0;
     nxthop = NETSTACK_ROUTING.nexthop(&ctrl_addr);
     if (nxthop != NULL)
     {
+        SDN_IP_BUF->vap = (0x01 << 5) | SDN_PROTO_DATA;
+
+        sdn_len = SDN_IPH_LEN + SDN_DATA_LEN;
+
+        SDN_IP_BUF->tlen = sdn_len;
+
         SDN_IP_BUF->ttl = 0x40;
 
         SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
@@ -273,86 +278,30 @@ static void send_data_output(void)
 
         /* Data packet */
         seq++;
-        if (!cluster_head || (sdn_data_aggregation_num_packets() == 0))
-        {
-            SDN_IP_BUF->vap = (0x03 << 4) | SDN_PROTO_DATA;
-
-            SDN_DATA_HDR_BUF->len = SDN_DATA_LEN;
-            SDN_DATA_BUF(0)->addr.u16 = sdnip_htons(linkaddr_node_addr.u16);
-            SDN_DATA_BUF(0)->seq = sdnip_htons(seq);
-            SDN_DATA_BUF(0)->temp = sdnip_htons(random_rand() % (uint8_t)(0x23));
-            SDN_DATA_BUF(0)->humidty = sdnip_htons(random_rand() % (uint8_t)(0x64));
-
-            PRINTF("1, %d, %u, %u, , , , , , , , ,\n",
-                   linkaddr_node_addr.u8[0],
-                   seq,
-                   SDN_DATA_BUF(0)->temp);
-        }
-        else
-        {
-            SDN_IP_BUF->vap = (0x01 << 5) | SDN_PROTO_DATA;
-            /* aggregate data available at the time */
-            SDN_DATA_HDR_BUF->len = SDN_DATA_LEN * (sdn_data_aggregation_num_packets() + 1);
-            SDN_DATA_BUF(0)->addr.u16 = sdnip_htons(linkaddr_node_addr.u16);
-            SDN_DATA_BUF(0)->seq = sdnip_htons(seq);
-            SDN_DATA_BUF(0)->temp = sdnip_htons(random_rand() % (uint8_t)(0x23));
-            SDN_DATA_BUF(0)->humidty = sdnip_htons(random_rand() % (uint8_t)(0x64));
-
-            PRINTF("1, %d, %u, %u, , , , , , , , ,\n",
-                   linkaddr_node_addr.u8[0],
-                   seq,
-                   SDN_DATA_BUF(0)->temp);
-
-            uint8_t i = 1;
-            sdn_data_aggregation_t *rt;
-            sdn_seq_list_t *dta;
-
-            for (rt = sdn_data_aggregation_head();
-                 rt != NULL;
-                 rt = sdn_data_aggregation_next(rt))
-            {
-
-                for (dta = list_head(rt->seq_list);
-                     dta != NULL;
-                     dta = list_item_next(dta))
-                {
-                    SDN_DATA_BUF(i)->addr.u16 = sdnip_htons(rt->addr.u16);
-                    SDN_DATA_BUF(i)->seq = sdnip_htons(dta->seq);
-                    SDN_DATA_BUF(i)->temp = sdnip_htons(dta->temp);
-                    SDN_DATA_BUF(i)->humidty = sdnip_htons(dta->humidty);
-                    PRINTF("1, %d, %u, %u, , , , , , , , ,\n",
-                           rt->addr.u8[0],
-                           dta->seq,
-                           dta->temp);
-                    i++;
-                }
-            }
-            aggregate = 1;
-        }
-
-        /* Total length */
-        sdn_len = SDN_IPH_LEN + SDN_DATAH_LEN + SDN_DATA_HDR_BUF->len;
-        SDN_IP_BUF->tlen = sdn_len;
+        SDN_DATA_BUF->seq = sdnip_htons(seq);
+        SDN_DATA_BUF->temp = sdnip_htons(random_rand() % (uint8_t)(0x23));
+        SDN_DATA_BUF->humidty = sdnip_htons(random_rand() % (uint8_t)(0x64));
+        SDN_DATA_BUF->light = sdnip_htons(random_rand() % (uint8_t)(0x64));
 
         SDN_IP_BUF->hdr_chksum = 0;
         SDN_IP_BUF->hdr_chksum = ~sdn_ipchksum();
 
         /* Update statistics */
         SDN_STAT(++sdn_stat.ip.sent);
-        if (!aggregate)
-        {
-            SDN_STAT(++sdn_stat.data.sent_nagg);
-            SDN_STAT(sdn_stat.data.sent_nagg_bytes += sdn_len);
-        }
-        else
-        {
-            SDN_STAT(++sdn_stat.data.sent_agg);
-            SDN_STAT(sdn_stat.data.sent_agg_bytes += sdn_len);
-        }
+        // if (!aggregate)
+        // {
+        SDN_STAT(++sdn_stat.data.sent_nagg);
+        SDN_STAT(sdn_stat.data.sent_nagg_bytes += sdn_len);
+        // }
+        // else
+        // {
+        //     SDN_STAT(++sdn_stat.data.sent_agg);
+        //     SDN_STAT(sdn_stat.data.sent_agg_bytes += sdn_len);
+        // }
 
         print_buff(sdn_buf, sdn_len, true);
 
-        sdnbuf_set_attr(SDNBUF_ATTR_MAX_MAC_TRANSMISSIONS, 0);
+        sdnbuf_set_attr(SDNBUF_ATTR_MAX_MAC_TRANSMISSIONS, 3);
 
         sdn_ip_output(nxthop);
 

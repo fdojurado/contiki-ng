@@ -286,31 +286,6 @@ void sdnip_process(uint8_t flag)
         PRINTF("sdn ip packet Not for us from %d.%d\n", scr.u8[0], scr.u8[1]);
 #endif
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
-        /* Aggregate? */
-        if (cluster_head &&
-            (SDN_IP_BUF->vap & 0x0F) == SDN_PROTO_DATA &&
-            ((SDN_IP_BUF->vap >> 4) & 0x01))
-        {
-            sdn_seq_list_t hdr;
-            // sdn_data_aggregation_t *rt;
-            scr.u16 = sdnip_htons(SDN_DATA_BUF(0)->addr.u16);
-            hdr.seq = sdnip_htons(SDN_DATA_BUF(0)->seq);
-            hdr.temp = sdnip_htons(SDN_DATA_BUF(0)->temp);
-            hdr.humidty = sdnip_htons(SDN_DATA_BUF(0)->humidty);
-            PRINTF("aggregating packet: node %d.%d, seq %u temp %u hum %u\n",
-                   scr.u8[0], scr.u8[1],
-                   hdr.seq,
-                   hdr.temp,
-                   hdr.humidty);
-            if (sdn_data_aggregation_add(&scr, &hdr) == NULL)
-            {
-                goto forward;
-            }
-            goto drop;
-        }
-    forward:
-#endif
         if (!sdn_update_ttl())
         {
             PRINTF("ttl expired\n");
