@@ -181,7 +181,7 @@ uint16_t sdn_nachksum(uint8_t len)
     uint16_t sum;
 
     sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_NAH_LEN + len);
-    PRINTF("sdn_cpchksum: sum 0x%04x\n", sum);
+    PRINTF("sdn_nachksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
@@ -190,7 +190,7 @@ uint16_t sdn_ncchksum(uint8_t len)
     uint16_t sum;
 
     sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_NCH_LEN + len);
-    PRINTF("sdn_cpchksum: sum 0x%04x\n", sum);
+    PRINTF("sdn_ncchksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/

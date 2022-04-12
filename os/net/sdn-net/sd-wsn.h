@@ -46,7 +46,7 @@
 #define SDN_NDH_LEN 6   /* Size of neighbor discovery header */
 #define SDN_NAH_LEN 6   /* Size of neighbor advertisment packet header */
 #define SDN_NAPL_LEN 6  /* Size of neighbor advertisment payload size */
-#define SDN_NCH_LEN 5   /* Size of network configuration routing and schedules packet header */
+#define SDN_NCH_LEN 6   /* Size of network configuration routing and schedules packet header */
 #define SDN_DATAH_LEN 1 /* Size of data header*/
 #define SDN_DATA_LEN 8  /* Size of data packet */
 
@@ -466,7 +466,8 @@ struct sdn_nc_routing_hdr
 {
     uint8_t payload_len,
         seq,
-        ack;
+        ack,
+        padding;
     int16_t pkt_chksum;
 };
 
