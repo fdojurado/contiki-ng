@@ -254,7 +254,6 @@ void send_ack(uint16_t ack)
     SDN_NC_ROUTE_BUF->seq = 0;
     SDN_NC_ROUTE_BUF->ack = ack + 1;
 
-
     SDN_NC_ROUTE_BUF->pkt_chksum = 0;
     SDN_NC_ROUTE_BUF->pkt_chksum = ~sdn_ncchksum(SDN_NC_ROUTE_BUF->payload_len);
 
@@ -267,27 +266,18 @@ void send_ack(uint16_t ack)
 #if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
 void sdn_nc_input(void)
 {
-    // linkaddr_t via, dest, ch_addr;
+    linkaddr_t via, dest;
     uint8_t i;
     uint16_t ack;
-    ack = sdnip_htons(SDN_NC_ROUTE_BUF->seq);
+    ack = SDN_NC_ROUTE_BUF->seq;
     /* Calculate number of routes */
-    uint8_t num_rt = SDN_NC_ROUTE_BUF->payload_len / 3;
-    // if (ch_addr.u16 != 0xFFFF)
-    // {
-    //     cluster_head = 0;
-    //     LOG_INFO("NC processing %d routes (CH %d.%d)\n", num_rt, ch_addr.u8[0], ch_addr.u8[1]);
-    // }
-    // else
-    // {
-    //     cluster_head = 1;
-    //     LOG_INFO("NC processing %d routes\n", num_rt);
-    // }
+    uint8_t num_rt;
+    num_rt = SDN_NC_ROUTE_BUF->payload_len / SDN_NCR_LEN;
     for (i = 0; i < num_rt; i++)
     {
-        // via.u16 = sdnip_htons(SDN_NC_ROUTE_PAYLOAD(i)->via.u16);
-        // dest.u16 = sdnip_htons(SDN_NC_ROUTE_PAYLOAD(i)->dest.u16);
-        // sdn_ds_route_add(&dest, 0, &via, CONTROLLER);
+        via.u16 = sdnip_htons(SDN_NC_ROUTE_PAYLOAD(i)->via.u16);
+        dest.u16 = sdnip_htons(SDN_NC_ROUTE_PAYLOAD(i)->dest.u16);
+        sdn_ds_route_add(&dest, 0, &via, CONTROLLER);
     }
 
     /* Send ACK */

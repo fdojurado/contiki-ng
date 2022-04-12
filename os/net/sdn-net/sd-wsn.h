@@ -47,6 +47,7 @@
 #define SDN_NAH_LEN 6   /* Size of neighbor advertisment packet header */
 #define SDN_NAPL_LEN 6  /* Size of neighbor advertisment payload size */
 #define SDN_NCH_LEN 6   /* Size of network configuration routing and schedules packet header */
+#define SDN_NCR_LEN 4   /* Size of NC routing packet*/
 #define SDN_DATAH_LEN 1 /* Size of data header*/
 #define SDN_DATA_LEN 8  /* Size of data packet */
 
@@ -86,7 +87,7 @@
  * Direct access to network configuration routing packet
  */
 #define SDN_NC_ROUTE_BUF ((struct sdn_nc_routing_hdr *)SDN_IP_PAYLOAD(0))
-#define SDN_NC_ROUTE_PAYLOAD(ext) ((unsigned char *)SDN_IP_PAYLOAD(0) + SDN_NCH_LEN + (ext))
+#define SDN_NC_ROUTE_PAYLOAD(ext) ((struct sdn_nc_routing_payload *)(SDN_IP_PAYLOAD(0) + SDN_NCH_LEN) + (ext))
 
 /**
  * Direct access to network configuration schedules packet
@@ -469,6 +470,13 @@ struct sdn_nc_routing_hdr
         ack,
         padding;
     int16_t pkt_chksum;
+};
+
+/* NC payload structure for routes */
+struct sdn_nc_routing_payload
+{
+    linkaddr_t via,
+        dest;
 };
 
 /* NC message structure for schedules */
