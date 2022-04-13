@@ -184,25 +184,19 @@ void sdn_nd_input(void)
 static void send_nd_output(void)
 {
     /* IP packet */
-    SDN_IP_BUF->vahl = (0x01 << 5) | SDN_IPH_LEN;
+    SDN_IP_BUF->vap = (0x01 << 5) | SDN_PROTO_ND;
     /* Total length */
     sdn_len = SDN_IPH_LEN + SDN_NDH_LEN;
-    SDN_IP_BUF->len = sdn_len;
+    SDN_IP_BUF->tlen = sdn_len;
 
     SDN_IP_BUF->ttl = 0x40;
-
-    SDN_IP_BUF->proto = SDN_PROTO_ND;
 
     SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
 
     SDN_IP_BUF->dest.u16 = sdnip_htons(linkaddr_null.u16);
 
-    // memcpy(&SDN_IP_BUF->scr, &linkaddr_node_addr, sizeof(linkaddr_node_addr));
-    // sdn_create_broadcast_addr(&SDN_IP_BUF->dest);
-    // linkaddr_copy(&SDN_IP_BUF->dest, &linkaddr_null);
-
-    SDN_IP_BUF->ipchksum = 0;
-    SDN_IP_BUF->ipchksum = ~sdn_ipchksum();
+    SDN_IP_BUF->hdr_chksum = 0;
+    SDN_IP_BUF->hdr_chksum = ~sdn_ipchksum();
 
     /* ND packet */
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)

@@ -101,7 +101,7 @@ static void
 set_packet_attrs(void)
 {
   /* set protocol in NETWORK_ID */
-  packetbuf_set_attr(PACKETBUF_ATTR_NETWORK_ID, SDN_IP_BUF->proto);
+  packetbuf_set_attr(PACKETBUF_ATTR_NETWORK_ID, SDN_IP_BUF->vap & 0x0F);
 }
 
 /*--------------------------------------------------------------------*/

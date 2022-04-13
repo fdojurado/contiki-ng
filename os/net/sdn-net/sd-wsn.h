@@ -41,18 +41,18 @@
 
 #include "net/netstack.h"
 /* Header sizes. */
-#define SDN_IPH_LEN 10
+#define SDN_IPH_LEN sizeof(struct sdn_ip_hdr)
 
-#define SDN_NDH_LEN 6    /* Size of neighbor discovery header */
-#define SDN_CPH_LEN 10   /* Size of neighbor control packet header */
-#define SDN_NA_LEN 6     /* Size of neighbor advertisment packet header */
-#define SDN_NC_LEN 4     /* Size of network configuration packet header */
-#define SDN_NC_ACK_LEN 2 /* Size of network configuration ACK packet */
-#define SDN_DATAH_LEN 1  /* Size of data header*/
-#define SDN_DATA_LEN 8   /* Size of data packet */
+#define SDN_NDH_LEN 6  /* Size of neighbor discovery header */
+#define SDN_NAH_LEN 6  /* Size of neighbor advertisment packet header */
+#define SDN_NAPL_LEN 6 /* Size of neighbor advertisment payload size */
+#define SDN_NCH_LEN 6  /* Size of network configuration routing and schedules packet header */
+#define SDN_NCR_LEN 4  /* Size of NC routing packet*/
+// #define SDN_DATAH_LEN 1 /* Size of data header*/
+#define SDN_DATA_LEN 8 /* Size of data packet */
 
-#define sdn_l3_nd_hdr_len (SDN_IPH_LEN + SDN_NDH_LEN)
-#define sdn_l3_cp_hdr_len (SDN_IPH_LEN + SDN_CPH_LEN)
+// #define sdn_l3_nd_hdr_len (SDN_IPH_LEN + SDN_NDH_LEN)
+// #define sdn_l3_cp_hdr_len (SDN_IPH_LEN + SDN_CPH_LEN)
 
 /**
  * Direct access to SDN IP header
@@ -63,41 +63,37 @@
 /**
  * Direct access to SDN Data packets
  */
-#define SDN_DATA_HDR_BUF ((struct sdn_data_hdr *)SDN_IP_PAYLOAD(0))
-#define SDN_DATA_HDR_PAYLOAD(ext) ((unsigned char *)SDN_IP_PAYLOAD(0) + SDN_DATAH_LEN + (ext))
+// #define SDN_DATA_HDR_BUF ((struct sdn_data_hdr *)SDN_IP_PAYLOAD(0))
+// #define SDN_DATA_HDR_PAYLOAD(ext) ((unsigned char *)SDN_IP_PAYLOAD(0) + SDN_DATAH_LEN + (ext))
 
 /**
  * Direct access to SDN Data packets
  */
-#define SDN_DATA_BUF(ext) ((struct sdn_data *)SDN_DATA_HDR_PAYLOAD(0) + (ext))
+#define SDN_DATA_BUF ((struct sdn_data *)SDN_IP_PAYLOAD(0))
 
 /**
  * Direct access to neighbor discovery
  */
 #define SDN_ND_BUF ((struct sdn_nd_hdr *)SDN_IP_PAYLOAD(0))
 #define SDN_ND_PAYLOAD ((unsigned char *)SDN_IP_PAYLOAD(0) + SDN_NDH_LEN)
-/**
- * Direct access to control packets
- */
-#define SDN_CP_BUF ((struct sdn_cp_hdr *)SDN_IP_PAYLOAD(0))
-#define SDN_CP_PAYLOAD(ext) ((unsigned char *)SDN_IP_PAYLOAD(0) + SDN_CPH_LEN + (ext))
 
 /**
  * Direct access to neighbor advertisement pkts
  */
-#define SDN_NA_BUF(ext) ((struct sdn_na_hdr *)SDN_CP_PAYLOAD(0) + (ext))
-// #define SDN_NA_PAYLOAD(ext) ((unsigned char *)SDN_CP_PAYLOAD(0) + SDN_NA_LEN + (ext))
+#define SDN_NA_BUF ((struct sdn_na_hdr *)SDN_IP_PAYLOAD(0))
+#define SDN_NA_PAYLOAD(ext) ((struct sdn_na_payload *)(SDN_IP_PAYLOAD(0) + SDN_NAH_LEN) + (ext))
 
 /**
- * Direct access to network configuration packet pkts
+ * Direct access to network configuration routing packet
  */
-#define SDN_NC_BUF(ext) ((struct sdn_nc_hdr *)SDN_CP_PAYLOAD(0) + (ext))
+#define SDN_NC_ROUTE_BUF ((struct sdn_nc_routing_hdr *)SDN_IP_PAYLOAD(0))
+#define SDN_NC_ROUTE_PAYLOAD(ext) ((struct sdn_nc_routing_payload *)(SDN_IP_PAYLOAD(0) + SDN_NCH_LEN) + (ext))
 
 /**
- * Direct access to NC ACK packet
+ * Direct access to network configuration schedules packet
  */
-#define SDN_NC_ACK_BUF ((struct sdn_nc_ack_hdr *)SDN_CP_PAYLOAD(0))
-// #define SDN_NA_PAYLOAD(ext) ((unsigned char *)SDN_CP_PAYLOAD(0) + SDN_NA_LEN + (ext))
+#define SDN_NC_SCHEDULES_BUF ((struct sdn_nc_schedules_hdr *)SDN_IP_PAYLOAD(0))
+#define SDN_NC_SCHEDULES_PAYLOAD(ext) ((unsigned char *)SDN_IP_PAYLOAD(0) + SDN_NCH_LEN + (ext))
 
 /**
  * The size of the SDN packet buffer.
@@ -421,27 +417,27 @@ void sdn_ip_process(uint8_t flag);
 struct sdn_ip_hdr
 {
     /* SDN IP header */
-    uint8_t vahl,
-        len,
-        ttl,
-        proto;
-    int16_t ipchksum;
+    uint8_t vap,
+        tlen,
+        ttl;
+    int16_t hdr_chksum;
     linkaddr_t scr, dest;
 };
 
-struct sdn_data_hdr
-{
-    uint8_t len;
-};
+// struct sdn_data_hdr
+// {
+//     uint8_t len;
+// };
 
 struct sdn_data
 {
     /* SDN Data header */
-    linkaddr_t addr;
+    // linkaddr_t addr;
     uint16_t seq,
         temp,
-        humidty;
-} __attribute__((packed));
+        humidty,
+        light;
+};
 
 /* The ND headers. */
 struct sdn_nd_hdr
@@ -449,37 +445,48 @@ struct sdn_nd_hdr
     int16_t rank, rssi;
     int16_t ndchksum;
 };
-/* The CP headers. */
-struct sdn_cp_hdr
-{
-    uint8_t type,
-        len;
-    int16_t rank,
-        energy,
-#if SDN_WITH_TABLE_CHKSUM
-        rt_chksum,
-#endif
-        cpchksum;
-};
+
 /* NA message structure */
 struct sdn_na_hdr
 {
-    /* The ->addr field holds the Rime address of gateway to controller. */
-    linkaddr_t addr;
+    uint8_t payload_len,
+        rank;
+    uint16_t energy;
+    int16_t pkt_chksum;
+};
+
+/* NA payload structure */
+struct sdn_na_payload
+{
+    linkaddr_t nb_addr;
     int16_t rssi;
     uint16_t etx;
 };
-/* NC message structure */
-struct sdn_nc_hdr
+
+/* NC message structure for routes */
+struct sdn_nc_routing_hdr
+{
+    uint8_t payload_len,
+        seq,
+        ack,
+        padding;
+    int16_t pkt_chksum;
+};
+
+/* NC payload structure for routes */
+struct sdn_nc_routing_payload
 {
     linkaddr_t via,
         dest;
 };
 
-/* NC ACK message structure */
-struct sdn_nc_ack_hdr
+/* NC message structure for schedules */
+struct sdn_nc_schedules_hdr
 {
-    uint16_t ack;
+    uint8_t payload_len,
+        seq,
+        ack;
+    int16_t pkt_chksum;
 };
 
 /**
@@ -499,13 +506,10 @@ struct sdn_nc_ack_hdr
 #define SDN_APPDATA_SIZE (SDN_BUFSIZE - SDN_IPH_LEN)
 
 #define SDN_PROTO_ND 1
-#define SDN_PROTO_CP 2
-#define SDN_PROTO_NA 3     /* Neighbor advertisement */
-#define SDN_PROTO_PI 4     /* Packet-in */
-#define SDN_PROTO_PO 5     /* Packet-out */
-#define SDN_PROTO_NC 6     /* Network configuration */
-#define SDN_PROTO_NC_ACK 7 /* NC acknowledgement */
-#define SDN_PROTO_DATA 8   /* Data packet */
+#define SDN_PROTO_NA 2           /* Neighbor advertisement */
+#define SDN_PROTO_NC_ROUTE 3     /* NC for routes */
+#define SDN_PROTO_NC_SCHEDULES 4 /* NC for schedules */
+#define SDN_PROTO_DATA 5         /* Data packet */
 
 /**
  * Calculate the Internet checksum over a buffer.
@@ -542,11 +546,17 @@ uint16_t sdn_ipchksum(void);
  */
 uint16_t sdn_ndchksum(void);
 /**
- * Calculate the checksum of the entire control packet.
+ * Calculate the checksum of the entire NA packet.
  *
- * \return The ICMP checksum of the ICMP packet in uip_buf
+ * \return The checksum of the NA packet in uip_buf
  */
-uint16_t sdn_cpchksum(uint8_t len);
+uint16_t sdn_nachksum(uint8_t len);
+/**
+ * Calculate the checksum of the entire NC packet.
+ *
+ * \return The checksum of the NC packet in uip_buf
+ */
+uint16_t sdn_ncchksum(uint8_t len);
 
 /** \brief Periodic processing of data structures */
 extern struct etimer sdn_ds_timer_periodic;

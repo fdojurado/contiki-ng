@@ -235,35 +235,27 @@ void send_ack(uint16_t ack)
              ack + 1,
              ctrl_addr.u8[0], ctrl_addr.u8[1]);
     /* layer 3 packet */
-    SDN_IP_BUF->vahl = (0x01 << 5) | SDN_IPH_LEN;
+    SDN_IP_BUF->vap = (0x01 << 5) | SDN_PROTO_NC_ROUTE;
     /* Total length */
-    sdn_len = SDN_IPH_LEN + SDN_CPH_LEN + SDN_NC_ACK_LEN;
+    sdn_len = SDN_IPH_LEN + SDN_NCH_LEN;
 
-    SDN_IP_BUF->len = sdn_len;
+    SDN_IP_BUF->tlen = sdn_len;
 
     SDN_IP_BUF->ttl = 0x40;
-
-    SDN_IP_BUF->proto = SDN_PROTO_CP;
 
     SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
 
     SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
 
-    SDN_IP_BUF->ipchksum = 0;
+    SDN_IP_BUF->hdr_chksum = 0;
 
-    /* Control packet */
-    SDN_CP_BUF->type = SDN_PROTO_NC_ACK;
+    /* Build NC routing packet packet */
+    SDN_NC_ROUTE_BUF->payload_len = 0;
+    SDN_NC_ROUTE_BUF->seq = 0;
+    SDN_NC_ROUTE_BUF->ack = ack + 1;
 
-    SDN_CP_BUF->len = SDN_NC_ACK_LEN;
-
-    SDN_CP_BUF->rank = 0;
-
-    SDN_CP_BUF->energy = 0;
-
-    SDN_NC_ACK_BUF->ack = sdnip_htons(ack + 1);
-
-    SDN_CP_BUF->cpchksum = 0;
-    SDN_CP_BUF->cpchksum = ~sdn_cpchksum(SDN_CP_BUF->len);
+    SDN_NC_ROUTE_BUF->pkt_chksum = 0;
+    SDN_NC_ROUTE_BUF->pkt_chksum = ~sdn_ncchksum(SDN_NC_ROUTE_BUF->payload_len);
 
     print_buff(sdn_buf, sdn_len, true);
     /* For the serial controller, the nxthop should be different */
@@ -274,27 +266,17 @@ void send_ack(uint16_t ack)
 #if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
 void sdn_nc_input(void)
 {
-    linkaddr_t via, dest, ch_addr;
+    linkaddr_t via, dest;
     uint8_t i;
     uint16_t ack;
-    ack = sdnip_htons(SDN_CP_BUF->rank);
-    ch_addr.u16 = sdnip_htons(SDN_CP_BUF->energy);
+    ack = SDN_NC_ROUTE_BUF->seq;
     /* Calculate number of routes */
-    uint8_t num_rt = SDN_CP_BUF->len / SDN_NC_LEN;
-    if (ch_addr.u16 != 0xFFFF)
-    {
-        cluster_head = 0;
-        LOG_INFO("NC processing %d routes (CH %d.%d)\n", num_rt, ch_addr.u8[0], ch_addr.u8[1]);
-    }
-    else
-    {
-        cluster_head = 1;
-        LOG_INFO("NC processing %d routes\n", num_rt);
-    }
+    uint8_t num_rt;
+    num_rt = SDN_NC_ROUTE_BUF->payload_len / SDN_NCR_LEN;
     for (i = 0; i < num_rt; i++)
     {
-        via.u16 = sdnip_htons(SDN_NC_BUF(i)->via.u16);
-        dest.u16 = sdnip_htons(SDN_NC_BUF(i)->dest.u16);
+        via.u16 = sdnip_htons(SDN_NC_ROUTE_PAYLOAD(i)->via.u16);
+        dest.u16 = sdnip_htons(SDN_NC_ROUTE_PAYLOAD(i)->dest.u16);
         sdn_ds_route_add(&dest, 0, &via, CONTROLLER);
     }
 

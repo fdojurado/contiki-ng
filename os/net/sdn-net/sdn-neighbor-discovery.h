@@ -60,7 +60,8 @@ typedef struct
 {
     /* The ->addr field holds the Rime address of gateway to controller. */
     linkaddr_t addr;
-    int16_t rank, rssi;
+    uint8_t rank;
+    int16_t rssi;
 } sdn_rank_t;
 extern sdn_rank_t my_rank;
 #endif
