@@ -128,6 +128,7 @@ static void copy_to_serial_buff(uint8_t *data)
         size--;
         i++;
     }
+    sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_SERIAL_PACKET_BUF->payload_len;
 }
 /*---------------------------------------------------------------------------*/
 static void serial_packet_input(uint8_t *data)

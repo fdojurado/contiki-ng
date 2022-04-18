@@ -100,6 +100,12 @@ uint8_t ncbuf_get_len_field(struct sdn_nc_routing_hdr *hdr)
   // return ((uint16_t)(hdr->len[0]) << 8) + hdr->len[1];
 }
 /*---------------------------------------------------------------------------*/
+uint8_t srbuf_get_len_field(struct sdn_nc_schedules_hdr *hdr)
+{
+  return hdr->payload_len;
+  // return ((uint16_t)(hdr->len[0]) << 8) + hdr->len[1];
+}
+/*---------------------------------------------------------------------------*/
 uint16_t sdnbuf_get_attr(uint8_t type)
 {
   if (type < SDNBUF_ATTR_MAX)

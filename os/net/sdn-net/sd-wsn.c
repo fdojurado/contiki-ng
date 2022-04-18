@@ -47,6 +47,7 @@
 #include "sdn-network-config.h"
 #include "sdn-data-packets.h"
 #include "sdn-data-aggregation.h"
+#include "sdn-schedule-advertisement.h"
 #if SDN_CONTROLLER
 #include "sdn-controller/sdn-ds-node-route.h"
 #include "sdn-controller/sdn-ds-config-routes.h"
@@ -194,6 +195,15 @@ uint16_t sdn_ncchksum(uint8_t len)
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
+uint16_t sdn_sachksum(uint8_t len)
+{
+    uint16_t sum;
+
+    sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_SA_LEN + len);
+    PRINTF("sdn_sachksum: sum 0x%04x\n", sum);
+    return (sum == 0) ? 0xffff : sdnip_htons(sum);
+}
+/*---------------------------------------------------------------------------*/
 void sdn_ds_periodic(void)
 {
 #if SDN_CONTROLLER
@@ -320,9 +330,9 @@ void sdnip_process(uint8_t flag)
         case SDN_PROTO_NC_ROUTE:
             /* CP input */
             goto nc_route_input;
-        // case SDN_PROTO_NC_SCHEDULES:
-        //     /* CP input */
-        //     goto nc_schedules_input;
+        case SDN_PROTO_NC_SCHEDULES:
+            /* TSCH schedules input */
+            goto sr_input;
         case SDN_PROTO_DATA:
             /* Data input */
             goto data_input;
@@ -368,6 +378,19 @@ na_input:
     sdn_na_input();
 #endif
     goto drop;
+sr_input:
+    if (sdn_sachksum(srbuf_get_len_field(SDN_SA_SCHEDULES_BUF)) != 0xffff)
+    {
+        PRINTF("SA bad checksum\n");
+        goto drop;
+    }
+    /* Process SR packet */
+    if (sdn_sa_input())
+    {
+        goto send;
+    }
+    goto drop;
+
 nc_route_input:
 #if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
     if (sdn_ncchksum(ncbuf_get_len_field(SDN_NC_ROUTE_BUF)) != 0xffff)

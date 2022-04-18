@@ -44,10 +44,12 @@
 #define SDN_IPH_LEN sizeof(struct sdn_ip_hdr)
 
 #define SDN_NDH_LEN 6  /* Size of neighbor discovery header */
-#define SDN_NAH_LEN 6  /* Size of neighbor advertisment packet header */
-#define SDN_NAPL_LEN 6 /* Size of neighbor advertisment payload size */
+#define SDN_NAH_LEN 6  /* Size of neighbor advertisement packet header */
+#define SDN_NAPL_LEN 6 /* Size of neighbor advertisement payload size */
 #define SDN_NCH_LEN 6  /* Size of network configuration routing and schedules packet header */
 #define SDN_NCR_LEN 4  /* Size of NC routing packet*/
+#define SDN_SA_LEN 6   /* Size of Schedule advertisement (SA) packet*/
+#define SDN_SAPL_LEN 8 /* Size of SA payload */
 // #define SDN_DATAH_LEN 1 /* Size of data header*/
 #define SDN_DATA_LEN 8 /* Size of data packet */
 
@@ -92,8 +94,8 @@
 /**
  * Direct access to network configuration schedules packet
  */
-#define SDN_NC_SCHEDULES_BUF ((struct sdn_nc_schedules_hdr *)SDN_IP_PAYLOAD(0))
-#define SDN_NC_SCHEDULES_PAYLOAD(ext) ((unsigned char *)SDN_IP_PAYLOAD(0) + SDN_NCH_LEN + (ext))
+#define SDN_SA_SCHEDULES_BUF ((struct sdn_nc_schedules_hdr *)SDN_IP_PAYLOAD(0))
+#define SDN_SA_SCHEDULES_PAYLOAD(ext) ((struct sdn_nc_schedules_payload *)(SDN_IP_PAYLOAD(0) + SDN_SA_LEN) + (ext))
 
 /**
  * The size of the SDN packet buffer.
@@ -484,9 +486,19 @@ struct sdn_nc_routing_payload
 struct sdn_nc_schedules_hdr
 {
     uint8_t payload_len,
-        seq,
-        ack;
+        padding;
+    uint16_t seq;
     int16_t pkt_chksum;
+};
+
+/* NC message structure for schedules */
+struct sdn_nc_schedules_payload
+{
+    uint8_t type,
+        channel_offset,
+        time_offset,
+        padding;
+    linkaddr_t scr, dst;
 };
 
 /**

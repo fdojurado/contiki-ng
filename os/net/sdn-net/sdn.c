@@ -104,6 +104,10 @@ void sdn_output()
     }
 
     /* Look for a next hop */
+    if (SDN_IP_BUF->vap == ((0x01 << 5) | SDN_PROTO_NC_SCHEDULES))
+    {
+        goto netflood;
+    }
     dest.u16 = sdnip_htons(SDN_IP_BUF->dest.u16);
     nexthop = NETSTACK_ROUTING.nexthop(&dest);
     // nexthop = NULL;
@@ -124,6 +128,9 @@ void sdn_output()
            nexthop->u8[0], nexthop->u8[1]);
 
     sdn_ip_output(nexthop);
+
+netflood:
+    sdn_ip_output(NULL);
 
 exit:
     PRINTF("output: packet not forwarded\n");

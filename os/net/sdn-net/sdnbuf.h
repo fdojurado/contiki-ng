@@ -92,6 +92,13 @@ uint8_t nabuf_get_len_field(struct sdn_na_hdr *hdr);
 uint8_t ncbuf_get_len_field(struct sdn_nc_routing_hdr *hdr);
 
 /**
+ * \brief          Returns the value of the length field in the SR buffer
+ * \param hdr      The header
+ * \retval         The length value
+ */
+uint8_t srbuf_get_len_field(struct sdn_nc_schedules_hdr *hdr);
+
+/**
  * \brief          Get the next IPv6 header.
  * \param buffer   A pointer to the buffer holding the IPv6 packet
  * \param size     The size of the data in the buffer
@@ -155,7 +162,7 @@ enum
   SDNBUF_ATTR_INTERFACE_ID,          /**< The interface to output packet on */
   SDNBUF_ATTR_PHYSICAL_NETWORK_ID,   /**< Physical network ID (mapped to PAN ID)*/
   SDNBUF_ATTR_MAX_MAC_TRANSMISSIONS, /**< MAX transmissions of the packet MAC */
-  //UIPBUF_ATTR_FLAGS,   /**< Flags that can control lower layers.  see above. */
+  // UIPBUF_ATTR_FLAGS,   /**< Flags that can control lower layers.  see above. */
   SDNBUF_ATTR_MAX
 };
 
