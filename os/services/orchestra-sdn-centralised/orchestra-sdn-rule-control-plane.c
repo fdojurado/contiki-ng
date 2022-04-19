@@ -62,6 +62,7 @@ struct comm_links
 static const struct comm_links control_link[] = {
     {3, 3},
     {9, 2},
+    {21, 2},
     {15, 1},
     {28, 0},
 };
@@ -70,7 +71,7 @@ static const struct comm_links control_link[] = {
 static uint8_t
 get_random()
 {
-  return random_rand() % (uint16_t)(4);
+  return random_rand() % (uint16_t)(5);
 }
 /*---------------------------------------------------------------------------*/
 static int
