@@ -60,7 +60,7 @@ struct comm_links
 };
 
 static const struct comm_links control_link[] = {
-    {1, 3},
+    {3, 3},
     {9, 2},
     {15, 1},
     {28, 0},
