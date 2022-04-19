@@ -75,13 +75,13 @@ init(uint16_t sf_handle)
       0, ORCHESTRA_DEFAULT_COMMON_CHANNEL_OFFSET, 1);
 }
 /*---------------------------------------------------------------------------*/
-struct orchestra_rule default_common = {
+struct orchestra_rule control_plane = {
   init,
   NULL,
   select_packet,
   NULL,
   NULL,
   NULL,
-  "default common",
+  "control plane",
   ORCHESTRA_COMMON_SHARED_PERIOD,
 };

@@ -125,6 +125,10 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     process_start(&sdn_process, NULL);
     /* start the sdn serial interface */
     sdn_serial_protocol_init();
+
+#if BUILD_WITH_ORCHESTRA
+    LOG_INFO("Building with orchestra\n");
+#endif
     /* Initialize NullNet */
     // sdn_net_buf = (uint8_t *)&count;
     // sdn_net_len = sizeof(count);

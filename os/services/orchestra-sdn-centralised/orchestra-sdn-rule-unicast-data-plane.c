@@ -125,13 +125,13 @@ init(uint16_t sf_handle)
   }
 }
 /*---------------------------------------------------------------------------*/
-struct orchestra_rule unicast_per_neighbor = {
+struct orchestra_rule unicast_data_plane = {
   init,
   new_time_source,
   select_packet,
   child_added,
   child_removed,
   NULL,
-  "unicast per neighbor",
+  "unicast data plane",
   ORCHESTRA_UNICAST_PERIOD,
 };

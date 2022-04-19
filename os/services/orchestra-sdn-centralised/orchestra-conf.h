@@ -47,8 +47,8 @@
  * - a common shared slotframe for any other traffic (mostly broadcast)
  *  */
 #define ORCHESTRA_RULES { &eb_per_time_source, \
-                          &unicast_per_neighbor, \
-                          &default_common }
+                          &control_plane, \
+                          &unicast_data_plane }
 /* Example configuration for RPL storing mode: */
 /* #define ORCHESTRA_RULES { &eb_per_time_source, \
                              &unicast_per_neighbor_rpl_storing, \
