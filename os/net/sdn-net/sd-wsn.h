@@ -46,9 +46,9 @@
 #define SDN_NDH_LEN 6  /* Size of neighbor discovery header */
 #define SDN_NAH_LEN 6  /* Size of neighbor advertisement packet header */
 #define SDN_NAPL_LEN 6 /* Size of neighbor advertisement payload size */
-#define SDN_NCH_LEN 6  /* Size of network configuration routing and schedules packet header */
-#define SDN_NCR_LEN 4  /* Size of NC routing packet*/
-#define SDN_SA_LEN 6   /* Size of Schedule advertisement (SA) packet*/
+#define SDN_RAH_LEN 6  /* Size of network configuration routing and schedules packet header */
+#define SDN_RAPL_LEN 6 /* Size of RA payload */
+#define SDN_SAH_LEN 6  /* Size of Schedule advertisement (SA) header */
 #define SDN_SAPL_LEN 8 /* Size of SA payload */
 // #define SDN_DATAH_LEN 1 /* Size of data header*/
 #define SDN_DATA_LEN 8 /* Size of data packet */
@@ -86,16 +86,16 @@
 #define SDN_NA_PAYLOAD(ext) ((struct sdn_na_payload *)(SDN_IP_PAYLOAD(0) + SDN_NAH_LEN) + (ext))
 
 /**
- * Direct access to network configuration routing packet
+ * Direct access to Routes Advertisement (RA) packet
  */
-#define SDN_NC_ROUTE_BUF ((struct sdn_nc_routing_hdr *)SDN_IP_PAYLOAD(0))
-#define SDN_NC_ROUTE_PAYLOAD(ext) ((struct sdn_nc_routing_payload *)(SDN_IP_PAYLOAD(0) + SDN_NCH_LEN) + (ext))
+#define SDN_RA_BUF ((struct sdn_ra_hdr *)SDN_IP_PAYLOAD(0))
+#define SDN_RA_PAYLOAD(ext) ((struct sdn_ra_payload *)(SDN_IP_PAYLOAD(0) + SDN_RAH_LEN) + (ext))
 
 /**
- * Direct access to network configuration schedules packet
+ * Direct access to Schedules Advertisement (SA) packet
  */
-#define SDN_SA_SCHEDULES_BUF ((struct sdn_nc_schedules_hdr *)SDN_IP_PAYLOAD(0))
-#define SDN_SA_SCHEDULES_PAYLOAD(ext) ((struct sdn_nc_schedules_payload *)(SDN_IP_PAYLOAD(0) + SDN_SA_LEN) + (ext))
+#define SDN_SA_BUF ((struct sdn_sa_hdr *)SDN_IP_PAYLOAD(0))
+#define SDN_SA_PAYLOAD(ext) ((struct sdn_sa_payload *)(SDN_IP_PAYLOAD(0) + SDN_SAH_LEN) + (ext))
 
 /**
  * The size of the SDN packet buffer.
@@ -466,24 +466,24 @@ struct sdn_na_payload
 };
 
 /* NC message structure for routes */
-struct sdn_nc_routing_hdr
+struct sdn_ra_hdr
 {
     uint8_t payload_len,
-        seq,
-        ack,
         padding;
+    uint16_t seq;
     int16_t pkt_chksum;
 };
 
 /* NC payload structure for routes */
-struct sdn_nc_routing_payload
+struct sdn_ra_payload
 {
-    linkaddr_t via,
-        dest;
+    linkaddr_t scr,
+        dest,
+        via;
 };
 
 /* NC message structure for schedules */
-struct sdn_nc_schedules_hdr
+struct sdn_sa_hdr
 {
     uint8_t payload_len,
         padding;
@@ -492,7 +492,7 @@ struct sdn_nc_schedules_hdr
 };
 
 /* NC message structure for schedules */
-struct sdn_nc_schedules_payload
+struct sdn_sa_payload
 {
     uint8_t type,
         channel_offset,
@@ -518,10 +518,10 @@ struct sdn_nc_schedules_payload
 #define SDN_APPDATA_SIZE (SDN_BUFSIZE - SDN_IPH_LEN)
 
 #define SDN_PROTO_ND 1
-#define SDN_PROTO_NA 2           /* Neighbor advertisement */
-#define SDN_PROTO_NC_ROUTE 3     /* NC for routes */
-#define SDN_PROTO_NC_SCHEDULES 4 /* NC for schedules */
-#define SDN_PROTO_DATA 5         /* Data packet */
+#define SDN_PROTO_NA 2   /* Neighbor advertisement */
+#define SDN_PROTO_RA 3   /* Routes Advertisement */
+#define SDN_PROTO_SA 4   /* Schedule Advertisment */
+#define SDN_PROTO_DATA 5 /* Data packet */
 
 /**
  * Calculate the Internet checksum over a buffer.
@@ -564,11 +564,11 @@ uint16_t sdn_ndchksum(void);
  */
 uint16_t sdn_nachksum(uint8_t len);
 /**
- * Calculate the checksum of the entire NC packet.
+ * Calculate the checksum of the entire RA packet.
  *
- * \return The checksum of the NC packet in uip_buf
+ * \return The checksum of the RA packet in uip_buf
  */
-uint16_t sdn_ncchksum(uint8_t len);
+uint16_t sdn_rachksum(uint8_t len);
 
 /** \brief Periodic processing of data structures */
 extern struct etimer sdn_ds_timer_periodic;

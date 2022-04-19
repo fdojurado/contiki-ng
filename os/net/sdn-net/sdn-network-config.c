@@ -228,63 +228,63 @@ void sdn_nc_ack_input()
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
-void send_ack(uint16_t ack)
-{
-    LOG_INFO("Sending ACK (%u) to %d.%dn",
-             ack + 1,
-             ctrl_addr.u8[0], ctrl_addr.u8[1]);
-    /* layer 3 packet */
-    SDN_IP_BUF->vap = (0x01 << 5) | SDN_PROTO_NC_ROUTE;
-    /* Total length */
-    sdn_len = SDN_IPH_LEN + SDN_NCH_LEN;
+// #if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+// void send_ack(uint16_t ack)
+// {
+//     LOG_INFO("Sending ACK (%u) to %d.%dn",
+//              ack + 1,
+//              ctrl_addr.u8[0], ctrl_addr.u8[1]);
+//     /* layer 3 packet */
+//     SDN_IP_BUF->vap = (0x01 << 5) | SDN_PROTO_RA;
+//     /* Total length */
+//     sdn_len = SDN_IPH_LEN + SDN_RAH_LEN;
 
-    SDN_IP_BUF->tlen = sdn_len;
+//     SDN_IP_BUF->tlen = sdn_len;
 
-    SDN_IP_BUF->ttl = 0x40;
+//     SDN_IP_BUF->ttl = 0x40;
 
-    SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
+//     SDN_IP_BUF->scr.u16 = sdnip_htons(linkaddr_node_addr.u16);
 
-    SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
+//     SDN_IP_BUF->dest.u16 = sdnip_htons(ctrl_addr.u16);
 
-    SDN_IP_BUF->hdr_chksum = 0;
+//     SDN_IP_BUF->hdr_chksum = 0;
 
-    /* Build NC routing packet packet */
-    SDN_NC_ROUTE_BUF->payload_len = 0;
-    SDN_NC_ROUTE_BUF->seq = 0;
-    SDN_NC_ROUTE_BUF->ack = ack + 1;
+//     /* Build NC routing packet packet */
+//     SDN_RA_BUF->payload_len = 0;
+//     SDN_RA_BUF->seq = 0;
+//     SDN_RA_BUF->ack = ack + 1;
 
-    SDN_NC_ROUTE_BUF->pkt_chksum = 0;
-    SDN_NC_ROUTE_BUF->pkt_chksum = ~sdn_ncchksum(SDN_NC_ROUTE_BUF->payload_len);
+//     SDN_RA_BUF->pkt_chksum = 0;
+//     SDN_RA_BUF->pkt_chksum = ~sdn_rachksum(SDN_RA_BUF->payload_len);
 
-    print_buff(sdn_buf, sdn_len, true);
-    /* For the serial controller, the nxthop should be different */
-    return;
-}
-#endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
+//     print_buff(sdn_buf, sdn_len, true);
+//     /* For the serial controller, the nxthop should be different */
+//     return;
+// }
+// #endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
 /*---------------------------------------------------------------------------*/
-#if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
-void sdn_nc_input(void)
-{
-    linkaddr_t via, dest;
-    uint8_t i;
-    uint16_t ack;
-    ack = SDN_NC_ROUTE_BUF->seq;
-    /* Calculate number of routes */
-    uint8_t num_rt;
-    num_rt = SDN_NC_ROUTE_BUF->payload_len / SDN_NCR_LEN;
-    for (i = 0; i < num_rt; i++)
-    {
-        via.u16 = sdnip_htons(SDN_NC_ROUTE_PAYLOAD(i)->via.u16);
-        dest.u16 = sdnip_htons(SDN_NC_ROUTE_PAYLOAD(i)->dest.u16);
-        sdn_ds_route_add(&dest, 0, &via, CONTROLLER);
-    }
+// #if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+// void sdn_nc_input(void)
+// {
+//     linkaddr_t via, dest;
+//     uint8_t i;
+//     uint16_t ack;
+//     ack = SDN_RA_BUF->seq;
+//     /* Calculate number of routes */
+//     uint8_t num_rt;
+//     num_rt = SDN_RA_BUF->payload_len / SDN_RAPL_LEN;
+//     for (i = 0; i < num_rt; i++)
+//     {
+//         via.u16 = sdnip_htons(SDN_RA_PAYLOAD(i)->via.u16);
+//         dest.u16 = sdnip_htons(SDN_RA_PAYLOAD(i)->dest.u16);
+//         sdn_ds_route_add(&dest, 0, &via, CONTROLLER);
+//     }
 
-    /* Send ACK */
-    send_ack(ack);
-    return;
-}
-#endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
+//     /* Send ACK */
+//     // send_ack(ack);
+//     return;
+// }
+// #endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
 /*---------------------------------------------------------------------------*/
 #if SDN_CONTROLLER
 static void ack_list_flush(void)

@@ -37,13 +37,13 @@
  *         Fernando Jurado <fdo.jurado@gmail.com>
  */
 
-#ifndef SDN_SA_H
-#define SDN_SA_H
+#ifndef SDN_RA_H
+#define SDN_RA_H
 
 /**
- * \brief Handle an incoming SA packet
+ * \brief Handle an incoming RA packet
 
  */
-int sdn_sa_input(void);
+int sdn_ra_input(void);
 
 #endif

@@ -104,7 +104,8 @@ void sdn_output()
     }
 
     /* Look for a next hop */
-    if (SDN_IP_BUF->vap == ((0x01 << 5) | SDN_PROTO_NC_SCHEDULES))
+    if ((SDN_IP_BUF->vap == ((0x01 << 5) | SDN_PROTO_SA)) ||
+        (SDN_IP_BUF->vap == ((0x01 << 5) | SDN_PROTO_RA)))
     {
         goto netflood;
     }
