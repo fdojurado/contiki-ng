@@ -135,7 +135,9 @@ static void serial_packet_input(uint8_t *data)
 {
     /* Lets process the serial data */
     copy_to_serial_buff(data);
+#if DEBUG
     sdn_serial_print_packet();
+#endif
     if (sdn_serial_len > 0)
     {
         PRINTF("input_serial: received %u bytes\n", sdn_serial_len);

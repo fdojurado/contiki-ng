@@ -48,6 +48,10 @@
 #include "sdn-ds-route.h"
 #include "sdnbuf.h"
 
+#if BUILD_WITH_ORCHESTRA
+#include "services/orchestra-sdn-centralised/orchestra.h"
+#endif
+
 /* Log configuration */
 #define DEBUG 1
 #if DEBUG
@@ -108,6 +112,9 @@ static void update_rank(int16_t rssi, uint8_t rank, const linkaddr_t *from)
     linkaddr_copy(&my_rank.addr, from);
     PRINTF("rank updated: rank %d total rssi %d\n", my_rank.rank, my_rank.rssi);
     PRINTF(" gw address = %d.%d\n", my_rank.addr.u8[0], my_rank.addr.u8[1]);
+#if BUILD_WITH_ORCHESTRA
+    NETSTACK_CONF_SDN_RANK_UPDATED_CALLBACK(from, my_rank.rank);
+#endif /* BUILD_WITH_ORCHESTRA */
     // }
 }
 #endif

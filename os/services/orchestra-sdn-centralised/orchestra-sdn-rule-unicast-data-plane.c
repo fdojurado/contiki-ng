@@ -140,6 +140,7 @@ struct orchestra_rule unicast_data_plane = {
     child_added,
     child_removed,
     NULL,
+    NULL,
     "unicast data plane",
     ORCHESTRA_UNICAST_PERIOD,
 };

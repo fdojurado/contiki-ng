@@ -42,13 +42,15 @@
 #include "orchestra-conf.h"
 
 /* The structure of an Orchestra rule */
-struct orchestra_rule {
-  void (* init)(uint16_t slotframe_handle);
-  void (* new_time_source)(const struct tsch_neighbor *old, const struct tsch_neighbor *new);
-  int  (* select_packet)(uint16_t *slotframe, uint16_t *timeslot, uint16_t *channel_offset);
-  void (* child_added)(const linkaddr_t *addr);
-  void (* child_removed)(const linkaddr_t *addr);
-  void (* root_node_updated)(const linkaddr_t *addr, uint8_t is_added);
+struct orchestra_rule
+{
+  void (*init)(uint16_t slotframe_handle);
+  void (*new_time_source)(const struct tsch_neighbor *old, const struct tsch_neighbor *new);
+  int (*select_packet)(uint16_t *slotframe, uint16_t *timeslot, uint16_t *channel_offset);
+  void (*child_added)(const linkaddr_t *addr);
+  void (*child_removed)(const linkaddr_t *addr);
+  void (*root_node_updated)(const linkaddr_t *addr, uint8_t is_added);
+  void (*rank_updated)(const linkaddr_t *addr, uint8_t rank);
   const char *const name;
   const int16_t slotframe_size;
 };
@@ -72,6 +74,8 @@ void orchestra_callback_new_time_source(const struct tsch_neighbor *old, const s
 void orchestra_callback_child_added(const linkaddr_t *addr);
 /* Set with #define NETSTACK_CONF_ROUTING_NEIGHBOR_REMOVED_CALLBACK orchestra_callback_child_removed */
 void orchestra_callback_child_removed(const linkaddr_t *addr);
+/* Set with #define NETSTACK_CONF_SDN_RANK_UPDATED_CALLBACK orchestra_callback_rank_updated */
+void orchestra_callback_rank_updated(const linkaddr_t *addr, uint8_t rank);
 /* Set with #define TSCH_CALLBACK_ROOT_NODE_UPDATED orchestra_callback_root_node_updated */
 void orchestra_callback_root_node_updated(const linkaddr_t *root, uint8_t is_added);
 

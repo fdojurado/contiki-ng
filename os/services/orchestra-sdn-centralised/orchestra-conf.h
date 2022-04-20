@@ -49,8 +49,8 @@
 #define ORCHESTRA_RULES          \
     {                            \
         &eb_per_time_source,     \
-            &unicast_data_plane, \
             &control_plane,      \
+            &unicast_data_plane, \
             &default_common      \
     }
 /* Example configuration for RPL storing mode: */
