@@ -137,7 +137,7 @@ int orchestra_callback_packet_ready(void)
   packetbuf_set_attr(PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET, channel_offset);
 #endif
 
-  LOG_INFO("matched ruled %d\n", matched_rule);
+  LOG_INFO("matched ruled %d (%u,%u)\n", matched_rule, channel_offset, timeslot);
 
   return matched_rule;
 }
