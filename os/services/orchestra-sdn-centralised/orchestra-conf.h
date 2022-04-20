@@ -50,7 +50,8 @@
     {                            \
         &eb_per_time_source,     \
             &unicast_data_plane, \
-            &control_plane       \
+            &control_plane,      \
+            &default_common      \
     }
 /* Example configuration for RPL storing mode: */
 /* #define ORCHESTRA_RULES { &eb_per_time_source, \
@@ -78,6 +79,13 @@
 #else /* ORCHESTRA_CONF_UNICAST_PERIOD */
 #define ORCHESTRA_UNICAST_PERIOD 17
 #endif /* ORCHESTRA_CONF_UNICAST_PERIOD */
+
+/* This is tight the number of hops of the network */
+#ifdef ORCHESTRA_CONF_CONTROL_PERIOD
+#define ORCHESTRA_CONTROL_PERIOD ORCHESTRA_CONF_CONTROL_PERIOD
+#else /* ORCHESTRA_CONF_CONTROL_PERIOD */
+#define ORCHESTRA_CONTROL_PERIOD 7
+#endif /* ORCHESTRA_CONF_CONTROL_PERIOD */
 
 /* Slotframe size for the root rule. Usually this should be shorter than the unicast slotframe size,
    as the root node receives more traffic than the other nodes in the network. */
@@ -141,6 +149,13 @@
 #define ORCHESTRA_DEFAULT_COMMON_CHANNEL_OFFSET ORCHESTRA_CONF_DEFAULT_COMMON_CHANNEL_OFFSET
 #else
 #define ORCHESTRA_DEFAULT_COMMON_CHANNEL_OFFSET 1
+#endif
+
+/* Channel offset for the control plane rule, default 1 */
+#ifdef ORCHESTRA_CONF_DEFAULT_CONTROL_CHANNEL_OFFSET
+#define ORCHESTRA_DEFAULT_CONTROL_CHANNEL_OFFSET ORCHESTRA_CONF_DEFAULT_CONTROL_CHANNEL_OFFSET
+#else
+#define ORCHESTRA_DEFAULT_CONTROL_CHANNEL_OFFSET 3
 #endif
 
 /* Min channel offset for the unicast rules; the default min/max range is [2, 255] */
