@@ -15,15 +15,16 @@ static uint16_t sequence_number = 0;
 /*---------------------------------------------------------------------------*/
 int sdn_ra_input(void)
 {
-    PRINTF("Processing RA pkt.\n");
+    uint16_t seq = sdnip_htons(SDN_RA_BUF->seq);
+    PRINTF("Processing RA pkt (SEQ: %u)\n", seq);
     // We first check whether we have seen this packet before.
-    if (sdnip_htons(SDN_RA_BUF->seq) < sequence_number)
+    if (seq < sequence_number)
     {
         PRINTF("pkt already processed, dropping\n");
         return 0;
     }
     // Update sequence number received
-    sequence_number = sdnip_htons(SDN_RA_BUF->seq) + 1;
+    sequence_number = seq + 1;
     // Process schedules
     uint8_t num_routes, i;
     linkaddr_t scr, dst, via;
