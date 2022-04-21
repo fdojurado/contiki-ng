@@ -51,7 +51,7 @@
 #define SDN_SAH_LEN 6  /* Size of Schedule advertisement (SA) header */
 #define SDN_SAPL_LEN 8 /* Size of SA payload */
 // #define SDN_DATAH_LEN 1 /* Size of data header*/
-#define SDN_DATA_LEN 8 /* Size of data packet */
+#define SDN_DATA_LEN 12 /* Size of data packet */
 
 // #define sdn_l3_nd_hdr_len (SDN_IPH_LEN + SDN_NDH_LEN)
 // #define sdn_l3_cp_hdr_len (SDN_IPH_LEN + SDN_CPH_LEN)
@@ -439,6 +439,8 @@ struct sdn_data
         temp,
         humidty,
         light;
+    uint16_t asn_ls2b,
+        asn_ms2b;
 };
 
 /* The ND headers. */
