@@ -469,7 +469,7 @@ struct sdn_na_payload
 struct sdn_ra_hdr
 {
     uint8_t payload_len,
-        padding;
+        hop_limit;
     uint16_t seq;
     int16_t pkt_chksum;
 };
@@ -486,7 +486,7 @@ struct sdn_ra_payload
 struct sdn_sa_hdr
 {
     uint8_t payload_len,
-        padding;
+        hop_limit;
     uint16_t seq;
     int16_t pkt_chksum;
 };

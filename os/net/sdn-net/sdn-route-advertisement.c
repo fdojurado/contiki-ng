@@ -1,5 +1,6 @@
 #include "net/sdn-net/sdn-route-advertisement.h"
 #include "net/sdn-net/sd-wsn.h"
+#include "net/sdn-net/sdn-neighbor-discovery.h"
 
 /* Log configuration */
 #define DEBUG 1
@@ -16,7 +17,7 @@ static uint16_t sequence_number = 0;
 int sdn_ra_input(void)
 {
     uint16_t seq = sdnip_htons(SDN_RA_BUF->seq);
-    PRINTF("Processing RA pkt (SEQ: %u)\n", seq);
+    PRINTF("Processing RA pkt (SEQ:%u)\n", seq);
     // We first check whether we have seen this packet before.
     if (seq < sequence_number)
     {
@@ -40,6 +41,13 @@ int sdn_ra_input(void)
             PRINTF("scr: %d.%d, dst: %d.%d, via: %d.%d\n",
                    scr.u8[0], scr.u8[1], dst.u8[0], dst.u8[1], via.u8[0], via.u8[1]);
         }
+    }
+    /* If we are the hop limit, we do not forward the packet */
+    if (SDN_RA_BUF->hop_limit <= my_rank.rank)
+    {
+        // Dont forward the packet, hop limit reached.
+        PRINTF("Hop limit reached.\n");
+        return 0;
     }
     return 1;
 }

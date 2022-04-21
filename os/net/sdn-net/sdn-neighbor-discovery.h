@@ -61,7 +61,7 @@
 #endif /* NETSTACK_CONF_ROUTING_NEIGHBOR_ADDED_CALLBACK */
 #endif /* BUILD_WITH_ORCHESTRA */
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+// #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
 typedef struct
 {
     /* The ->addr field holds the Rime address of gateway to controller. */
@@ -70,7 +70,7 @@ typedef struct
     int16_t rssi;
 } sdn_rank_t;
 extern sdn_rank_t my_rank;
-#endif
+// #endif
 
 extern struct etimer nd_timer_periodic; /**< Timer for periodic ND */
 

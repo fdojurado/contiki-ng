@@ -68,9 +68,9 @@
 #define SDN_ND_PERIOD SDN_ND_CONF_PERIOD
 #endif
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+// #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
 sdn_rank_t my_rank; // Holds the rank value and the total rssi value to the controller
-#endif
+// #endif
 
 struct etimer nd_timer_periodic;
 struct stimer nd_timer_na; /**< ND timer, to schedule ND sending */
@@ -125,6 +125,9 @@ void sdn_nd_init(void)
     stimer_set(&nd_timer_na, 2); /* wait to have a link local IP address */
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
     my_rank.rank = 0xff; /* Sensor node */
+    my_rank.rssi = 0x00;
+#else
+    my_rank.rank = 0x00; /* Sensor node */
     my_rank.rssi = 0x00;
 #endif
 /* callback function when neighbor removed */

@@ -1,5 +1,7 @@
 #include "net/sdn-net/sdn-schedule-advertisement.h"
 #include "net/sdn-net/sd-wsn.h"
+#include "net/sdn-net/sdn-neighbor-discovery.h"
+
 
 /* Log configuration */
 #define DEBUG 1
@@ -42,6 +44,13 @@ int sdn_sa_input(void)
             PRINTF("Type: %u, chan: %u, time: %u, scr: %d.%d, dst= %d.%d\n",
                    type, channel_offset, time_offset, scr.u8[0], scr.u8[1], dst.u8[0], dst.u8[1]);
         }
+    }
+    /* If we are the hop limit, we do not forward the packet */
+    if (SDN_SA_BUF->hop_limit <= my_rank.rank)
+    {
+        // Dont forward the packet, hop limit reached.
+        PRINTF("Hop limit reached.\n");
+        return 0;
     }
     return 1;
 }
