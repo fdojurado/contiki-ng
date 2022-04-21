@@ -133,7 +133,7 @@ init(uint16_t sf_handle)
   }
 }
 /*---------------------------------------------------------------------------*/
-struct orchestra_rule unicast_data_plane = {
+struct orchestra_rule data_plane = {
     init,
     new_time_source,
     select_packet,
@@ -141,6 +141,6 @@ struct orchestra_rule unicast_data_plane = {
     child_removed,
     NULL,
     NULL,
-    "unicast data plane",
+    "data plane",
     ORCHESTRA_UNICAST_PERIOD,
 };

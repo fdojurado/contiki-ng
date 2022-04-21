@@ -50,7 +50,7 @@
     {                            \
         &eb_per_time_source,     \
             &control_plane,      \
-            &unicast_data_plane, \
+            &data_plane, \
             &default_common      \
     }
 /* Example configuration for RPL storing mode: */

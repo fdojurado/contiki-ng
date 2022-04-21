@@ -57,7 +57,7 @@ struct orchestra_rule
 
 extern struct orchestra_rule eb_per_time_source;
 extern struct orchestra_rule control_plane;
-extern struct orchestra_rule unicast_data_plane;
+extern struct orchestra_rule data_plane;
 extern struct orchestra_rule default_common;
 
 extern linkaddr_t orchestra_parent_linkaddr;
