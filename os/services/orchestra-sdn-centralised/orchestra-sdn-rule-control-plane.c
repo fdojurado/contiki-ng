@@ -74,11 +74,15 @@ static uint8_t tx_timeoffset = 0;
 static uint8_t tx_channeloffset = 0;
 static struct tsch_slotframe *sf_control;
 /*---------------------------------------------------------------------------*/
-// static uint8_t
-// get_random()
-// {
-//   return random_rand() % (uint16_t)(5);
-// }
+static uint16_t
+get_node_timeslot(const uint8_t rank)
+{
+#if ORCHESTRA_CONTROL_PERIOD > 0
+  return rank % ORCHESTRA_CONTROL_PERIOD;
+#else
+  return 0xffff;
+#endif
+}
 /*---------------------------------------------------------------------------*/
 static uint16_t
 get_node_channel_offset(const linkaddr_t *addr)
@@ -140,13 +144,13 @@ static void rank_updated(const linkaddr_t *addr, uint8_t rank)
   if (tsch_schedule_remove_link_by_timeslot(sf_control, rx_timeoffset, rx_channeloffset) &&
       (tsch_schedule_remove_link_by_timeslot(sf_control, tx_timeoffset, tx_channeloffset)))
   {
-    rx_timeoffset = rank;
+    rx_timeoffset = get_node_timeslot(rank);
     rx_channeloffset = get_node_channel_offset(addr);
     tsch_schedule_add_link(sf_control,
                            LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED,
                            ORCHESTRA_COMMON_SHARED_TYPE, &tsch_broadcast_address,
                            rx_timeoffset, rx_channeloffset, 1);
-    tx_timeoffset = rank + 1;
+    tx_timeoffset = get_node_timeslot(rank + 1);
     tx_channeloffset = get_node_channel_offset(&linkaddr_node_addr);
     tsch_schedule_add_link(sf_control,
                            LINK_OPTION_SHARED | LINK_OPTION_TX,
