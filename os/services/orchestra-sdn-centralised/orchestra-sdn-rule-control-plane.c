@@ -72,6 +72,7 @@ static uint8_t rx_timeoffset = 0;
 static uint8_t rx_channeloffset = 0;
 static uint8_t tx_timeoffset = 0;
 static uint8_t tx_channeloffset = 0;
+static linkaddr_t parent;
 static struct tsch_slotframe *sf_control;
 /*---------------------------------------------------------------------------*/
 static uint16_t
@@ -136,10 +137,17 @@ init(uint16_t sf_handle)
                          LINK_OPTION_TX | LINK_OPTION_SHARED,
                          ORCHESTRA_COMMON_SHARED_TYPE, &tsch_broadcast_address,
                          tx_timeoffset, tx_channeloffset, 1);
+
+  linkaddr_copy(&parent, &linkaddr_node_addr);
 }
 /*---------------------------------------------------------------------------*/
 static void rank_updated(const linkaddr_t *addr, uint8_t rank)
 {
+  if (linkaddr_cmp(&parent, addr))
+  {
+    return;
+  }
+  linkaddr_copy(&parent, addr);
   /* Update the listening timeslot, which is based on the hop position */
   if (tsch_schedule_remove_link_by_timeslot(sf_control, rx_timeoffset, rx_channeloffset) &&
       (tsch_schedule_remove_link_by_timeslot(sf_control, tx_timeoffset, tx_channeloffset)))
