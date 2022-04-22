@@ -51,7 +51,7 @@
 #endif
 
 /* Alpha for moving average */
-#define ALPHA 0.6
+// #define ALPHA 0.6
 
 #ifndef SDN_CONF_MAX_ND_INTERVAL
 #define NEIGHBOR_TIMEOUT 60 * 5 * 3 // Every 5 mins

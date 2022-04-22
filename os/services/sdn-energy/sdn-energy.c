@@ -10,9 +10,13 @@
 #define PRINTF(...)
 #endif
 
+/* EWMA (exponential moving average) used to maintain statistics over time */
+#define EWMA_SCALE 100
+#define EWMA_ALPHA 40
+
 #define DEC2FIX(h, d) ((h * 64L) + (unsigned long)((d * 64L) / 1000L))
 
-signed long energy;
+unsigned long energy;
 
 PROCESS(sdn_energy, "SDN energy module");
 
@@ -79,7 +83,11 @@ PROCESS_THREAD(sdn_energy, ev, data)
     sample_energy = avg_power * to_seconds(stime);
     /* total energy consumed */
     // convert to mJ
-    energy = sample_energy * 1L / 1000L;
+    // sample_energy = sample_energy * 1L / 1000L;
+    /* Compute EWMA */
+    energy = ((int32_t)energy * (EWMA_SCALE - EWMA_ALPHA) +
+              ((int32_t)sample_energy * EWMA_ALPHA)) /
+             EWMA_SCALE;
 
     // PRINTF("\nEnergest:\n");
     // PRINTF(" CPU          %4lus LPM      %4lus DEEP LPM %4lus  Total time %lus\n",
@@ -95,6 +103,7 @@ PROCESS_THREAD(sdn_energy, ev, data)
     // PRINTF("total time: %4lus\n", to_seconds(all_time));
     // PRINTF("Total average power consumed in this sample (uW): %lu\n", avg_power);
     // PRINTF("Total energy consumed in sample (uJ): %lu\n", sample_energy);
+    // PRINTF("Moving average (uJ): %lu\n", energy);
     PRINTF("2, %ld, %lu, %lu, , , , , , , , ,\n",
            energy,
            sample_energy,
