@@ -47,6 +47,7 @@
 #include "sdn-ds-nbr.h"
 #include "sdn-ds-route.h"
 #include "sdnbuf.h"
+#include "net/link-stats.h"
 
 #if BUILD_WITH_ORCHESTRA
 #include "services/orchestra-sdn-centralised/orchestra.h"
@@ -142,7 +143,19 @@ void sdn_nd_init(void)
 void sdn_nd_input(void)
 {
     int16_t ndRank, ndRssi, rssi;
-    rssi = (int16_t)sdn_net_get_last_rssi();
+    const struct link_stats *stats;
+    const linkaddr_t *addr;
+    addr = packetbuf_addr(PACKETBUF_ADDR_SENDER);
+    // We get the ETX, RSSI values from link-stats.c
+    stats = link_stats_from_lladdr(addr);
+    if (stats != NULL)
+    {
+        rssi = stats->rssi;
+    }
+    else
+    {
+        rssi = (int16_t)sdn_net_get_last_rssi();
+    }
     ndRank = sdn_ntohs(SDN_ND_BUF->rank);
     ndRssi = sdn_ntohs(SDN_ND_BUF->rssi);
 
@@ -156,7 +169,7 @@ void sdn_nd_input(void)
      * from the gateway. If it is, we need
      * to update the rank
      * */
-    if (linkaddr_cmp((linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER),
+    if (linkaddr_cmp(addr,
                      &my_rank.addr))
     {
         if (ndRank == 255)
@@ -170,7 +183,7 @@ void sdn_nd_input(void)
         {
             update_rank(ndRssi + rssi,
                         ndRank,
-                        (linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER));
+                        addr);
         }
     }
     else if (ndRank == my_rank.rank - 1)
@@ -180,15 +193,15 @@ void sdn_nd_input(void)
         if (ndRssi + rssi > my_rank.rssi)
         {
             PRINTF("better link quality\n");
-            update_rank(ndRssi + rssi, ndRank, (linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER));
+            update_rank(ndRssi + rssi, ndRank, addr);
         }
     }
     else if (ndRank < my_rank.rank - 1)
     {
-        update_rank(ndRssi + rssi, ndRank, (linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER));
+        update_rank(ndRssi + rssi, ndRank, addr);
     }
 #endif
-    sdn_ds_nbr_add((linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER), &ndRank, &ndRssi, &rssi, NULL);
+    sdn_ds_nbr_add(addr, &ndRank, &ndRssi, &rssi, NULL);
 }
 /*---------------------------------------------------------------------------*/
 static void send_nd_output(void)

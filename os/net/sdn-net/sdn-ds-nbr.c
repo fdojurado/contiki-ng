@@ -67,7 +67,7 @@ NBR_TABLE_GLOBAL(sdn_ds_nbr_t, ds_neighbors);
 
 // static void sdn_ds_nbr_timer_rm(void *n);
 static void sdn_ds_nbr_print(void);
-static float exp_mov_avg(float, float);
+// static float exp_mov_avg(float, float);
 
 /*---------------------------------------------------------------------------*/
 #if SDN_DS_NBR_NOTIFICATIONS
@@ -113,15 +113,15 @@ sdn_ds_nbr_add(const linkaddr_t *from, int16_t *ndRank, int16_t *ndRssi,
 
     /* Does this NB exists? */
     nbr = sdn_ds_nbr_lookup(from);
-    float exp_avg_old, plus_percent, minus_percent;
-    uint8_t adv = 1;
+    // float exp_avg_old, plus_percent, minus_percent;
+    // uint8_t adv = 1;
 
     if (nbr == NULL)
     {
         /* New NB */
         PRINTF("Adding new NB\n");
         nbr = nbr_table_add_lladdr(ds_neighbors, (linkaddr_t *)from, NBR_TABLE_REASON_IPV6_ND, data);
-        adv = 0;
+        // adv = 0;
         if (nbr)
         {
             linkaddr_copy(&nbr->addr, from);
@@ -142,34 +142,34 @@ sdn_ds_nbr_add(const linkaddr_t *from, int16_t *ndRank, int16_t *ndRssi,
     /* Neighbor rssi received from lower layer */
     nbr->rssi = *rcv_rssi;
     /* calculate the exponential average */
-    exp_avg_old = nbr->exp_avg;
-    plus_percent = exp_avg_old + exp_avg_old * 0.05;
-    minus_percent = exp_avg_old - exp_avg_old * 0.05;
-    nbr->exp_avg = exp_mov_avg(nbr->rssi, nbr->exp_avg);
+    // exp_avg_old = nbr->exp_avg;
+    // plus_percent = exp_avg_old + exp_avg_old * 0.05;
+    // minus_percent = exp_avg_old - exp_avg_old * 0.05;
+    // nbr->exp_avg = exp_mov_avg(nbr->rssi, nbr->exp_avg);
     /* rank to controller */
     nbr->rank = *ndRank;
     /* set the lifetime of node */
     stimer_set(&nbr->lifetime, NEIGHBOR_TIMEOUT);
     // ctimer_set(&nbr->timeout, NEIGHBOR_TIMEOUT, sdn_ds_nbr_timer_rm, nbr);
     /* Print out a message. */
-    PRINTF("neighbor message received from %d.%d with RSSI %d rank %d cost %d exp avg %d.%d\n",
+    PRINTF("neighbor message received from %d.%d with RSSI %d rank %d cost %d\n", // exp avg %d.%d\n",
            from->u8[0], from->u8[1],
            nbr->rssi,
            nbr->rank,
-           nbr->rssi + *ndRssi,
-           (int)nbr->exp_avg,
-           (int)(((-1) * nbr->exp_avg - (int)((-1) * nbr->exp_avg)) * 100)); //,
+           nbr->rssi + *ndRssi);
+    //    (int)nbr->exp_avg,
+    //    (int)(((-1) * nbr->exp_avg - (int)((-1) * nbr->exp_avg)) * 100)); //,
     sdn_ds_nbr_print();
-    if (nbr->exp_avg < plus_percent || nbr->exp_avg > minus_percent)
-        adv = 0;
-    if (!adv)
-    {
-        NETSTACK_ROUTING.neighbor_state_changed(nbr);
-        PRINTF("neighbor data changed.\n");
-#if SDN_DS_NBR_NOTIFICATIONS
-        call_nbr_callback(SDN_DS_NBR_NOTIFICATION_CH, nbr);
-#endif
-    }
+    //     if (nbr->exp_avg < plus_percent || nbr->exp_avg > minus_percent)
+    //         adv = 0;
+    //     if (!adv)
+    //     {
+    //         NETSTACK_ROUTING.neighbor_state_changed(nbr);
+    //         PRINTF("neighbor data changed.\n");
+    // #if SDN_DS_NBR_NOTIFICATIONS
+    //         call_nbr_callback(SDN_DS_NBR_NOTIFICATION_CH, nbr);
+    // #endif
+    //     }
     return nbr;
 }
 /*---------------------------------------------------------------------------*/
@@ -278,4 +278,4 @@ void sdn_ds_neighbor_periodic(void)
     }
 }
 /*---------------------------------------------------------------------------*/
-static float exp_mov_avg(float new, float old) { return ALPHA * new + (1 - ALPHA) * old; }
+// static float exp_mov_avg(float new, float old) { return ALPHA * new + (1 - ALPHA) * old; }
