@@ -33,7 +33,7 @@
  * \file
  *         Header file for forwarding packets in SDN
  * \author
- *         Fernando Jurado <fjurado@student.unimelb.edu.au>
+ *         Fernando Jurado <ffjla@dtu.dk>
  *
  *
  */
