@@ -59,6 +59,10 @@
 #if SERIAL_SDN_CONTROLLER
 #include "sdn-controller-serial/sdn-serial.h"
 #endif /* SERIAL_SDN_CONTROLLER */
+#if BUILD_WITH_ORCHESTRA
+#include "net/mac/tsch/tsch.h"
+// #include "net/mac/tsch/tsch-asn.h"
+#endif /* BUILD_WITH_ORCHESTRA */
 /* Log configuration */
 #define DEBUG 1
 #if DEBUG
@@ -241,6 +245,10 @@ void sdnip_process(uint8_t flag)
     linkaddr_t scr;
 #endif
 
+#if SERIAL_SDN_CONTROLLER
+    struct tsch_asn_t data_asn;
+#endif /* SERIAL_SDN_CONTROLLER */
+
     print_buff(sdn_buf, sdn_len, true);
 
     /* This is where the input processing starts. */
@@ -303,6 +311,23 @@ void sdnip_process(uint8_t flag)
             SDN_STAT(++sdn_stat.nd.drop);
             goto drop;
         }
+        /* If this is a data packet received at the sink. Then, calculate the
+        ASN difference (useful for delay calcaulation at the controller)*/
+#if SERIAL_SDN_CONTROLLER
+        if ((SDN_IP_BUF->vap & 0x0F) == SDN_PROTO_DATA)
+        {
+            data_asn = tsch_current_asn;
+            data_asn.ls4b = sdnip_htons(SDN_DATA_BUF->asn_ms2b) & 0x0000ffff;
+            data_asn.ls4b = data_asn.ls4b << 16;
+            data_asn.ls4b = data_asn.ls4b | sdnip_htons(SDN_DATA_BUF->asn_ls2b);
+            // PRINTF("rcv asn: %lu.\n", data_asn.ls4b);
+            data_asn.ls4b = TSCH_ASN_DIFF(tsch_current_asn, data_asn);
+            data_asn.ms1b = 0;
+            // PRINTF("Difference:  %lu.\n", data_asn.ls4b);
+            SDN_DATA_BUF->asn_ls2b = sdnip_htons(data_asn.ls4b & 0x0000FFFF);
+            SDN_DATA_BUF->asn_ms2b = sdnip_htons(data_asn.ls4b & 0xFFFF0000);
+        }
+#endif /* SERIAL_SDN_CONTROLLER */
         PRINTF("Forwarding packet to destination %d.%d\n",
                dest.u8[0], dest.u8[1]);
         SDN_STAT(++sdn_stat.ip.forwarded);
