@@ -105,6 +105,10 @@ void orchestra_callback_child_removed(const linkaddr_t *addr)
   }
 }
 /*---------------------------------------------------------------------------*/
+void orchestra_callback_add_sa_link(const linkaddr_t *addr, uint8_t rank)
+{
+}
+/*---------------------------------------------------------------------------*/
 int orchestra_callback_packet_ready(void)
 {
   LOG_INFO("Initializing orchestra\n");

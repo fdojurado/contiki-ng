@@ -177,6 +177,7 @@ struct orchestra_rule control_plane = {
     NULL,
     NULL,
     rank_updated,
+    NULL,
     "control plane",
     ORCHESTRA_COMMON_SHARED_PERIOD,
 };

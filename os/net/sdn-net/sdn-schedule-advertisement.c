@@ -2,6 +2,9 @@
 #include "net/sdn-net/sd-wsn.h"
 #include "net/sdn-net/sdn-neighbor-discovery.h"
 
+#if BUILD_WITH_ORCHESTRA
+#include "services/orchestra-sdn-centralised/orchestra.h"
+#endif
 
 /* Log configuration */
 #define DEBUG 1
@@ -43,6 +46,9 @@ int sdn_sa_input(void)
             dst.u16 = sdnip_htons(SDN_SA_PAYLOAD(i)->dst.u16);
             PRINTF("Type: %u, chan: %u, time: %u, scr: %d.%d, dst= %d.%d\n",
                    type, channel_offset, time_offset, scr.u8[0], scr.u8[1], dst.u8[0], dst.u8[1]);
+#if BUILD_WITH_ORCHESTRA
+            NETSTACK_CONF_SDN_SA_LINK_CALLBACK(&linkaddr_node_addr, 0);
+#endif /* BUILD_WITH_ORCHESTRA */
         }
     }
     /* If we are the hop limit, we do not forward the packet */

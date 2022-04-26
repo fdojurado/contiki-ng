@@ -82,6 +82,11 @@ child_removed(const linkaddr_t *linkaddr)
 {
 }
 /*---------------------------------------------------------------------------*/
+static void
+add_sa_link(const linkaddr_t *addr, uint8_t rank)
+{
+}
+/*---------------------------------------------------------------------------*/
 static int
 select_packet(uint16_t *slotframe, uint16_t *timeslot, uint16_t *channel_offset)
 {
@@ -141,6 +146,7 @@ struct orchestra_rule data_plane = {
     child_removed,
     NULL,
     NULL,
+    add_sa_link,
     "data plane",
     ORCHESTRA_UNICAST_PERIOD,
 };
