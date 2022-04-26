@@ -1,6 +1,7 @@
 #include "net/sdn-net/sdn-route-advertisement.h"
 #include "net/sdn-net/sd-wsn.h"
 #include "net/sdn-net/sdn-neighbor-discovery.h"
+#include "sdn-ds-route.h"
 
 /* Log configuration */
 #define DEBUG 1
@@ -40,6 +41,7 @@ int sdn_ra_input(void)
             via.u16 = sdnip_htons(SDN_RA_PAYLOAD(i)->via.u16);
             PRINTF("scr: %d.%d, dst: %d.%d, via: %d.%d\n",
                    scr.u8[0], scr.u8[1], dst.u8[0], dst.u8[1], via.u8[0], via.u8[1]);
+            sdn_ds_route_add(&dst, 0, &via, CONTROLLER);
         }
     }
     /* If we are the hop limit, we do not forward the packet */

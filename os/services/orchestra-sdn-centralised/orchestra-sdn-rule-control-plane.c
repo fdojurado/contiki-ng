@@ -72,6 +72,7 @@ static uint8_t rx_timeoffset = 0;
 static uint8_t rx_channeloffset = 0;
 static uint8_t tx_timeoffset = 0;
 static uint8_t tx_channeloffset = 0;
+static uint8_t rank_set = 0;
 static linkaddr_t parent;
 static struct tsch_slotframe *sf_control;
 /*---------------------------------------------------------------------------*/
@@ -143,7 +144,7 @@ init(uint16_t sf_handle)
 /*---------------------------------------------------------------------------*/
 static void rank_updated(const linkaddr_t *addr, uint8_t rank)
 {
-  if (linkaddr_cmp(&parent, addr))
+  if ((linkaddr_cmp(&parent, addr)) && (rank_set == rank))
   {
     return;
   }
@@ -164,6 +165,7 @@ static void rank_updated(const linkaddr_t *addr, uint8_t rank)
                            LINK_OPTION_SHARED | LINK_OPTION_TX,
                            LINK_TYPE_NORMAL, &tsch_broadcast_address,
                            tx_timeoffset, tx_channeloffset, 1);
+    rank_set = rank;
   }
 }
 /*---------------------------------------------------------------------------*/
