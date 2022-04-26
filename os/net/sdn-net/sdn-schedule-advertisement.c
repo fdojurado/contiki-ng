@@ -47,7 +47,7 @@ int sdn_sa_input(void)
             PRINTF("Type: %u, chan: %u, time: %u, scr: %d.%d, dst= %d.%d\n",
                    type, channel_offset, time_offset, scr.u8[0], scr.u8[1], dst.u8[0], dst.u8[1]);
 #if BUILD_WITH_ORCHESTRA
-            NETSTACK_CONF_SDN_SA_LINK_CALLBACK(&linkaddr_node_addr, 0);
+            NETSTACK_CONF_SDN_SA_LINK_CALLBACK(type, channel_offset, time_offset, &dst);
 #endif /* BUILD_WITH_ORCHESTRA */
         }
     }

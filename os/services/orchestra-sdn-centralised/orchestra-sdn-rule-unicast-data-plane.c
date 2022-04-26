@@ -83,7 +83,7 @@ child_removed(const linkaddr_t *linkaddr)
 }
 /*---------------------------------------------------------------------------*/
 static void
-add_sa_link(const linkaddr_t *addr, uint8_t rank)
+add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, linkaddr_t *addr)
 {
 }
 /*---------------------------------------------------------------------------*/

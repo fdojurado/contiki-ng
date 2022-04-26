@@ -51,7 +51,7 @@ struct orchestra_rule
   void (*child_removed)(const linkaddr_t *addr);
   void (*root_node_updated)(const linkaddr_t *addr, uint8_t is_added);
   void (*rank_updated)(const linkaddr_t *addr, uint8_t rank);
-  void (*add_sa_link)(const linkaddr_t *addr, uint8_t rank);
+  void (*add_sa_link)(uint8_t type, uint8_t channel_offset, uint8_t timeslot, linkaddr_t *addr);
   const char *const name;
   const int16_t slotframe_size;
 };
@@ -80,7 +80,7 @@ void orchestra_callback_rank_updated(const linkaddr_t *addr, uint8_t rank);
 /* Set with #define TSCH_CALLBACK_ROOT_NODE_UPDATED orchestra_callback_root_node_updated */
 void orchestra_callback_root_node_updated(const linkaddr_t *root, uint8_t is_added);
 /* Set with #define NETSTACK_CONF_SDN_SA_LINK_CALLBACK orchestra_callback_add_sa_link */
-void orchestra_callback_add_sa_link(const linkaddr_t *addr, uint8_t rank);
+void orchestra_callback_add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, linkaddr_t *addr);
 
 /* Returns nonzero if the root slotframe should be used to transmit to the specific address */
 uint8_t orchestra_is_root_schedule_active(const linkaddr_t *addr);
