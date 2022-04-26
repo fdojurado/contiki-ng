@@ -109,6 +109,15 @@ void orchestra_callback_add_sa_link(uint8_t type, uint8_t channel_offset, uint8_
 {
   LOG_INFO("Configuring UC link of type %d chan %d timeslot %d addr %d.%d\n",
            type, channel_offset, timeslot, addr->u8[0], addr->u8[1]);
+
+  int i;
+  for (i = 0; i < NUM_RULES; i++)
+  {
+    if (all_rules[i]->add_sa_link != NULL)
+    {
+      all_rules[i]->add_sa_link(type, channel_offset, timeslot, addr);
+    }
+  }
 }
 /*---------------------------------------------------------------------------*/
 int orchestra_callback_packet_ready(void)
