@@ -43,6 +43,7 @@
 #include "net/packetbuf.h"
 
 static uint16_t slotframe_handle = 0;
+static uint16_t current_seq = 0;
 static struct tsch_slotframe *sf_unicast;
 
 /*---------------------------------------------------------------------------*/
@@ -82,9 +83,67 @@ child_removed(const linkaddr_t *linkaddr)
 {
 }
 /*---------------------------------------------------------------------------*/
-static void
-add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, linkaddr_t *addr)
+static void remove_all_links()
 {
+  /* Remove all links belonging to this slotframe */
+  struct tsch_link *l;
+  while ((l = list_head(sf_unicast->links_list)))
+  {
+    tsch_schedule_remove_link(sf_unicast, l);
+  }
+}
+/*---------------------------------------------------------------------------*/
+static void
+add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, uint16_t seq, linkaddr_t *addr)
+{
+  /* Remove all links in the slotframe if the rcv seq is greater that current seq */
+  if (seq > current_seq)
+  {
+    remove_all_links();
+    current_seq = seq;
+  }
+  switch (type)
+  {
+  case LINK_OPTION_RX:
+    tsch_schedule_add_link(sf_unicast,
+                           LINK_OPTION_RX,
+                           LINK_TYPE_NORMAL, &tsch_broadcast_address,
+                           timeslot, channel_offset, 1);
+    break;
+  case LINK_OPTION_TX:
+    tsch_schedule_add_link(sf_unicast,
+                           LINK_OPTION_SHARED | LINK_OPTION_TX,
+                           LINK_TYPE_NORMAL, addr,
+                           timeslot, channel_offset, 1);
+
+    uint8_t ts = (timeslot - 1) % ORCHESTRA_UNICAST_PERIOD;
+    tsch_schedule_add_link(sf_unicast,
+                           LINK_OPTION_SHARED | LINK_OPTION_TX,
+                           LINK_TYPE_NORMAL, addr,
+                           ts, 2, 1);
+    break;
+
+  default:
+    break;
+  }
+}
+/*---------------------------------------------------------------------------*/
+static int
+get_ts_ch_from_dst_addr(const linkaddr_t *dst, uint16_t *timeslot, uint16_t *channel_offset)
+{
+  struct tsch_link *l = list_head(sf_unicast->links_list);
+  /* Loop over all items. Assume there is max one link per timeslot */
+  while (l != NULL)
+  {
+    if (linkaddr_cmp(dst, &l->addr))
+    {
+      *timeslot = l->timeslot;
+      *channel_offset = l->channel_offset;
+      return 1;
+    }
+    l = list_item_next(l);
+  }
+  return 0;
 }
 /*---------------------------------------------------------------------------*/
 static int
@@ -94,6 +153,10 @@ select_packet(uint16_t *slotframe, uint16_t *timeslot, uint16_t *channel_offset)
   const linkaddr_t *dest = packetbuf_addr(PACKETBUF_ADDR_RECEIVER);
   if (packetbuf_attr(PACKETBUF_ATTR_FRAME_TYPE) == FRAME802154_DATAFRAME && !linkaddr_cmp(dest, &linkaddr_null))
   {
+    if (get_ts_ch_from_dst_addr(dest, timeslot, channel_offset))
+    {
+      return 1;
+    }
     if (slotframe != NULL)
     {
       *slotframe = slotframe_handle;

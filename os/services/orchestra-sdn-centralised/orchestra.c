@@ -105,7 +105,7 @@ void orchestra_callback_child_removed(const linkaddr_t *addr)
   }
 }
 /*---------------------------------------------------------------------------*/
-void orchestra_callback_add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, linkaddr_t *addr)
+void orchestra_callback_add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, uint16_t seq, linkaddr_t *addr)
 {
   LOG_INFO("Configuring UC link of type %d chan %d timeslot %d addr %d.%d\n",
            type, channel_offset, timeslot, addr->u8[0], addr->u8[1]);
@@ -115,7 +115,7 @@ void orchestra_callback_add_sa_link(uint8_t type, uint8_t channel_offset, uint8_
   {
     if (all_rules[i]->add_sa_link != NULL)
     {
-      all_rules[i]->add_sa_link(type, channel_offset, timeslot, addr);
+      all_rules[i]->add_sa_link(type, channel_offset, timeslot, seq, addr);
     }
   }
 }
