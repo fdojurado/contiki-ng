@@ -125,12 +125,6 @@ add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, uint16_t seq
                            LINK_OPTION_SHARED | LINK_OPTION_TX,
                            LINK_TYPE_NORMAL, addr,
                            timeslot, channel_offset, 1);
-
-    uint16_t ts = (timeslot - 1) % ORCHESTRA_UNICAST_PERIOD;
-    tsch_schedule_add_link(sf_unicast,
-                           LINK_OPTION_SHARED | LINK_OPTION_TX,
-                           LINK_TYPE_NORMAL, addr,
-                           ts, 2, 1);
     break;
 
   default:
@@ -145,15 +139,24 @@ get_ts_ch_from_dst_addr(const linkaddr_t *dst, uint16_t *timeslot, uint16_t *cha
   uint16_t ts_asn = TSCH_ASN_MOD(tsch_current_asn, sf_unicast->size); // This is the timeslot of the current ASN
   PRINTF("tsch current %lu, ts %d (%d.%d)\n", tsch_current_asn.ls4b, ts_asn, dst->u8[0], dst->u8[1]);
   int8_t difference, min = 127;
+  uint16_t ts;
   struct tsch_link *l = list_head(sf_unicast->links_list);
   /* Loop over all items. Assume there is max one link per timeslot */
   while (l != NULL)
   {
     if (linkaddr_cmp(dst, &l->addr))
     {
-      difference = l->timeslot - ts_asn;
+      if (l->timeslot <= ts_asn)
+      {
+        ts = l->timeslot + sf_unicast->size.val;
+      }
+      else
+      {
+        ts = l->timeslot;
+      }
+      difference = ts - ts_asn;
       PRINTF("difference %d\n", difference);
-      if (difference > 0 && difference < min)
+      if (difference < min)
       {
         *timeslot = l->timeslot;
         *channel_offset = l->channel_offset;

@@ -301,17 +301,17 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
         return NULL;
     }
 
-#ifdef BUILD_WITH_ORCHESTRA
-    if (linkaddr_cmp(dest, &ctrl_addr))
-    {
-        PRINTF("destination is ctrl.\n");
-        if (tsch_is_associated == 1)
-        {
-            PRINTF("tsch associated.\n");
-            tsch_queue_update_time_source(nexthop);
-        }
-    }
-#endif /* BUILD_WITH_ORCHESTRA */
+// #ifdef BUILD_WITH_ORCHESTRA
+//     if (linkaddr_cmp(dest, &ctrl_addr))
+//     {
+//         PRINTF("destination is ctrl.\n");
+//         if (tsch_is_associated == 1)
+//         {
+//             PRINTF("tsch associated.\n");
+//             tsch_queue_update_time_source(nexthop);
+//         }
+//     }
+// #endif /* BUILD_WITH_ORCHESTRA */
 
     /* Get link-layer address of next hop, make sure it is in neighbor table */
     const linkaddr_t *nexthop_lladdr = nexthop;
