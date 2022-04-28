@@ -457,6 +457,15 @@ queuebuf_attr(struct queuebuf *b, uint8_t type)
   return buframptr->attrs[type].val;
 }
 /*---------------------------------------------------------------------------*/
+#if BUILD_WITH_ORCHESTRA
+void queuebuf_set_attr(struct queuebuf *b, uint8_t type, const packetbuf_attr_t val)
+{
+  struct queuebuf_data *buframptr = queuebuf_load_to_ram(b);
+  buframptr->attrs[type].val = val;
+  // return packetbuf_set_attr(type, val);
+}
+#endif /* BUILD_WITH_ORCHESTRA */
+/*---------------------------------------------------------------------------*/
 void
 queuebuf_debug_print(void)
 {

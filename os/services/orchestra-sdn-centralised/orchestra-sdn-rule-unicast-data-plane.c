@@ -42,6 +42,7 @@
 #include "orchestra.h"
 #include "net/packetbuf.h"
 #include "net/mac/tsch/tsch.h"
+#include "net/queuebuf.h"
 
 /* Log configuration */
 #define DEBUG 1
@@ -92,6 +93,37 @@ static void
 child_removed(const linkaddr_t *linkaddr)
 {
 }
+/*---------------------------------------------------------------------------*/
+#ifdef NETSTACK_CONF_SDN_PACKET_TX_FAILED
+void orchestra_callback_packet_transmission_failed(struct tsch_neighbor *n,
+                                                   struct tsch_packet *p,
+                                                   struct tsch_link *link)
+{
+  PRINTF("Pkt tx failed\n");
+  // Re-schedule the packet in the next available UC link for neighbour
+  struct tsch_link *l = list_head(sf_unicast->links_list);
+  struct tsch_link *new_link = link;
+  /* Loop over all items. Assume there is max one link per timeslot */
+  while (l != NULL)
+  {
+    if (linkaddr_cmp(&link->addr, &l->addr) && (link->timeslot != l->timeslot))
+    {
+      new_link = l;
+    }
+    l = list_item_next(l);
+  }
+  int packet_attr_timeslot = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_TIMESLOT);
+  int packet_attr_channeloffset = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET);
+  PRINTF("Current ts %d ch %d\n", packet_attr_timeslot, packet_attr_channeloffset);
+  PRINTF("Potential ts: %d ch: %d\n", new_link->timeslot, new_link->channel_offset);
+  queuebuf_set_attr(p->qb, PACKETBUF_ATTR_TSCH_TIMESLOT, new_link->timeslot);
+  queuebuf_set_attr(p->qb, PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET, new_link->channel_offset);
+  PRINTF("new ts and ch set\n");
+  packet_attr_timeslot = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_TIMESLOT);
+  packet_attr_channeloffset = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET);
+  PRINTF("New current ts %d ch %d\n", packet_attr_timeslot, packet_attr_channeloffset);
+}
+#endif /* NETSTACK_CONF_SDN_PACKET_TX_FAILED */
 /*---------------------------------------------------------------------------*/
 static void remove_all_links()
 {

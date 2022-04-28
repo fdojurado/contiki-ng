@@ -81,6 +81,8 @@ void orchestra_callback_rank_updated(const linkaddr_t *addr, uint8_t rank);
 void orchestra_callback_root_node_updated(const linkaddr_t *root, uint8_t is_added);
 /* Set with #define NETSTACK_CONF_SDN_SA_LINK_CALLBACK orchestra_callback_add_sa_link */
 void orchestra_callback_add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, uint16_t seq, linkaddr_t *addr);
+/* Set with #define NETSTACK_CONF_SDN_PACKET_TX_FAILED orchestra_callback_packet_transmission_failed */
+void orchestra_callback_packet_transmission_failed(struct tsch_neighbor *n, struct tsch_packet *p, struct tsch_link *link);
 
 /* Returns nonzero if the root slotframe should be used to transmit to the specific address */
 uint8_t orchestra_is_root_schedule_active(const linkaddr_t *addr);
