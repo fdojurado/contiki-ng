@@ -57,6 +57,8 @@ static uint16_t slotframe_handle = 0;
 static uint16_t current_seq = 0;
 static struct tsch_slotframe *sf_unicast;
 
+static int get_ts_ch_from_dst_addr(const linkaddr_t *dst, uint16_t *timeslot, uint16_t *channel_offset);
+
 /*---------------------------------------------------------------------------*/
 static uint16_t
 get_node_timeslot(const linkaddr_t *addr)
@@ -99,29 +101,22 @@ void orchestra_callback_packet_transmission_failed(struct tsch_neighbor *n,
                                                    struct tsch_packet *p,
                                                    struct tsch_link *link)
 {
-  PRINTF("Pkt tx failed\n");
-  // Re-schedule the packet in the next available UC link for neighbour
-  struct tsch_link *l = list_head(sf_unicast->links_list);
-  struct tsch_link *new_link = link;
-  /* Loop over all items. Assume there is max one link per timeslot */
-  while (l != NULL)
+  int packet_attr_frametype = queuebuf_attr(p->qb, PACKETBUF_ATTR_FRAME_TYPE);
+  if (packet_attr_frametype == FRAME802154_DATAFRAME && current_seq > 0)
   {
-    if (linkaddr_cmp(&link->addr, &l->addr) && (link->timeslot != l->timeslot))
-    {
-      new_link = l;
-    }
-    l = list_item_next(l);
+    PRINTF("Pkt tx failed\n");
+    uint16_t timeslot, channel_offset;
+    // Re-schedule the packet in the next closest and available UC link for neighbour
+    get_ts_ch_from_dst_addr(&link->addr, &timeslot, &channel_offset);
+    // int packet_attr_timeslot = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_TIMESLOT);
+    // int packet_attr_channeloffset = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET);
+    // PRINTF("Current ts %d ch %d\n", packet_attr_timeslot, packet_attr_channeloffset);
+    queuebuf_set_attr(p->qb, PACKETBUF_ATTR_TSCH_TIMESLOT, timeslot);
+    queuebuf_set_attr(p->qb, PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET, channel_offset);
+    // packet_attr_timeslot = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_TIMESLOT);
+    // packet_attr_channeloffset = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET);
+    // PRINTF("New current ts %d ch %d\n", packet_attr_timeslot, packet_attr_channeloffset);
   }
-  int packet_attr_timeslot = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_TIMESLOT);
-  int packet_attr_channeloffset = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET);
-  PRINTF("Current ts %d ch %d\n", packet_attr_timeslot, packet_attr_channeloffset);
-  PRINTF("Potential ts: %d ch: %d\n", new_link->timeslot, new_link->channel_offset);
-  queuebuf_set_attr(p->qb, PACKETBUF_ATTR_TSCH_TIMESLOT, new_link->timeslot);
-  queuebuf_set_attr(p->qb, PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET, new_link->channel_offset);
-  PRINTF("new ts and ch set\n");
-  packet_attr_timeslot = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_TIMESLOT);
-  packet_attr_channeloffset = queuebuf_attr(p->qb, PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET);
-  PRINTF("New current ts %d ch %d\n", packet_attr_timeslot, packet_attr_channeloffset);
 }
 #endif /* NETSTACK_CONF_SDN_PACKET_TX_FAILED */
 /*---------------------------------------------------------------------------*/
