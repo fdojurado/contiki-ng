@@ -20,12 +20,19 @@ unsigned long energy;
 
 PROCESS(sdn_energy, "SDN energy module");
 
+/*---------------------------------------------------------------------------*/
+static unsigned long
+to_permil(unsigned long delta_metric, unsigned long delta_time)
+{
+  return (1000ul * (delta_metric)) / delta_time;
+}
+/*---------------------------------------------------------------------------*/
 static unsigned long
 to_seconds(uint64_t time)
 {
   return (unsigned long)(time / RTIMER_ARCH_SECOND);
 }
-
+/*---------------------------------------------------------------------------*/
 PROCESS_THREAD(sdn_energy, ev, data)
 {
   static struct etimer periodic_timer;
@@ -39,6 +46,8 @@ PROCESS_THREAD(sdn_energy, ev, data)
 
   unsigned long avg_power, sample_energy;
   unsigned long stime; //, ttime;
+
+  static unsigned count = 0;
 
   energy = NODE_INIT_ENERGY; // 10000 mJ or 10 J
 
@@ -90,19 +99,16 @@ PROCESS_THREAD(sdn_energy, ev, data)
              EWMA_SCALE;
 
     // PRINTF("\nEnergest:\n");
-    // PRINTF(" CPU          %4lus LPM      %4lus DEEP LPM %4lus  Total time %lus\n",
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_CPU)),
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_LPM)),
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_DEEP_LPM)),
-    //        to_seconds(all_time));
-    // PRINTF(" Radio LISTEN %4lus TRANSMIT %4lus OFF      %4lus\n",
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_LISTEN)),
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_TRANSMIT)),
-    //        to_seconds(all_time - energest_type_time(ENERGEST_TYPE_TRANSMIT) - energest_type_time(ENERGEST_TYPE_LISTEN)));
-    // PRINTF("total time spent in this sample: %4lus\n", to_seconds(stime));
-    // PRINTF("total time: %4lus\n", to_seconds(all_time));
-    // PRINTF("Total average power consumed in this sample (uW): %lu\n", avg_power);
-    // PRINTF("Total energy consumed in sample (uJ): %lu\n", sample_energy);
+    // PRINTF("--- Period summary #%u (%lu seconds)\n", count++, stime / ENERGEST_SECOND);
+    // PRINTF("Total time  : %10lu\n", stime);
+    // PRINTF("CPU         : %10lu/%10lu (%lu permil)\n", cpu, stime, to_permil(cpu, stime));
+    // PRINTF("LPM         : %10lu/%10lu (%lu permil)\n", lpm, stime, to_permil(lpm, stime));
+    // // PRINTF("Deep LPM    : %10lu/%10lu (%lu permil)\n", delta_deep_lpm, stime, to_permil(delta_deep_lpm, stime));
+    // PRINTF("Radio Tx    : %10lu/%10lu (%lu permil)\n", transmit, stime, to_permil(transmit, stime));
+    // PRINTF("Radio Rx    : %10lu/%10lu (%lu permil)\n", listen, stime, to_permil(listen, stime));
+    // PRINTF("Radio total : %10lu/%10lu (%lu permil)\n", transmit + listen, stime, to_permil(transmit + listen, stime));
+    // PRINTF("Power (uW): %lu\n", avg_power);
+    // PRINTF("Energy in sample (uJ): %lu\n", sample_energy);
     // PRINTF("Moving average (uJ): %lu\n", energy);
     PRINTF("2, %ld, %lu, %lu, , , , , , , , ,\n",
            energy,

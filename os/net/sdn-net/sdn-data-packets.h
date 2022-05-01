@@ -45,7 +45,7 @@
 #include "net/linkaddr.h"
 
 #ifndef SDN_CONF_DATA_PACKET_INTERVAL
-#define SDN_DATA_PACKET_INTERVAL 60 * 3 // 1 pkt/min.
+#define SDN_DATA_PACKET_INTERVAL 60 * 1 // 1 pkt/min.
 #else
 #define SDN_DATA_PACKET_INTERVAL SDN_CONF_DATA_PACKET_INTERVAL
 #endif
