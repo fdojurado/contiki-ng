@@ -41,7 +41,7 @@
 /* Network configuration period */
 #define SDN_CONF_MIN_NC_INTERVAL 60 * 14
 /* Initial emergy */
-#define NODE_CONF_INIT_ENERGY 500000L
+#define NODE_CONF_INIT_ENERGY 50000L
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
 /* Num of max routing routes */

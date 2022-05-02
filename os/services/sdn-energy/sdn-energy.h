@@ -41,7 +41,7 @@
 #define SDN_ENERGY_H
 #include "contiki.h"
 
-extern unsigned long energy;
+extern unsigned long ewma_power;
 
 // #ifdef RX_CONF_CURRENT
 // #define RX_CURRENT RX_CONF_CURRENT

@@ -149,7 +149,7 @@ PROCESS_THREAD(sdn_node_process, ev, data)
         PROCESS_YIELD();
         if (ev == PROCESS_EVENT_TIMER && data == &alive_timer)
         {
-            if (energy < 100)
+            if (ewma_power < 100)
             {
                 /* This node is dead */
                 // LOG_INFO("Node dead\n");
