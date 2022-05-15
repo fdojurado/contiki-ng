@@ -84,6 +84,18 @@ static void sdn_serial_print_packet()
 }
 #endif
 /*---------------------------------------------------------------------------*/
+static void send_ack(ack)
+{
+    /* Get the sender node address */
+    sdn_serial_len = SDN_SERIAL_PACKETH_LEN;
+    SDN_SERIAL_PACKET_BUF->addr = linkaddr_null;
+    SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_ACK;
+    SDN_SERIAL_PACKET_BUF->payload_len = sdn_serial_len - SDN_SERIAL_PACKETH_LEN;
+    SDN_SERIAL_PACKET_BUF->reserved[0] = ack;
+    SDN_SERIAL_PACKET_BUF->reserved[1] = 0;
+    serial_packet_output();
+}
+/*---------------------------------------------------------------------------*/
 uint8_t serial_packet_output(void)
 {
     if (sdn_serial_len == 0)
@@ -174,11 +186,8 @@ static void serial_packet_input(uint8_t *data)
         memcpy(buffer, sdn_serial_packet_buf + SDN_SERIAL_PACKETH_LEN, SDN_SERIAL_PACKET_BUF->payload_len);
         sdn_len = SDN_SERIAL_PACKET_BUF->payload_len;
         sdn_ip_input();
-        if (sdn_len > 0)
-        {
-            sdn_output();
-            return;
-        }
+        // Send ACK to the controller
+        send_ack(SDN_SERIAL_PACKET_BUF->reserved[0] + 1);
     drop:
         PRINTF("Dropping serial line packet.\n");
     }
