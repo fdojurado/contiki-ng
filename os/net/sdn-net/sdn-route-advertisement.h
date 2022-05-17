@@ -32,55 +32,18 @@
 
 /**
  * \file
- *         Data packets header. 
- *          It sends a data packets at any specified data rate.
+ *         Header for the Contiki/SD-WSN interface
  * \author
  *         Fernando Jurado <fdo.jurado@gmail.com>
  */
 
-#ifndef SDN_DATA_PACKETS_H
-#define SDN_DATA_PACKETS_H
+#ifndef SDN_RA_H
+#define SDN_RA_H
 
-#include "sys/stimer.h"
-#include "net/linkaddr.h"
-
-#ifndef SDN_CONF_DATA_PACKET_INTERVAL
-#define SDN_DATA_PACKET_INTERVAL 60 * 1 // 1 pkt/min.
-#else
-#define SDN_DATA_PACKET_INTERVAL SDN_CONF_DATA_PACKET_INTERVAL
-#endif
-
-#ifndef SDN_CONF_MIN_DATA_PACKET_INTERVAL
-#define SDN_MIN_DATA_PACKET_INTERVAL (SDN_DATA_PACKET_INTERVAL * 9 / 10)
-#else
-#define SDN_MIN_DATA_PACKET_INTERVAL SDN_CONF_MIN_DATA_PACKET_INTERVAL
-#endif
-
-// typedef struct
-// {
-//     uint8_t seq,
-//     temp,
-//     hum;
-// } sdn_data_pkt_t;
-
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
-extern struct etimer data_timer_periodic; /**< Timer for periodic ND */
-#endif
-
-/** \brief Initialize ND structures */
-void sdn_data_init(void);
-
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
-/** \brief Periodic processing of data structures */
-void sdn_data_periodic(void);
-#endif
-
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
 /**
- * \brief Handle an incoming ND message
+ * \brief Handle an incoming RA packet
 
  */
-void sdn_data_input(void);
-#endif
+int sdn_ra_input(void);
 
 #endif

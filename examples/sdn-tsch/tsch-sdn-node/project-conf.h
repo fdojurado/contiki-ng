@@ -41,7 +41,7 @@
 /* Network configuration period */
 #define SDN_CONF_MIN_NC_INTERVAL 60 * 14
 /* Initial emergy */
-#define NODE_CONF_INIT_ENERGY 20000L
+#define NODE_CONF_INIT_ENERGY 50000L
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
 /* Num of max routing routes */
@@ -76,6 +76,9 @@
 #define TSCH_CALLBACK_PACKET_READY orchestra_callback_packet_ready
 #define TSCH_CALLBACK_NEW_TIME_SOURCE orchestra_callback_new_time_source
 #define NETSTACK_CONF_ROUTING_NEIGHBOR_ADDED_CALLBACK orchestra_callback_child_added
+#define NETSTACK_CONF_SDN_RANK_UPDATED_CALLBACK orchestra_callback_rank_updated
+#define NETSTACK_CONF_SDN_SA_LINK_CALLBACK orchestra_callback_add_sa_link
+#define NETSTACK_CONF_SDN_PACKET_TX_FAILED orchestra_callback_packet_transmission_failed
 #define NETSTACK_CONF_ROUTING_NEIGHBOR_REMOVED_CALLBACK orchestra_callback_child_removed
 #define TSCH_CALLBACK_ROOT_NODE_UPDATED orchestra_callback_root_node_updated
 
@@ -87,16 +90,16 @@
 #endif /* WITH_SECURITY */
 
 /* Enable printing of packet counters */
-#define LINK_STATS_CONF_PACKET_COUNTERS          1
+#define LINK_STATS_CONF_PACKET_COUNTERS          0
 
 /* Logs */
 /* Logging */
 #define LOG_CONF_LEVEL_RPL                         LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_TCPIP                       LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_IPV6                        LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_6LOWPAN                     LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_6LOWPAN                     LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_MAC                         LOG_LEVEL_DBG
-#define LOG_CONF_LEVEL_FRAMER                      LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_FRAMER                      LOG_LEVEL_NONE
 #define TSCH_LOG_CONF_PER_SLOT                     1
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */

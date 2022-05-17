@@ -51,13 +51,13 @@ uint8_t *sdnbuf_get_next_header(uint8_t *buffer, uint16_t size, uint8_t *protoco
   {
     next_hdr_len = SDN_NAH_LEN;
   }
-  else if (*protocol == SDN_PROTO_NC_ROUTE)
+  else if (*protocol == SDN_PROTO_RA)
   {
-    next_hdr_len = SDN_NCH_LEN;
+    next_hdr_len = SDN_RAH_LEN;
   }
-  else if (*protocol == SDN_PROTO_NC_SCHEDULES)
+  else if (*protocol == SDN_PROTO_SA)
   {
-    next_hdr_len = SDN_NCH_LEN;
+    next_hdr_len = SDN_SAH_LEN;
   }
   else if (*protocol == SDN_PROTO_DATA)
   {
@@ -94,13 +94,13 @@ uint8_t nabuf_get_len_field(struct sdn_na_hdr *hdr)
   // return ((uint16_t)(hdr->len[0]) << 8) + hdr->len[1];
 }
 /*---------------------------------------------------------------------------*/
-uint8_t ncbuf_get_len_field(struct sdn_nc_routing_hdr *hdr)
+uint8_t ncbuf_get_len_field(struct sdn_ra_hdr *hdr)
 {
   return hdr->payload_len;
   // return ((uint16_t)(hdr->len[0]) << 8) + hdr->len[1];
 }
 /*---------------------------------------------------------------------------*/
-uint8_t srbuf_get_len_field(struct sdn_nc_schedules_hdr *hdr)
+uint8_t srbuf_get_len_field(struct sdn_sa_hdr *hdr)
 {
   return hdr->payload_len;
   // return ((uint16_t)(hdr->len[0]) << 8) + hdr->len[1];

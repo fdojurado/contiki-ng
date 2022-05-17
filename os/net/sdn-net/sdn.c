@@ -104,7 +104,8 @@ void sdn_output()
     }
 
     /* Look for a next hop */
-    if (SDN_IP_BUF->vap == ((0x01 << 5) | SDN_PROTO_NC_SCHEDULES))
+    if ((SDN_IP_BUF->vap == ((0x01 << 5) | SDN_PROTO_SA)) ||
+        (SDN_IP_BUF->vap == ((0x01 << 5) | SDN_PROTO_RA)))
     {
         goto netflood;
     }
@@ -122,15 +123,22 @@ void sdn_output()
             serial_ip_output();
         }
 #endif /* SERIAL_SDN_CONTROLLER */
-        goto exit;
+        goto sent;
     }
     PRINTF("output: sending to %d.%d\n",
            nexthop->u8[0], nexthop->u8[1]);
 
     sdn_ip_output(nexthop);
 
+    goto sent;
+
 netflood:
     sdn_ip_output(NULL);
+
+sent:
+    PRINTF("output: packet forwarded\n");
+    // sdnbuf_clear();
+    return;
 
 exit:
     PRINTF("output: packet not forwarded\n");

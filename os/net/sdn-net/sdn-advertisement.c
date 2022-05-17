@@ -297,7 +297,7 @@ static void send_na_output(void)
         /* NA packet */
         SDN_NA_BUF->payload_len = payload_size;
         SDN_NA_BUF->rank = my_rank.rank;
-        SDN_NA_BUF->energy = sdnip_htons((int16_t)energy);
+        SDN_NA_BUF->energy = sdnip_htons((int16_t)ewma_power);
 
         /* Put neighbor's info in payload */
         sdn_ds_nbr_t *nbr;

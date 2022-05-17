@@ -40,8 +40,14 @@
 #ifndef SDN_SA_H
 #define SDN_SA_H
 
+#if BUILD_WITH_ORCHESTRA
+#ifndef NETSTACK_CONF_SDN_SA_LINK_CALLBACK
+#define NETSTACK_CONF_SDN_SA_LINK_CALLBACK orchestra_callback_add_sa_link
+#endif /* NETSTACK_CONF_ROUTING_NEIGHBOR_ADDED_CALLBACK */
+#endif /* BUILD_WITH_ORCHESTRA */
+
 /**
- * \brief Handle an incoming ND message
+ * \brief Handle an incoming SA packet
 
  */
 int sdn_sa_input(void);

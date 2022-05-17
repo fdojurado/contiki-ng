@@ -125,6 +125,7 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     process_start(&sdn_process, NULL);
     /* start the sdn serial interface */
     sdn_serial_protocol_init();
+
     /* Initialize NullNet */
     // sdn_net_buf = (uint8_t *)&count;
     // sdn_net_len = sizeof(count);

@@ -2,7 +2,7 @@
 #include "sys/energest.h"
 
 /* Log configuration */
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -10,33 +10,50 @@
 #define PRINTF(...)
 #endif
 
+/* EWMA (exponential moving average) used to maintain statistics over time */
+#define EWMA_SCALE 100
+#define EWMA_ALPHA 40
+
 #define DEC2FIX(h, d) ((h * 64L) + (unsigned long)((d * 64L) / 1000L))
 
-signed long energy;
+unsigned long ewma_power;
 
 PROCESS(sdn_energy, "SDN energy module");
 
+/*---------------------------------------------------------------------------*/
+#if DEBUG
 static unsigned long
-to_seconds(uint64_t time)
+to_permil(unsigned long delta_metric, unsigned long delta_time)
 {
-  return (unsigned long)(time / RTIMER_ARCH_SECOND);
+  return (1000ul * (delta_metric)) / delta_time;
 }
-
+#endif
+// /*---------------------------------------------------------------------------*/
+// static unsigned long
+// to_seconds(uint64_t time)
+// {
+//   return (unsigned long)(time / RTIMER_ARCH_SECOND);
+// }
+/*---------------------------------------------------------------------------*/
 PROCESS_THREAD(sdn_energy, ev, data)
 {
   static struct etimer periodic_timer;
   PROCESS_BEGIN();
 
-  static unsigned long last_all_cpu = 0, last_all_lpm = 0,
+  static unsigned long last_all_time = 0, last_all_cpu = 0, last_all_lpm = 0,
                        last_all_transmit = 0, last_all_listen = 0;
 
   unsigned long cpu, lpm, transmit, listen;
-  unsigned long all_cpu, all_lpm, all_transmit, all_listen;
+  unsigned long all_time, all_cpu, all_lpm, all_transmit, all_listen;
 
-  unsigned long avg_power, sample_energy;
+  unsigned long avg_power;
   unsigned long stime; //, ttime;
 
-  energy = NODE_INIT_ENERGY; // 10000 mJ or 10 J
+#if DEBUG
+  static unsigned count = 0;
+#endif
+
+  ewma_power = NODE_INIT_ENERGY; // 10000 mJ or 10 J
 
   etimer_set(&periodic_timer, CLOCK_SECOND * 10);
   while (1)
@@ -49,19 +66,21 @@ PROCESS_THREAD(sdn_energy, ev, data)
 
     /* update energy consumed at each state */
     /* total time */
+    all_time = ENERGEST_GET_TOTAL_TIME();
     all_cpu = energest_type_time(ENERGEST_TYPE_CPU);
     all_lpm = energest_type_time(ENERGEST_TYPE_LPM);
     all_transmit = energest_type_time(ENERGEST_TYPE_TRANSMIT);
     all_listen = energest_type_time(ENERGEST_TYPE_LISTEN);
     /* time for this period */
+    stime = all_time - last_all_time;
     cpu = all_cpu - last_all_cpu;
     lpm = all_lpm - last_all_lpm;
     transmit = all_transmit - last_all_transmit;
     listen = all_listen - last_all_listen;
     /* sample & total time */
-    stime = cpu + lpm;
     // ttime = all_cpu + all_lpm;
     /* save last energy period */
+    last_all_time = all_time;
     last_all_cpu = all_cpu;
     last_all_lpm = all_lpm;
     last_all_transmit = all_transmit;
@@ -74,29 +93,29 @@ PROCESS_THREAD(sdn_energy, ev, data)
                   listen * DEC2FIX(20L, 0))) /
                 ((64L * stime) / 1000);
     /* energy consume in sample */
-    sample_energy = avg_power * to_seconds(stime);
+    // sample_energy = avg_power * to_seconds(stime);
     /* total energy consumed */
-    //convert to mJ
-    energy -= sample_energy * 1L / 1000L;
+    // convert to mJ
+    // sample_energy = sample_energy * 1L / 1000L;
+    /* Compute EWMA */
+    ewma_power = ((int32_t)ewma_power * (EWMA_SCALE - EWMA_ALPHA) +
+                  ((int32_t)avg_power * EWMA_ALPHA)) /
+                 EWMA_SCALE;
 
-    // PRINTF("\nEnergest:\n");
-    // PRINTF(" CPU          %4lus LPM      %4lus DEEP LPM %4lus  Total time %lus\n",
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_CPU)),
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_LPM)),
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_DEEP_LPM)),
-    //        to_seconds(ttime));
-    // PRINTF(" Radio LISTEN %4lus TRANSMIT %4lus OFF      %4lus\n",
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_LISTEN)),
-    //        to_seconds(energest_type_time(ENERGEST_TYPE_TRANSMIT)),
-    //        to_seconds(ttime - energest_type_time(ENERGEST_TYPE_TRANSMIT) - energest_type_time(ENERGEST_TYPE_LISTEN)));
-    // PRINTF("total time spent in this sample: %4lus\n", to_seconds(stime));
-    // PRINTF("total time: %4lus\n", to_seconds(ttime));
-    // PRINTF("Total average power consumed in this sample (uW): %lu\n", avg_power);
-    // PRINTF("Total energy consumed in sample (uJ): %lu\n", sample_energy);
-    PRINTF("2, %ld, %lu, %lu, , , , , , , , ,\n",
-           energy,
-           sample_energy,
-           avg_power);
+    PRINTF("\nEnergest:\n");
+    PRINTF("--- Period summary #%u (%lu seconds)\n", count++, stime / ENERGEST_SECOND);
+    PRINTF("Total time  : %10lu\n", stime);
+    PRINTF("CPU         : %10lu/%10lu (%lu permil)\n", cpu, stime, to_permil(cpu, stime));
+    PRINTF("LPM         : %10lu/%10lu (%lu permil)\n", lpm, stime, to_permil(lpm, stime));
+    PRINTF("Radio Tx    : %10lu/%10lu (%lu permil)\n", transmit, stime, to_permil(transmit, stime));
+    PRINTF("Radio Rx    : %10lu/%10lu (%lu permil)\n", listen, stime, to_permil(listen, stime));
+    PRINTF("Radio total : %10lu/%10lu (%lu permil)\n", transmit + listen, stime, to_permil(transmit + listen, stime));
+    PRINTF("Power (uW): %lu\n", avg_power);
+    PRINTF("Moving average (uW): %lu\n", ewma_power);
+    // PRINTF("2, %ld, %lu, %lu, , , , , , , , ,\n",
+    //        energy,
+    //        sample_energy,
+    //        avg_power);
   }
   PROCESS_END();
 }

@@ -5,7 +5,7 @@ CONTIKI = ../../../
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 
-MODULES += os/services/orchestra-sdn
+MODULES += os/services/orchestra-sdn-centralised
 
 MAKE_WITH_SECURITY ?= 0
 
@@ -25,6 +25,11 @@ WITH_SERIAL_SDN_CONTROLLER=1
 
 ifeq ($(MAKE_WITH_SECURITY),1)
 CFLAGS += -DWITH_SECURITY=1
+endif
+
+
+ifeq ($(MAKE_WITH_ORCHESTRA),1)
+CFLAGS += -DBUILD_WITH_ORCHESTRA=1
 endif
 
 #use this to enable TSCH: MAKE_MAC = MAKE_MAC_TSCH

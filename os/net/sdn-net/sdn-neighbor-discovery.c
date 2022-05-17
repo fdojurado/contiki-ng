@@ -47,6 +47,11 @@
 #include "sdn-ds-nbr.h"
 #include "sdn-ds-route.h"
 #include "sdnbuf.h"
+#include "net/link-stats.h"
+
+#if BUILD_WITH_ORCHESTRA
+#include "services/orchestra-sdn-centralised/orchestra.h"
+#endif
 
 /* Log configuration */
 #define DEBUG 1
@@ -64,9 +69,9 @@
 #define SDN_ND_PERIOD SDN_ND_CONF_PERIOD
 #endif
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+// #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
 sdn_rank_t my_rank; // Holds the rank value and the total rssi value to the controller
-#endif
+// #endif
 
 struct etimer nd_timer_periodic;
 struct stimer nd_timer_na; /**< ND timer, to schedule ND sending */
@@ -108,6 +113,10 @@ static void update_rank(int16_t rssi, uint8_t rank, const linkaddr_t *from)
     linkaddr_copy(&my_rank.addr, from);
     PRINTF("rank updated: rank %d total rssi %d\n", my_rank.rank, my_rank.rssi);
     PRINTF(" gw address = %d.%d\n", my_rank.addr.u8[0], my_rank.addr.u8[1]);
+#if BUILD_WITH_ORCHESTRA
+    tsch_queue_update_time_source(from);
+    NETSTACK_CONF_SDN_RANK_UPDATED_CALLBACK(from, my_rank.rank);
+#endif /* BUILD_WITH_ORCHESTRA */
     // }
 }
 #endif
@@ -118,6 +127,9 @@ void sdn_nd_init(void)
     stimer_set(&nd_timer_na, 2); /* wait to have a link local IP address */
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
     my_rank.rank = 0xff; /* Sensor node */
+    my_rank.rssi = 0x00;
+#else
+    my_rank.rank = 0x00; /* Sensor node */
     my_rank.rssi = 0x00;
 #endif
 /* callback function when neighbor removed */
@@ -132,7 +144,19 @@ void sdn_nd_init(void)
 void sdn_nd_input(void)
 {
     int16_t ndRank, ndRssi, rssi;
-    rssi = (int16_t)sdn_net_get_last_rssi();
+    const struct link_stats *stats;
+    const linkaddr_t *addr;
+    addr = packetbuf_addr(PACKETBUF_ADDR_SENDER);
+    // We get the ETX, RSSI values from link-stats.c
+    stats = link_stats_from_lladdr(addr);
+    if (stats != NULL)
+    {
+        rssi = stats->rssi;
+    }
+    else
+    {
+        rssi = (int16_t)sdn_net_get_last_rssi();
+    }
     ndRank = sdn_ntohs(SDN_ND_BUF->rank);
     ndRssi = sdn_ntohs(SDN_ND_BUF->rssi);
 
@@ -146,7 +170,7 @@ void sdn_nd_input(void)
      * from the gateway. If it is, we need
      * to update the rank
      * */
-    if (linkaddr_cmp((linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER),
+    if (linkaddr_cmp(addr,
                      &my_rank.addr))
     {
         if (ndRank == 255)
@@ -160,7 +184,7 @@ void sdn_nd_input(void)
         {
             update_rank(ndRssi + rssi,
                         ndRank,
-                        (linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER));
+                        addr);
         }
     }
     else if (ndRank == my_rank.rank - 1)
@@ -170,15 +194,15 @@ void sdn_nd_input(void)
         if (ndRssi + rssi > my_rank.rssi)
         {
             PRINTF("better link quality\n");
-            update_rank(ndRssi + rssi, ndRank, (linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER));
+            update_rank(ndRssi + rssi, ndRank, addr);
         }
     }
     else if (ndRank < my_rank.rank - 1)
     {
-        update_rank(ndRssi + rssi, ndRank, (linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER));
+        update_rank(ndRssi + rssi, ndRank, addr);
     }
 #endif
-    sdn_ds_nbr_add((linkaddr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER), &ndRank, &ndRssi, &rssi, NULL);
+    sdn_ds_nbr_add(addr, &ndRank, &ndRssi, &rssi, NULL);
 }
 /*---------------------------------------------------------------------------*/
 static void send_nd_output(void)

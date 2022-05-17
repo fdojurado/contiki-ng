@@ -33,7 +33,7 @@
  * \file
  *         Header file for forwarding packets in SDN
  * \author
- *         Fernando Jurado <fjurado@student.unimelb.edu.au>
+ *         Fernando Jurado <ffjla@dtu.dk>
  *
  *
  */
@@ -41,7 +41,7 @@
 #define SDN_ENERGY_H
 #include "contiki.h"
 
-extern signed long energy;
+extern unsigned long ewma_power;
 
 // #ifdef RX_CONF_CURRENT
 // #define RX_CURRENT RX_CONF_CURRENT
@@ -64,7 +64,7 @@ extern signed long energy;
 #ifdef NODE_CONF_INIT_ENERGY
 #define NODE_INIT_ENERGY NODE_CONF_INIT_ENERGY
 #else /* ROUTE_CONF_ENTRIES */
-#define NODE_INIT_ENERGY 65535L
+#define NODE_INIT_ENERGY 0L
 #endif /* ROUTE_CONF_ENTRIES */
 
 #ifdef NODE_CONF_VOLTAGE

@@ -89,14 +89,14 @@ uint8_t nabuf_get_len_field(struct sdn_na_hdr *hdr);
  * \param hdr      The header
  * \retval         The length value
  */
-uint8_t ncbuf_get_len_field(struct sdn_nc_routing_hdr *hdr);
+uint8_t ncbuf_get_len_field(struct sdn_ra_hdr *hdr);
 
 /**
  * \brief          Returns the value of the length field in the SR buffer
  * \param hdr      The header
  * \retval         The length value
  */
-uint8_t srbuf_get_len_field(struct sdn_nc_schedules_hdr *hdr);
+uint8_t srbuf_get_len_field(struct sdn_sa_hdr *hdr);
 
 /**
  * \brief          Get the next IPv6 header.

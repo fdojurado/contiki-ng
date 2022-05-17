@@ -47,6 +47,7 @@
 #include "sdn-network-config.h"
 #include "sdn-data-packets.h"
 #include "sdn-data-aggregation.h"
+#include "sdn-route-advertisement.h"
 #include "sdn-schedule-advertisement.h"
 #if SDN_CONTROLLER
 #include "sdn-controller/sdn-ds-node-route.h"
@@ -58,6 +59,10 @@
 #if SERIAL_SDN_CONTROLLER
 #include "sdn-controller-serial/sdn-serial.h"
 #endif /* SERIAL_SDN_CONTROLLER */
+#if BUILD_WITH_ORCHESTRA
+#include "net/mac/tsch/tsch.h"
+// #include "net/mac/tsch/tsch-asn.h"
+#endif /* BUILD_WITH_ORCHESTRA */
 /* Log configuration */
 #define DEBUG 1
 #if DEBUG
@@ -186,12 +191,12 @@ uint16_t sdn_nachksum(uint8_t len)
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
-uint16_t sdn_ncchksum(uint8_t len)
+uint16_t sdn_rachksum(uint8_t len)
 {
     uint16_t sum;
 
-    sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_NCH_LEN + len);
-    PRINTF("sdn_ncchksum: sum 0x%04x\n", sum);
+    sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_RAH_LEN + len);
+    PRINTF("sdn_rachksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
@@ -199,7 +204,7 @@ uint16_t sdn_sachksum(uint8_t len)
 {
     uint16_t sum;
 
-    sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_SA_LEN + len);
+    sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_SAH_LEN + len);
     PRINTF("sdn_sachksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
@@ -239,6 +244,10 @@ void sdnip_process(uint8_t flag)
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER) || DEBUG
     linkaddr_t scr;
 #endif
+
+#if SERIAL_SDN_CONTROLLER
+    struct tsch_asn_t data_asn;
+#endif /* SERIAL_SDN_CONTROLLER */
 
     print_buff(sdn_buf, sdn_len, true);
 
@@ -302,6 +311,23 @@ void sdnip_process(uint8_t flag)
             SDN_STAT(++sdn_stat.nd.drop);
             goto drop;
         }
+        /* If this is a data packet received at the sink. Then, calculate the
+        ASN difference (useful for delay calcaulation at the controller)*/
+#if SERIAL_SDN_CONTROLLER
+        if ((SDN_IP_BUF->vap & 0x0F) == SDN_PROTO_DATA)
+        {
+            data_asn = tsch_current_asn;
+            data_asn.ls4b = sdnip_htons(SDN_DATA_BUF->asn_ms2b) & 0x0000ffff;
+            data_asn.ls4b = data_asn.ls4b << 16;
+            data_asn.ls4b = data_asn.ls4b | sdnip_htons(SDN_DATA_BUF->asn_ls2b);
+            // PRINTF("rcv asn: %lu.\n", data_asn.ls4b);
+            data_asn.ls4b = TSCH_ASN_DIFF(tsch_current_asn, data_asn);
+            data_asn.ms1b = 0;
+            // PRINTF("Difference:  %lu.\n", data_asn.ls4b);
+            SDN_DATA_BUF->asn_ls2b = sdnip_htons(data_asn.ls4b & 0x0000FFFF);
+            SDN_DATA_BUF->asn_ms2b = sdnip_htons(data_asn.ls4b & 0xFFFF0000);
+        }
+#endif /* SERIAL_SDN_CONTROLLER */
         PRINTF("Forwarding packet to destination %d.%d\n",
                dest.u8[0], dest.u8[1]);
         SDN_STAT(++sdn_stat.ip.forwarded);
@@ -325,14 +351,14 @@ void sdnip_process(uint8_t flag)
             /* ND input */
             goto nd_input;
         case SDN_PROTO_NA:
-            /* CP input */
+            /* NA input */
             goto na_input;
-        case SDN_PROTO_NC_ROUTE:
-            /* CP input */
-            goto nc_route_input;
-        case SDN_PROTO_NC_SCHEDULES:
+        case SDN_PROTO_RA:
+            /* RA input */
+            goto ra_input;
+        case SDN_PROTO_SA:
             /* TSCH schedules input */
-            goto sr_input;
+            goto sa_input;
         case SDN_PROTO_DATA:
             /* Data input */
             goto data_input;
@@ -378,8 +404,8 @@ na_input:
     sdn_na_input();
 #endif
     goto drop;
-sr_input:
-    if (sdn_sachksum(srbuf_get_len_field(SDN_SA_SCHEDULES_BUF)) != 0xffff)
+sa_input:
+    if (sdn_sachksum(srbuf_get_len_field(SDN_SA_BUF)) != 0xffff)
     {
         PRINTF("SA bad checksum\n");
         goto drop;
@@ -391,20 +417,17 @@ sr_input:
     }
     goto drop;
 
-nc_route_input:
-#if !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
-    if (sdn_ncchksum(ncbuf_get_len_field(SDN_NC_ROUTE_BUF)) != 0xffff)
+ra_input:
+    if (sdn_rachksum(ncbuf_get_len_field(SDN_RA_BUF)) != 0xffff)
     {
-        // SDN_STAT(++sdn_stat.nd.drop);
-        // SDN_STAT(++sdn_stat.nd.chkerr);
-        PRINTF("nc bad checksum\n");
+        PRINTF("RA bad checksum\n");
         goto drop;
     }
-    /* This is NC processing. */
-    sdn_nc_input();
-    // At this stage, we have already built our ACK packet
-    goto send;
-#endif /* !SDN_CONTROLLER || SERIAL_SDN_CONTROLLER */
+    /* Process RA packet */
+    if (sdn_ra_input())
+    {
+        goto send;
+    }
     goto drop;
 send:
     /* Recalculate the checksum */
