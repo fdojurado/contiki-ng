@@ -239,6 +239,20 @@ new_time_source(const struct tsch_neighbor *old, const struct tsch_neighbor *new
 {
 }
 /*---------------------------------------------------------------------------*/
+#ifdef NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK
+void orchestra_callback_slotframe_size(uint16_t sf_size)
+{
+  PRINTF("changing slotframe size to %d\n", sf_size);
+  if (!tsch_schedule_remove_slotframe(sf_unicast))
+  {
+    PRINTF("Unsuccessful removing dataplane slotframe.\n");
+    return;
+  }
+  /* Create a new slotframe with the given size */
+  sf_unicast = tsch_schedule_add_slotframe(slotframe_handle, sf_size);
+}
+#endif
+/*---------------------------------------------------------------------------*/
 static void
 init(uint16_t sf_handle)
 {
