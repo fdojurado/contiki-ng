@@ -84,11 +84,57 @@ static void sdn_serial_print_packet()
 }
 #endif
 /*---------------------------------------------------------------------------*/
+static uint16_t
+chksum(uint16_t sum, const uint8_t *data, uint16_t len)
+{
+    uint16_t t;
+    const uint8_t *dataptr;
+    const uint8_t *last_byte;
+
+    dataptr = data;
+    last_byte = data + len - 1;
+
+    while (dataptr < last_byte)
+    { /* At least two more bytes */
+        t = (dataptr[0] << 8) + dataptr[1];
+        sum += t;
+        if (sum < t)
+        {
+            sum++; /* carry */
+        }
+        dataptr += 2;
+    }
+
+    if (dataptr == last_byte)
+    {
+        t = (dataptr[0] << 8) + 0;
+        sum += t;
+        if (sum < t)
+        {
+            sum++; /* carry */
+        }
+    }
+
+    /* Return sum in host byte order. */
+    return sum;
+}
+/*---------------------------------------------------------------------------*/
+uint16_t
+sdn_serialchksum(uint8_t len)
+{
+    uint16_t sum;
+
+    sum = chksum(0, sdn_serial_packet_buf, len);
+    PRINTF("sdn_ipchksum: sum 0x%04x\n", sum);
+    return (sum == 0) ? 0xffff : sdnip_htons(sum);
+}
+/*---------------------------------------------------------------------------*/
 static void send_ack(ack)
 {
     /* Get the sender node address */
     sdn_serial_len = SDN_SERIAL_PACKETH_LEN;
     SDN_SERIAL_PACKET_BUF->addr = linkaddr_null;
+    SDN_SERIAL_PACKET_BUF->pkt_chksum = 0x0000;
     SDN_SERIAL_PACKET_BUF->type = SDN_SERIAL_MSG_TYPE_ACK;
     SDN_SERIAL_PACKET_BUF->payload_len = sdn_serial_len - SDN_SERIAL_PACKETH_LEN;
     SDN_SERIAL_PACKET_BUF->reserved[0] = ack;
@@ -120,6 +166,10 @@ static void copy_to_serial_buff(uint8_t *data)
     SDN_SERIAL_PACKET_BUF->addr.u8[0] = *data;
     data++;
     SDN_SERIAL_PACKET_BUF->addr.u8[1] = *data;
+    data++;
+    // Copy checksum
+    memcpy(&SDN_SERIAL_PACKET_BUF->pkt_chksum, data, 2);
+    data++;
     data++;
     SDN_SERIAL_PACKET_BUF->type = *data;
     data++;
@@ -154,8 +204,12 @@ static void serial_packet_input(uint8_t *data)
     {
         PRINTF("input_serial: received %u bytes\n", sdn_serial_len);
         /* Inspect the received serial packet */
-        // As this is a serial interface, we assume this is a reliable connection;
-        // Therefore, we don't include a checksum field in the header of the serial pkt
+        /* Compute serial packet checksum */
+        if (sdn_serialchksum(sdn_serial_get_len(SDN_SERIAL_PACKET_BUF)) != 0xffff)
+        {
+            PRINTF("serial bad checksum\n");
+            goto drop;
+        }
         /*
          * If the reported length in the serial header doesnot match the packet size,
          * then we drop the packet.

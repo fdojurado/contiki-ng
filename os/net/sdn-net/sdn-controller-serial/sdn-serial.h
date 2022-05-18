@@ -64,13 +64,12 @@
 
 /* Serial packet buffer */
 #ifndef SDN_SERIAL_PACKET_CONF_BUFFER_SIZE
-#define SDN_SERIAL_PACKET_BUFFER_SIZE 128
 #else /* UIP_CONF_BUFFER_SIZE */
 #define SDN_SERIAL_PACKET_BUFFER_SIZE (SDN_SERIAL_PACKET_CONF_BUFFER_SIZE)
 #endif /* UIP_CONF_BUFFER_SIZE */
 
 /* Header size */
-#define SDN_SERIAL_PACKETH_LEN 6      /* Size of the sdn serial packet header */
+#define SDN_SERIAL_PACKETH_LEN 8      /* Size of the sdn serial packet header */
 #define SDN_SERIAL_PACKET_NODEH_LEN 8 /* Size of the sdn serial node packet header */
 
 #define SDN_SERIAL_MAX_PACKET_SIZE (SDN_SERIAL_PACKET_BUFFER_SIZE - SDN_SERIAL_PACKETH_LEN)
@@ -92,6 +91,7 @@
 struct sdn_serial_packet_hdr
 {
     linkaddr_t addr;
+    int16_t pkt_chksum;
     uint8_t type;
     uint8_t payload_len;
     uint8_t reserved[2];

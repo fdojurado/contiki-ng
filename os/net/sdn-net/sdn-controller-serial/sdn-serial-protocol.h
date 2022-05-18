@@ -54,6 +54,8 @@ void sdn_serial_protocol_init(void);
  */
 uint8_t serial_packet_output(void);
 
+uint16_t sdn_serialchksum(uint8_t len);
+
 PROCESS_NAME(sdn_serial_protocol_process);
 
 #endif

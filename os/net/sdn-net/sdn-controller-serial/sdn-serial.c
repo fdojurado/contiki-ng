@@ -86,6 +86,11 @@ static int copy_to_tx_buffer()
         return 1;
     if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->addr.u8[1]) == 0)
         return 1;
+    // Copy checksum
+    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->addr.u8[0]) == 0)
+        return 1;
+    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->addr.u8[1]) == 0)
+        return 1;
     if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->type) == 0)
         return 1;
     if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->payload_len) == 0)

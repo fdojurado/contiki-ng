@@ -214,6 +214,10 @@ select_packet(uint16_t *slotframe, uint16_t *timeslot, uint16_t *channel_offset)
   {
     if (get_ts_ch_from_dst_addr(dest, timeslot, channel_offset))
     {
+      if (slotframe != NULL)
+      {
+        *slotframe = slotframe_handle;
+      }
       return 1;
     }
     if (slotframe != NULL)
