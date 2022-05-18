@@ -311,7 +311,7 @@ static void send_data_output(void)
         //     SDN_STAT(++sdn_stat.data.sent_agg);
         //     SDN_STAT(sdn_stat.data.sent_agg_bytes += sdn_len);
         // }
-        PRINTF("Sending Data pkt.\n");
+        PRINTF("Sending Data pkt (SEQ: %d).\n", seq);
 
         print_buff(sdn_buf, sdn_len, true);
 

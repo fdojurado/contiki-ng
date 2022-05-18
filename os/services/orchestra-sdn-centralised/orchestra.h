@@ -51,7 +51,7 @@ struct orchestra_rule
   void (*child_removed)(const linkaddr_t *addr);
   void (*root_node_updated)(const linkaddr_t *addr, uint8_t is_added);
   void (*rank_updated)(const linkaddr_t *addr, uint8_t rank);
-  void (*add_sa_link)(uint8_t type, uint8_t channel_offset, uint8_t timeslot, uint16_t seq, linkaddr_t *addr);
+  void (*add_sa_link)(uint8_t type, uint8_t channel_offset, uint8_t timeslot, uint16_t seq, linkaddr_t *addr, uint16_t sf_len);
   const char *const name;
   const int16_t slotframe_size;
 };
@@ -66,7 +66,7 @@ extern int orchestra_parent_knows_us;
 
 /* Call from application to start Orchestra */
 void orchestra_init(void);
-/* Callbacks requied for Orchestra to operate */
+/* Callbacks required for Orchestra to operate */
 /* Set with #define TSCH_CALLBACK_PACKET_READY orchestra_callback_packet_ready */
 int orchestra_callback_packet_ready(void);
 /* Set with #define TSCH_CALLBACK_NEW_TIME_SOURCE orchestra_callback_new_time_source */
@@ -80,7 +80,7 @@ void orchestra_callback_rank_updated(const linkaddr_t *addr, uint8_t rank);
 /* Set with #define TSCH_CALLBACK_ROOT_NODE_UPDATED orchestra_callback_root_node_updated */
 void orchestra_callback_root_node_updated(const linkaddr_t *root, uint8_t is_added);
 /* Set with #define NETSTACK_CONF_SDN_SA_LINK_CALLBACK orchestra_callback_add_sa_link */
-void orchestra_callback_add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, uint16_t seq, linkaddr_t *addr);
+void orchestra_callback_add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, uint16_t seq, linkaddr_t *addr, uint16_t sf_len);
 /* Set with #define NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK orchestra_callback_slotframe_size */
 void orchestra_callback_slotframe_size(uint16_t sf_size);
 /* Set with #define NETSTACK_CONF_SDN_PACKET_TX_FAILED orchestra_callback_packet_transmission_failed */

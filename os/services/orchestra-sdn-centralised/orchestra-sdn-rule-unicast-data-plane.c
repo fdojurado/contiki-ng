@@ -131,10 +131,11 @@ static void remove_all_links()
 }
 /*---------------------------------------------------------------------------*/
 static void
-add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot, uint16_t seq, linkaddr_t *addr)
+add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot,
+            uint16_t seq, linkaddr_t *addr, uint16_t sf_len)
 {
   /* Remove all links in the slotframe if the rcv seq is greater that current seq */
-  if (seq > current_seq)
+  if (seq > current_seq && sf_len != 0)
   {
     remove_all_links();
     current_seq = seq;
