@@ -64,7 +64,7 @@
 // #include "net/mac/tsch/tsch-asn.h"
 #endif /* BUILD_WITH_ORCHESTRA */
 /* Log configuration */
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -241,7 +241,7 @@ void sdnip_process(uint8_t flag)
     uint8_t *next_header;
     linkaddr_t dest;
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER) || DEBUG
+#if DEBUG
     linkaddr_t scr;
 #endif
 

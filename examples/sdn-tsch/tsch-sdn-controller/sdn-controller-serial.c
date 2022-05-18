@@ -85,12 +85,12 @@ AUTOSTART_PROCESSES(&serial_sdn_controller_process);
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 {
-    static struct etimer stats_timer;
+    // static struct etimer stats_timer;
     int is_coordinator;
 
     PROCESS_BEGIN();
 
-    etimer_set(&stats_timer, CLOCK_SECOND * 10);
+    // etimer_set(&stats_timer, CLOCK_SECOND * 10);
 
     // Set the controller address as 1.1 where the sink takes the 1.0 address
     ctrl_addr.u8[0] = 1;
@@ -135,23 +135,23 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     while (1)
     {
         PROCESS_YIELD();
-        if (ev == PROCESS_EVENT_TIMER && data == &stats_timer)
-        {
-            printf("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
-                   SDN_STAT(sdn_stat.ip.forwarded),
-                   SDN_STAT(sdn_stat.data.sent_agg),
-                   SDN_STAT(sdn_stat.data.sent_agg_bytes),
-                   SDN_STAT(sdn_stat.data.sent_nagg),
-                   SDN_STAT(sdn_stat.data.sent_nagg_bytes),
-                   SDN_STAT(sdn_stat.cp.adv),
-                   SDN_STAT(sdn_stat.cp.adv_bytes),
-                   SDN_STAT(sdn_stat.cp.nc),
-                   SDN_STAT(sdn_stat.cp.nc_bytes),
-                   SDN_STAT(sdn_stat.nd.sent),
-                   SDN_STAT(sdn_stat.nd.sent_bytes),
-                   SDN_STAT(sdn_stat.nodes.dead));
-            etimer_reset(&stats_timer);
-        }
+        // if (ev == PROCESS_EVENT_TIMER && data == &stats_timer)
+        // {
+        //     printf("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
+        //            SDN_STAT(sdn_stat.ip.forwarded),
+        //            SDN_STAT(sdn_stat.data.sent_agg),
+        //            SDN_STAT(sdn_stat.data.sent_agg_bytes),
+        //            SDN_STAT(sdn_stat.data.sent_nagg),
+        //            SDN_STAT(sdn_stat.data.sent_nagg_bytes),
+        //            SDN_STAT(sdn_stat.cp.adv),
+        //            SDN_STAT(sdn_stat.cp.adv_bytes),
+        //            SDN_STAT(sdn_stat.cp.nc),
+        //            SDN_STAT(sdn_stat.cp.nc_bytes),
+        //            SDN_STAT(sdn_stat.nd.sent),
+        //            SDN_STAT(sdn_stat.nd.sent_bytes),
+        //            SDN_STAT(sdn_stat.nodes.dead));
+        //     etimer_reset(&stats_timer);
+        // }
         // if (ev == PROCESS_EVENT_TIMER && data == &et)
         // {
         //     printf("printing current schedule\n");

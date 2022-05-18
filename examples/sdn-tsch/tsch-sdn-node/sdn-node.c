@@ -84,29 +84,29 @@ AUTOSTART_PROCESSES(&sdn_node_process, &sdn_energy);
 /*---------------------------------------------------------------------------*/
 void static print_stats(void)
 {
-    LOG_INFO("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
-             SDN_STAT(sdn_stat.ip.forwarded),
-             SDN_STAT(sdn_stat.data.sent_agg),
-             SDN_STAT(sdn_stat.data.sent_agg_bytes),
-             SDN_STAT(sdn_stat.data.sent_nagg),
-             SDN_STAT(sdn_stat.data.sent_nagg_bytes),
-             SDN_STAT(sdn_stat.cp.adv),
-             SDN_STAT(sdn_stat.cp.adv_bytes),
-             SDN_STAT(sdn_stat.cp.nc),
-             SDN_STAT(sdn_stat.cp.nc_bytes),
-             SDN_STAT(sdn_stat.nd.sent),
-             SDN_STAT(sdn_stat.nd.sent_bytes),
-             SDN_STAT(sdn_stat.nodes.dead));
+    // LOG_INFO("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
+    //          SDN_STAT(sdn_stat.ip.forwarded),
+    //          SDN_STAT(sdn_stat.data.sent_agg),
+    //          SDN_STAT(sdn_stat.data.sent_agg_bytes),
+    //          SDN_STAT(sdn_stat.data.sent_nagg),
+    //          SDN_STAT(sdn_stat.data.sent_nagg_bytes),
+    //          SDN_STAT(sdn_stat.cp.adv),
+    //          SDN_STAT(sdn_stat.cp.adv_bytes),
+    //          SDN_STAT(sdn_stat.cp.nc),
+    //          SDN_STAT(sdn_stat.cp.nc_bytes),
+    //          SDN_STAT(sdn_stat.nd.sent),
+    //          SDN_STAT(sdn_stat.nd.sent_bytes),
+    //          SDN_STAT(sdn_stat.nodes.dead));
 }
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(sdn_node_process, ev, data)
 {
-    static struct etimer stats_timer, alive_timer;
+    static struct etimer alive_timer;
     int is_coordinator;
 
     PROCESS_BEGIN();
 
-    etimer_set(&stats_timer, CLOCK_SECOND * 1);
+    // etimer_set(&stats_timer, CLOCK_SECOND * 1);
 
     /* To check whether the node still alive or not. */
     etimer_set(&alive_timer, CLOCK_SECOND / 2);

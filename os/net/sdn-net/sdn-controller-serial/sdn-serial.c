@@ -44,7 +44,7 @@
 #include "lib/ringbuf.h"
 
 /* Log configuration */
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #include "net/sdn-net/sd-wsn.h"

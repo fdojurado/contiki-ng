@@ -51,7 +51,7 @@
 /* Flocklab deployment? */
 #define FLOCKLAB_DEPLOYMENT 0
 /* SDN STATISTICS? */
-#define SDN_STATISTICS 1
+#define SDN_STATISTICS 0
 /* Max number of neighbors in cache */
 #define SDN_DS_NBR_CONF_MAX_NEIGHBOR_CACHES 10
 #undef NETSTACK_CONF_NETWORK
@@ -101,8 +101,8 @@
 #define LOG_CONF_LEVEL_TCPIP                       LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_IPV6                        LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_6LOWPAN                     LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_MAC                         LOG_LEVEL_DBG
+#define LOG_CONF_LEVEL_MAC                         LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_FRAMER                      LOG_LEVEL_NONE
-#define TSCH_LOG_CONF_PER_SLOT                     1
+#define TSCH_LOG_CONF_PER_SLOT                     0
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */
