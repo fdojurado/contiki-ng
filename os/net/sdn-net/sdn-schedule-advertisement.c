@@ -33,7 +33,8 @@ int sdn_sa_input(void)
     // Set the slotframe size
     uint16_t sf_len = sdnip_htons(SDN_SA_BUF->sf_len);
 #if BUILD_WITH_ORCHESTRA
-    NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK(sf_len);
+    if (sf_len != 0)
+        NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK(sf_len);
 #endif
     // Process schedules
     uint8_t num_schedules, i, type, channel_offset, time_offset;

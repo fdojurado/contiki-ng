@@ -35,7 +35,9 @@
 /* Set neighbour discovery period */
 #define SDN_CONF_MAX_ND_INTERVAL 30
 /* Set neighbour advertisement period */
-#define SDN_CONF_MAX_NA_INTERVAL 45
+#define SDN_CONF_MAX_NA_INTERVAL 70
+/* Set the data packet period */
+#define SDN_CONF_DATA_PACKET_INTERVAL 90
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
 /* Num of max routing routes */
