@@ -131,11 +131,11 @@ init(uint16_t sf_handle)
   rx_channeloffset = 3;
   tx_channeloffset = 3;
   tsch_schedule_add_link(sf_control,
-                         LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED,
+                         LINK_OPTION_RX,
                          ORCHESTRA_COMMON_SHARED_TYPE, &tsch_broadcast_address,
                          rx_timeoffset, rx_channeloffset, 1);
   tsch_schedule_add_link(sf_control,
-                         LINK_OPTION_TX | LINK_OPTION_SHARED,
+                         LINK_OPTION_TX,
                          ORCHESTRA_COMMON_SHARED_TYPE, &tsch_broadcast_address,
                          tx_timeoffset, tx_channeloffset, 1);
 
@@ -156,13 +156,13 @@ static void rank_updated(const linkaddr_t *addr, uint8_t rank)
     rx_timeoffset = get_node_timeslot(rank);
     rx_channeloffset = get_node_channel_offset(addr);
     tsch_schedule_add_link(sf_control,
-                           LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED,
+                           LINK_OPTION_RX,
                            ORCHESTRA_COMMON_SHARED_TYPE, &tsch_broadcast_address,
                            rx_timeoffset, rx_channeloffset, 1);
     tx_timeoffset = get_node_timeslot(rank + 1);
     tx_channeloffset = get_node_channel_offset(&linkaddr_node_addr);
     tsch_schedule_add_link(sf_control,
-                           LINK_OPTION_SHARED | LINK_OPTION_TX,
+                           LINK_OPTION_TX,
                            LINK_TYPE_NORMAL, &tsch_broadcast_address,
                            tx_timeoffset, tx_channeloffset, 1);
     rank_set = rank;
