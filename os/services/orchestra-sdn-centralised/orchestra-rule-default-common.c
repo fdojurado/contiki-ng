@@ -42,10 +42,10 @@ static uint16_t slotframe_handle = 0;
 
 #if ORCHESTRA_EBSF_PERIOD > 0
 /* There is a slotframe for EBs, use this slotframe for non-EB traffic only */
-#define ORCHESTRA_COMMON_SHARED_TYPE              LINK_TYPE_NORMAL
+#define ORCHESTRA_COMMON_SHARED_TYPE LINK_TYPE_NORMAL
 #else
 /* There is no slotframe for EBs, use this slotframe both EB and non-EB traffic */
-#define ORCHESTRA_COMMON_SHARED_TYPE              LINK_TYPE_ADVERTISING
+#define ORCHESTRA_COMMON_SHARED_TYPE LINK_TYPE_ADVERTISING
 #endif
 
 /*---------------------------------------------------------------------------*/
@@ -53,12 +53,13 @@ static int
 select_packet(uint16_t *slotframe, uint16_t *timeslot, uint16_t *channel_offset)
 {
   /* We are the default slotframe, select anything */
-  if(slotframe != NULL) {
+  if (slotframe != NULL)
+  {
     *slotframe = slotframe_handle;
   }
-  if(timeslot != NULL) {
-    *timeslot = 0;
-  }
+  // if(timeslot != NULL) {
+  //   *timeslot = 0;
+  // }
   return 1;
 }
 /*---------------------------------------------------------------------------*/
@@ -70,20 +71,24 @@ init(uint16_t sf_handle)
    * do not have a link to */
   struct tsch_slotframe *sf_common = tsch_schedule_add_slotframe(slotframe_handle, ORCHESTRA_COMMON_SHARED_PERIOD);
   tsch_schedule_add_link(sf_common,
-      LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED,
-      ORCHESTRA_COMMON_SHARED_TYPE, &tsch_broadcast_address,
-      0, ORCHESTRA_DEFAULT_COMMON_CHANNEL_OFFSET, 1);
+                         LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED,
+                         ORCHESTRA_COMMON_SHARED_TYPE, &tsch_broadcast_address,
+                         9, ORCHESTRA_DEFAULT_COMMON_CHANNEL_OFFSET, 1);
+  tsch_schedule_add_link(sf_common,
+                         LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED,
+                         ORCHESTRA_COMMON_SHARED_TYPE, &tsch_broadcast_address,
+                         18, ORCHESTRA_DEFAULT_COMMON_CHANNEL_OFFSET + 1, 1);
 }
 /*---------------------------------------------------------------------------*/
 struct orchestra_rule default_common = {
-  init,
-  NULL,
-  select_packet,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  "default common",
-  ORCHESTRA_COMMON_SHARED_PERIOD,
+    init,
+    NULL,
+    select_packet,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    "default common",
+    ORCHESTRA_COMMON_SHARED_PERIOD,
 };
