@@ -48,15 +48,21 @@
 #define ROUTING_H_
 
 #include "contiki.h"
+#if !ROUTING_CONF_SDN
 #include "net/ipv6/uip.h"
 #include "net/ipv6/uip-ds6-nbr.h"
 #include "net/ipv6/uip-ds6-route.h"
 #include "net/ipv6/uip-sr.h"
 #include "net/linkaddr.h"
+#endif
 
+#if ROUTING_CONF_SDN
+#include "net/sdn-net/sdn-ds-nbr.h"
+#endif
 /**
  * The structure of a routing protocol driver.
  */
+#if !ROUTING_CONF_SDN
 struct routing_driver {
   char *name;
   /** Initialize the routing protocol */
@@ -189,6 +195,66 @@ struct routing_driver {
    */
   uint8_t (* is_in_leaf_mode)(void);
 };
+#endif
+
+#if ROUTING_CONF_SDN
+struct routing_driver
+{
+  char *name;
+  /** Initialize the routing protocol */
+  void (*init)(void);
+  /**
+   * Called by uIP to notify addition/removal of IPv6 neighbor entries
+   *
+   * \param addr The link-layer addrress of the packet destination
+   * \param status The transmission status (see os/net/mac/mac.h)
+   * \param numtx The total number of transmission attempts
+   */
+  void (*neighbor_state_changed)(sdn_ds_nbr_t *nbr);
+  /**
+   * Called by uIP to notify removal of a neighbor
+   *
+   * \param addr The link-layer addrress of the packet destination
+   * \param status The transmission status (see os/net/mac/mac.h)
+   * \param numtx The total number of transmission attempts
+   */
+  void (*neighbor_removed)(sdn_ds_nbr_t *nbr);
+  /**
+   * Called by uIP to notify removal of a neighbor
+   *
+   * \param addr The link-layer addrress of the packet destination
+   * \param status The transmission status (see os/net/mac/mac.h)
+   * \param numtx The total number of transmission attempts
+   */
+  const linkaddr_t *(*nexthop)(const linkaddr_t *dest);
+  /**
+   * Tells whether the protocol is in leaf mode
+   *
+   * \retval 1 if the protocol is in leaf mode, 0 if not.
+   */
+  uint8_t (*is_in_leaf_mode)(void);
+
+  /**
+   * Compute the centralized network algorithm
+   *
+   * \retval 
+   */
+  uint8_t (*compute_routing_algorithm)(void);
+
+  /**
+   * get netwokr modified variable
+   *
+   * \retval 
+   */
+  uint8_t (*network_modified)(void);
+  /**
+   * clear network modified variable
+   *
+   * \retval 
+   */
+  void (*clear_network_modified)(void);
+};
+#endif
 
 #endif /* ROUTING_H_ */
 /**
