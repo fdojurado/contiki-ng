@@ -44,9 +44,9 @@
 #include "sdn-ds-nbr.h"
 #include "net/ipv6/uip.h" // show this header be here?
 #include "sdn-ds-route.h"
-#include "sdn-network-config.h"
+// #include "sdn-network-config.h"
 #include "sdn-data-packets.h"
-#include "sdn-data-aggregation.h"
+// #include "sdn-data-aggregation.h"
 #include "sdn-route-advertisement.h"
 #include "sdn-schedule-advertisement.h"
 #if SDN_CONTROLLER
@@ -90,7 +90,7 @@ void sdn_wsn_init(void)
     sdn_ds_route_init();
     sdn_na_init();
     sdn_data_init();
-    sdn_data_aggregation_init();
+    // sdn_data_aggregation_init();
 #if SDN_CONTROLLER
     sdn_ds_node_id_init();
     sdn_nc_init();

@@ -45,7 +45,7 @@
 #include "sdnbuf.h"
 #include "sdn-neighbor-discovery.h"
 #include "sdn-advertisement.h"
-#include "sdn-network-config.h"
+// #include "sdn-network-config.h"
 #include "sdn-data-packets.h"
 
 #if SERIAL_SDN_CONTROLLER

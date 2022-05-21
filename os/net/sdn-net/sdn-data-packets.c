@@ -38,7 +38,7 @@
  */
 
 #include "sdn-data-packets.h"
-#include "sdn-data-aggregation.h"
+// #include "sdn-data-aggregation.h"
 #include "sdn-ds-route.h"
 #include "sdn-net.h"
 #include "net/routing/routing.h"
@@ -319,7 +319,7 @@ static void send_data_output(void)
 
         sdn_ip_output(nxthop);
 
-        sdn_data_aggregation_flush_all();
+        // sdn_data_aggregation_flush_all();
     }
 }
 #endif

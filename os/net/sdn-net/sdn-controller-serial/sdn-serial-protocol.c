@@ -129,7 +129,7 @@ sdn_serialchksum(uint8_t len)
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
-static void send_ack(ack)
+static void send_ack(uint8_t ack)
 {
     /* Get the sender node address */
     sdn_serial_len = SDN_SERIAL_PACKETH_LEN;
