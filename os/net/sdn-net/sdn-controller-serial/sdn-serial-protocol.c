@@ -46,6 +46,10 @@
 #include "dev/uart1.h"
 #endif /* !CONTIKI_TARGET_COOJA */
 
+#if CONTIKI_TARGET_COOJA
+#include "dev/rs232.h"
+#endif /* CONTIKI_TARGET_COOJA */
+
 #ifdef Z1_DEF_H_
 #include "dev/uart0.h"
 #endif /* Z1_DEF_H_ */
@@ -281,7 +285,9 @@ PROCESS_THREAD(sdn_serial_protocol_process, ev, data)
 #ifdef CONTIKI_TARGET_IOTLAB
     uart1_set_input(&sdn_serial_input_byte); // set the callback function
 #endif
-
+#ifdef CONTIKI_TARGET_COOJA
+    rs232_set_input(&sdn_serial_input_byte); // set the callback function
+#endif
     while (1)
     {
         PROCESS_YIELD();
