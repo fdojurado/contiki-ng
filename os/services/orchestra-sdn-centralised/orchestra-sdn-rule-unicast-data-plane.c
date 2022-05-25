@@ -150,7 +150,7 @@ add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot,
     break;
   case LINK_OPTION_TX:
     tsch_schedule_add_link(sf_unicast,
-                           LINK_OPTION_SHARED | LINK_OPTION_TX,
+                           LINK_OPTION_TX,
                            LINK_TYPE_NORMAL, addr,
                            timeslot, channel_offset, 1);
     break;
@@ -221,6 +221,14 @@ select_packet(uint16_t *slotframe, uint16_t *timeslot, uint16_t *channel_offset)
       }
       return 1;
     }
+
+    // We don't retrieve ts and ch from the node address
+    // if the network reconfiguration has started
+    if (current_seq > 0)
+    {
+      return 0;
+    }
+
     if (slotframe != NULL)
     {
       *slotframe = slotframe_handle;
@@ -245,8 +253,12 @@ new_time_source(const struct tsch_neighbor *old, const struct tsch_neighbor *new
 }
 /*---------------------------------------------------------------------------*/
 #ifdef NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK
-void orchestra_callback_slotframe_size(uint16_t sf_size)
+void orchestra_callback_slotframe_size(uint16_t sf_size, uint16_t seq)
 {
+  if (seq > current_seq)
+  {
+    current_seq = seq;
+  }
   PRINTF("changing slotframe size to %d\n", sf_size);
   if (!tsch_schedule_remove_slotframe(sf_unicast))
   {

@@ -75,6 +75,9 @@
 /* Do not start TSCH at init, wait for NETSTACK_MAC.on() */
 #define TSCH_CONF_AUTOSTART 0
 
+
+#define QUEUEBUF_CONF_NUM  128
+
 #define TSCH_CALLBACK_PACKET_READY orchestra_callback_packet_ready
 #define TSCH_CALLBACK_NEW_TIME_SOURCE orchestra_callback_new_time_source
 #define NETSTACK_CONF_ROUTING_NEIGHBOR_ADDED_CALLBACK orchestra_callback_child_added
