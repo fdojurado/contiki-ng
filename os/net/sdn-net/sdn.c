@@ -134,7 +134,7 @@ void sdn_output()
 
 netflood:
     sdn_ip_output(NULL);
-    // sdn_ip_output(NULL);
+    sdn_ip_output(NULL);
 
 sent:
     PRINTF("output: packet forwarded\n");

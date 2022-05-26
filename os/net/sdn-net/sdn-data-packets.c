@@ -315,7 +315,7 @@ static void send_data_output(void)
 
         print_buff(sdn_buf, sdn_len, true);
 
-        sdnbuf_set_attr(SDNBUF_ATTR_MAX_MAC_TRANSMISSIONS, 3);
+        // sdnbuf_set_attr(SDNBUF_ATTR_MAX_MAC_TRANSMISSIONS, 3);
 
         sdn_ip_output(nxthop);
 

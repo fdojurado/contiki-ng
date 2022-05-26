@@ -120,26 +120,26 @@ void orchestra_callback_packet_transmission_failed(struct tsch_neighbor *n,
 }
 #endif /* NETSTACK_CONF_SDN_PACKET_TX_FAILED */
 /*---------------------------------------------------------------------------*/
-static void remove_all_links()
-{
-  /* Remove all links belonging to this slotframe */
-  struct tsch_link *l;
-  while ((l = list_head(sf_unicast->links_list)))
-  {
-    tsch_schedule_remove_link(sf_unicast, l);
-  }
-}
+// static void remove_all_links()
+// {
+//   /* Remove all links belonging to this slotframe */
+//   struct tsch_link *l;
+//   while ((l = list_head(sf_unicast->links_list)))
+//   {
+//     tsch_schedule_remove_link(sf_unicast, l);
+//   }
+// }
 /*---------------------------------------------------------------------------*/
 static void
 add_sa_link(uint8_t type, uint8_t channel_offset, uint8_t timeslot,
             uint16_t seq, linkaddr_t *addr, uint16_t sf_len)
 {
   /* Remove all links in the slotframe if the rcv seq is greater that current seq */
-  if (seq > current_seq && sf_len != 0)
-  {
-    remove_all_links();
-    current_seq = seq;
-  }
+  // if (seq > current_seq && sf_len != 0)
+  // {
+  //   remove_all_links();
+  //   current_seq = seq;
+  // }
   switch (type)
   {
   case LINK_OPTION_RX:
@@ -267,6 +267,19 @@ void orchestra_callback_slotframe_size(uint16_t sf_size, uint16_t seq)
   }
   /* Create a new slotframe with the given size */
   sf_unicast = tsch_schedule_add_slotframe(slotframe_handle, sf_size);
+  /* Look in the nbr TSCH queue with packets and update ts and ch */
+  tsch_queue_reset();
+  // if (!tsch_is_locked())
+  // {
+  //   struct tsch_neighbor *n = (struct tsch_neighbor *)nbr_table_head(tsch_neighbors);
+  //   while (n != NULL)
+  //   {
+  //     struct tsch_neighbor *next_n = (struct tsch_neighbor *)nbr_table_next(tsch_neighbors, n);
+  //     /* get packets in queue */
+
+  //     n = next_n;
+  //   }
+// }
 }
 #endif
 /*---------------------------------------------------------------------------*/
