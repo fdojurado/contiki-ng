@@ -1,8 +1,10 @@
 #include "net/sdn-net/sdn-schedule-advertisement.h"
 #include "net/sdn-net/sd-wsn.h"
 #include "net/sdn-net/sdn-neighbor-discovery.h"
+#include "net/sdn-net/sdn-data-packets.h"
 
 #if BUILD_WITH_ORCHESTRA
+#include "net/mac/tsch/tsch.h"
 #include "services/orchestra-sdn-centralised/orchestra.h"
 #endif
 
@@ -53,10 +55,16 @@ int sdn_sa_input(void)
             PRINTF("Type: %u, chan: %u, time: %u, scr: %d.%d, dst= %d.%d\n",
                    type, channel_offset, time_offset, scr.u8[0], scr.u8[1], dst.u8[0], dst.u8[1]);
 #if BUILD_WITH_ORCHESTRA
-            NETSTACK_CONF_SDN_SA_LINK_CALLBACK(type, channel_offset, time_offset, sequence_number, &dst, sf_len);
+            NETSTACK_CONF_SDN_SA_LINK_CALLBACK(type, channel_offset, time_offset, &dst);
 #endif /* BUILD_WITH_ORCHESTRA */
         }
     }
+    /* Look in the nbr TSCH queue with packets and update ts and ch */
+    tsch_queue_reset();
+    /* Reset the data packets sequence number */
+#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+    sdn_data_reset_seq();
+#endif
     /* If we are the hop limit, we do not forward the packet */
     if (SDN_SA_BUF->hop_limit <= my_rank.rank)
     {

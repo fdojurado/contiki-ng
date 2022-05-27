@@ -71,6 +71,11 @@ extern struct etimer data_timer_periodic; /**< Timer for periodic ND */
 void sdn_data_init(void);
 
 #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+/** \brief Reset data sequence number */
+void sdn_data_reset_seq(void);
+#endif
+
+#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
 /** \brief Periodic processing of data structures */
 void sdn_data_periodic(void);
 #endif

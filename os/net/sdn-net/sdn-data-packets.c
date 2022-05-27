@@ -221,6 +221,13 @@ void sdn_data_init(void)
     return;
 }
 /*---------------------------------------------------------------------------*/
+#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+void sdn_data_reset_seq(void)
+{
+    seq = 0;
+}
+#endif
+/*---------------------------------------------------------------------------*/
 #if SDN_CONTROLLER
 void sdn_data_input(void)
 {
