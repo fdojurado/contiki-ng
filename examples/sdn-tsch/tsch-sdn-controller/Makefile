@@ -5,11 +5,12 @@ CONTIKI = ../../../
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 
-MODULES += os/services/orchestra-sdn-centralised
+# MODULES += os/services/orchestra-sdn-centralised
 
 MAKE_WITH_SECURITY ?= 0
 
-MAKE_WITH_ORCHESTRA ?= 1
+# force Orchestra from command line
+MAKE_WITH_SDN_ORCHESTRA = 1
 
 PLATFORMS_EXCLUDE = nrf52dk
 
@@ -28,8 +29,8 @@ CFLAGS += -DWITH_SECURITY=1
 endif
 
 
-ifeq ($(MAKE_WITH_ORCHESTRA),1)
-CFLAGS += -DBUILD_WITH_ORCHESTRA=1
+ifeq ($(MAKE_WITH_SDN_ORCHESTRA),1)
+MODULES += $(CONTIKI_NG_SERVICES_DIR)/orchestra-sdn-centralised
 endif
 
 #use this to enable TSCH: MAKE_MAC = MAKE_MAC_TSCH

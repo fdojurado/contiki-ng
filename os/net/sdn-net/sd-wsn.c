@@ -59,10 +59,10 @@
 #if SERIAL_SDN_CONTROLLER
 #include "sdn-controller-serial/sdn-serial.h"
 #endif /* SERIAL_SDN_CONTROLLER */
-#if BUILD_WITH_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA
 #include "net/mac/tsch/tsch.h"
 // #include "net/mac/tsch/tsch-asn.h"
-#endif /* BUILD_WITH_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA */
 /* Log configuration */
 #define DEBUG 0
 #if DEBUG

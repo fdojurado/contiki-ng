@@ -52,7 +52,11 @@
 #include "net/app-layer/coap/coap-engine.h"
 #include "net/app-layer/snmp/snmp.h"
 #include "services/rpl-border-router/rpl-border-router.h"
+#ifdef BUILD_WITH_SDN_ORCHESTRA
+#include "services/orchestra-sdn-centralised/orchestra.h"
+#else
 #include "services/orchestra/orchestra.h"
+#endif
 #include "services/shell/serial-shell.h"
 #include "services/simple-energest/simple-energest.h"
 #include "services/tsch-cs/tsch-cs.h"
@@ -138,10 +142,10 @@ main(void)
   LOG_DBG("With RPL Border Router\n");
 #endif /* BUILD_WITH_RPL_BORDER_ROUTER */
 
-#if BUILD_WITH_ORCHESTRA
+#if BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA
   orchestra_init();
   LOG_DBG("With Orchestra\n");
-#endif /* BUILD_WITH_ORCHESTRA */
+#endif /* BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA */
 
 #if BUILD_WITH_SHELL
   serial_shell_init();

@@ -206,7 +206,7 @@ void orchestra_callback_root_node_updated(const linkaddr_t *root, uint8_t is_add
 void orchestra_init(void)
 {
   int i;
-  LOG_INFO("Initializing orchestra-sdn\n");
+  LOG_INFO("Initializing orchestra-sdn-centralized\n");
   /* Snoop on packet transmission to know if our parent knows about us
    * (i.e. has ACKed at one of our DAOs since we decided to use it as a parent) */
   netstack_sniffer_add(&orchestra_sniffer);

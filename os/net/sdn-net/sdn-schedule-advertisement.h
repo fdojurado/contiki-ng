@@ -40,14 +40,14 @@
 #ifndef SDN_SA_H
 #define SDN_SA_H
 
-#if BUILD_WITH_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA
 #ifndef NETSTACK_CONF_SDN_SA_LINK_CALLBACK
 #define NETSTACK_CONF_SDN_SA_LINK_CALLBACK orchestra_callback_add_sa_link
 #endif /* NETSTACK_CONF_ROUTING_NEIGHBOR_ADDED_CALLBACK */
 #ifndef NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK
 #define NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK orchestra_callback_slotframe_size
 #endif
-#endif /* BUILD_WITH_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA */
 
 /**
  * \brief Handle an incoming SA packet

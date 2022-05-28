@@ -109,13 +109,11 @@ uint8_t srbuf_get_len_field(struct sdn_sa_hdr *hdr);
  */
 uint8_t *sdnbuf_get_next_header(uint8_t *buffer, uint16_t size, uint8_t *protocol);
 /**
- * \brief          Get the next IPv6 header.
- * \param buffer   A pointer to the buffer holding the IPv6 packet
- * \param size     The size of the data in the buffer
- * \param protocol A pointer to a variable where the protocol of the header will be stored
- * \retval         returns address of the next header, or NULL in case of insufficient buffer space
+ * \brief          Get the value of the attribute
+ * \param type     The attribute to get the value of
+ * \retval         The value of the attribute
  *
- *                 This function moves to the next header in a IPv6 packet.
+ *                 This function gets the value of a specific sdnbuf attribute.
  */
 uint16_t sdnbuf_get_attr(uint8_t type);
 
@@ -126,7 +124,7 @@ uint16_t sdnbuf_get_attr(uint8_t type);
  * \retval         0 - indicates failure of setting the value
  * \retval         1 - indicates success of setting the value
  *
- *                 This function sets the value of a specific uipbuf attribute.
+ *                 This function sets the value of a specific sdnbuf attribute.
  */
 int sdnbuf_set_attr(uint8_t type, uint16_t value);
 

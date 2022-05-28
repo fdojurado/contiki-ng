@@ -113,9 +113,9 @@ int queuebuf_datalen(struct queuebuf *b);
 linkaddr_t *queuebuf_addr(struct queuebuf *b, uint8_t type);
 packetbuf_attr_t queuebuf_attr(struct queuebuf *b, uint8_t type);
 
-#if BUILD_WITH_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA
 void queuebuf_set_attr(struct queuebuf *b, uint8_t type, const packetbuf_attr_t val);
-#endif /* BUILD_WITH_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA */
 
 void queuebuf_debug_print(void);
 
