@@ -62,7 +62,7 @@ int sdn_sa_input(void)
     /* Look in the nbr TSCH queue with packets and update ts and ch */
     tsch_queue_reset();
     /* Reset the data packets sequence number */
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     sdn_data_reset_seq();
 #endif
     /* If we are the hop limit, we do not forward the packet */

@@ -67,7 +67,7 @@ void sdn_na_periodic(void);
  * \brief Handle an incoming ND message
 
  */
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
 void sdn_na_input(void);
 #endif
 

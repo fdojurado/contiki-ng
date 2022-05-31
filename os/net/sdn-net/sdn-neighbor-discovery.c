@@ -69,7 +69,7 @@
 #define SDN_ND_PERIOD SDN_ND_CONF_PERIOD
 #endif
 
-// #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+// #if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 sdn_rank_t my_rank; // Holds the rank value and the total rssi value to the controller
 // #endif
 
@@ -84,7 +84,7 @@ neighbor_callback(int event, const sdn_ds_nbr_t *nbr)
 {
     if (event == SDN_DS_NBR_NOTIFICATION_RM)
     {
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
         PRINTF("removing neighbor %d.%d, check whether is gtw to ctrl\n",
                nbr->addr.u8[0], nbr->addr.u8[1]);
         if (linkaddr_cmp(&my_rank.addr, &nbr->addr))
@@ -100,7 +100,7 @@ neighbor_callback(int event, const sdn_ds_nbr_t *nbr)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 static void update_rank(int16_t rssi, uint8_t rank, const linkaddr_t *from)
 {
     // if (my_rank.rank > 1)
@@ -125,7 +125,7 @@ void sdn_nd_init(void)
 {
     etimer_set(&nd_timer_periodic, SDN_ND_PERIOD);
     stimer_set(&nd_timer_na, 2); /* wait to have a link local IP address */
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     my_rank.rank = 0xff; /* Sensor node */
     my_rank.rssi = 0x00;
 #else
@@ -165,7 +165,7 @@ void sdn_nd_input(void)
            ndRank,
            ndRssi);
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     /* Check whether the ND message is
      * from the gateway. If it is, we need
      * to update the rank
@@ -223,7 +223,7 @@ static void send_nd_output(void)
     SDN_IP_BUF->hdr_chksum = ~sdn_ipchksum();
 
     /* ND packet */
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     SDN_ND_BUF->rank = sdnip_htons(my_rank.rank);
     SDN_ND_BUF->rssi = sdnip_htons(my_rank.rssi);
 #else

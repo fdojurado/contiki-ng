@@ -93,7 +93,7 @@ extern process_event_t sdn_event;
  */
 void sdn_ip_input(void);
 
-#if SERIAL_SDN_CONTROLLER
+#if BUILD_WITH_SDN_CONTROLLER_SERIAL
 /**
  * \brief      Deliver an incoming packet to the serial interface
  *
@@ -104,7 +104,7 @@ void sdn_ip_input(void);
  *             uip_len variable.
  */
 void serial_ip_output(void);
-#endif /* SERIAL_SDN_CONTROLLER */
+#endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
 
 /**
  * \brief Output packet to layer 2

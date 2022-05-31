@@ -48,11 +48,11 @@
 // #include "sdn-network-config.h"
 #include "sdn-data-packets.h"
 
-#if SERIAL_SDN_CONTROLLER
+#if BUILD_WITH_SDN_CONTROLLER_SERIAL
 #include "sdn-controller-serial/sdn-serial.h"
 #include "sdn-controller-serial/sdn-serial-protocol.h"
 #include <string.h>
-#endif /* SERIAL_SDN_CONTROLLER */
+#endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
 
 /* Log configuration */
 #define DEBUG 0
@@ -114,7 +114,7 @@ void sdn_output()
     // nexthop = NULL;
     if (nexthop == NULL)
     {
-#if SERIAL_SDN_CONTROLLER
+#if BUILD_WITH_SDN_CONTROLLER_SERIAL
         // Check if this packet needs to be forwarded to the serial controller
         if (linkaddr_cmp(&ctrl_addr, &dest))
         {
@@ -122,7 +122,7 @@ void sdn_output()
             PRINTF("Forwarding packet to serial interface\n");
             serial_ip_output();
         }
-#endif /* SERIAL_SDN_CONTROLLER */
+#endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
         goto sent;
     }
     PRINTF("output: sending to %d.%d\n",
@@ -171,7 +171,7 @@ void sdn_ip_input(void)
     sdnbuf_clear();
 }
 /*---------------------------------------------------------------------------*/
-#if SERIAL_SDN_CONTROLLER
+#if BUILD_WITH_SDN_CONTROLLER_SERIAL
 void serial_ip_output()
 {
     if (sdn_len == 0)
@@ -192,7 +192,7 @@ void serial_ip_output()
     memcpy(SDN_SERIAL_PACKET_PAYLOAD_BUF(0), SDN_IP_BUF, SDN_IP_BUF->tlen);
     serial_packet_output();
 }
-#endif /* SERIAL_SDN_CONTROLLER */
+#endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
 /*---------------------------------------------------------------------------*/
 uint8_t sdn_ip_output(const linkaddr_t *dest)
 {
@@ -230,7 +230,7 @@ eventhandler(process_event_t ev, process_data_t data)
                 sdn_nd_periodic();
                 // tcpip_ipv6_output();
             }
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
             if (data == &data_timer_periodic &&
                 etimer_expired(&data_timer_periodic))
             {
