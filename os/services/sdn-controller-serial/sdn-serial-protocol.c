@@ -167,33 +167,12 @@ uint8_t serial_packet_output(void)
 /*---------------------------------------------------------------------------*/
 static void copy_to_serial_buff(uint8_t *data)
 {
-    SDN_SERIAL_PACKET_BUF->addr.u8[0] = *data;
-    data++;
-    SDN_SERIAL_PACKET_BUF->addr.u8[1] = *data;
-    data++;
-    // Copy checksum
-    memcpy(&SDN_SERIAL_PACKET_BUF->pkt_chksum, data, 2);
-    data++;
-    data++;
-    SDN_SERIAL_PACKET_BUF->type = *data;
-    data++;
-    SDN_SERIAL_PACKET_BUF->payload_len = *data;
-    data++;
-    SDN_SERIAL_PACKET_BUF->reserved[0] = *data;
-    data++;
-    SDN_SERIAL_PACKET_BUF->reserved[1] = *data;
-    /* Copy payload */
-    uint16_t size = SDN_SERIAL_PACKET_BUF->payload_len; // payload size
-    uint8_t i = 0;
-    uint8_t *ptr;
-    while (size)
-    {
-        data++;
-        ptr = SDN_SERIAL_PACKET_PAYLOAD_BUF(i);
-        *ptr = *data;
-        size--;
-        i++;
-    }
+    print_buff(data, 128, 0);
+
+    uint8_t *buffer;
+    buffer = (uint8_t *)sdn_serial_packet_buf;
+    /* Put uncompressed IP header in sdn_buf. */
+    memcpy(buffer, data, SDN_SERIAL_PACKET_BUFFER_SIZE);
     sdn_serial_len = SDN_SERIAL_PACKETH_LEN + SDN_SERIAL_PACKET_BUF->payload_len;
 }
 /*---------------------------------------------------------------------------*/
