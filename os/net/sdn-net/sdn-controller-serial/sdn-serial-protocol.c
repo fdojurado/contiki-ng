@@ -154,7 +154,7 @@ uint8_t serial_packet_output(void)
     }
     if (!sdn_serial_send())
     {
-        PRINTF("output: send %u bytes through serial\n", sdn_serial_len);
+        // PRINTF("output: send %u bytes through serial\n", sdn_serial_len);
         return 0;
     }
     else

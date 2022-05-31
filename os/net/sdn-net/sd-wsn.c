@@ -264,7 +264,7 @@ void sdnip_process(uint8_t flag)
     }
 
     /*
-     * If the reported length in the ip header doesnot match the packet size,
+     * If the reported length in the ip header doesn't match the packet size,
      * then we drop the packet.
      */
     if (sdn_len < sdnbuf_get_len_field(SDN_IP_BUF))

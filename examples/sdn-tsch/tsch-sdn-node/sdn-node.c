@@ -82,8 +82,8 @@ AUTOSTART_PROCESSES(&sdn_node_process, &sdn_energy);
 
 /*-------------------------------TSCH configuration---------------------------*/
 /*---------------------------------------------------------------------------*/
-void static print_stats(void)
-{
+// void static print_stats(void)
+// {
     // LOG_INFO("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
     //          SDN_STAT(sdn_stat.ip.forwarded),
     //          SDN_STAT(sdn_stat.data.sent_agg),
@@ -97,7 +97,7 @@ void static print_stats(void)
     //          SDN_STAT(sdn_stat.nd.sent),
     //          SDN_STAT(sdn_stat.nd.sent_bytes),
     //          SDN_STAT(sdn_stat.nodes.dead));
-}
+// }
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(sdn_node_process, ev, data)
 {
@@ -147,23 +147,23 @@ PROCESS_THREAD(sdn_node_process, ev, data)
     while (1)
     {
         PROCESS_YIELD();
-        if (ev == PROCESS_EVENT_TIMER && data == &alive_timer)
-        {
-            if (ewma_power < 100)
-            {
-                /* This node is dead */
-                // LOG_INFO("Node dead\n");
-                SDN_STAT(++sdn_stat.nodes.dead);
-                print_stats();
-                /* Turn off the radio */
-                NETSTACK_MAC.off();
-                NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, -25);
-                process_exit(&sdn_process);
-                process_exit(&sdn_energy);
-                PROCESS_EXIT();
-            }
-            etimer_reset(&alive_timer);
-        }
+        // if (ev == PROCESS_EVENT_TIMER && data == &alive_timer)
+        // {
+        //     if (ewma_power < 100)
+        //     {
+        //         /* This node is dead */
+        //         // LOG_INFO("Node dead\n");
+        //         SDN_STAT(++sdn_stat.nodes.dead);
+        //         print_stats();
+        //         /* Turn off the radio */
+        //         NETSTACK_MAC.off();
+        //         NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, -25);
+        //         process_exit(&sdn_process);
+        //         process_exit(&sdn_energy);
+        //         PROCESS_EXIT();
+        //     }
+        //     etimer_reset(&alive_timer);
+        // }
         // if (ev == PROCESS_EVENT_TIMER && data == &stats_timer)
         // {
         //     printf("printing current schedule\n");

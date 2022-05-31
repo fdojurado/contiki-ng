@@ -123,7 +123,7 @@ int sdn_serial_send(void)
     // Packet size
     uint16_t size = sdn_serial_len;
     uint8_t data = 0;
-    PRINTF("size to send %d\n", size);
+    // PRINTF("size to send %d\n", size);
 
     /* copy SDN_SERIAL_BUF into outgoing txbuf_data  */
     if (copy_to_tx_buffer())
@@ -147,11 +147,6 @@ int sdn_serial_send(void)
             // PRINTF("in tx buffer %x\n", data);
             sdn_serial_putchar((uint8_t)data);
             size--;
-        }
-        else
-        {
-            // no bytes left in buffer
-            PRINTF("Buffer empty\n");
         }
     }
     sdn_serial_putchar((uint8_t)FRAME_BOUNDARY_OCTET);
