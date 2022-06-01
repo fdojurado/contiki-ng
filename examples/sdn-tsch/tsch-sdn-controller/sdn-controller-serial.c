@@ -59,12 +59,9 @@
 #endif
 
 /* Log configuration */
-#define DEBUG 1
-#if DEBUG
 #include "sys/log.h"
 #define LOG_MODULE "App"
 #define LOG_LEVEL LOG_LEVEL_INFO
-#endif
 
 linkaddr_t ctrl_addr;
 
