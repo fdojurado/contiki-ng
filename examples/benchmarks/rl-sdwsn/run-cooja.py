@@ -2,7 +2,6 @@
 
 import sys
 import os
-import tempfile
 from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 
 # get the path of this example
@@ -10,27 +9,18 @@ SELF_PATH = os.path.dirname(os.path.abspath(__file__))
 # move three levels up
 CONTIKI_PATH = os.path.dirname(os.path.dirname(os.path.dirname(SELF_PATH)))
 
-CONTROLLER_PATH = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.dirname(SELF_PATH))))
-CONTROLLER_PATH = os.path.normpath(os.path.join(
-    CONTROLLER_PATH, "sdwsn-controller", "controller", "bin", "serial-controller"))
-
-
-cooja_jar = os.path.normpath(os.path.join(
-    CONTIKI_PATH, "tools", "cooja", "dist", "cooja.jar"))
+cooja_jar = os.path.normpath(os.path.join(CONTIKI_PATH, "tools", "cooja", "dist", "cooja.jar"))
 cooja_input = 'cooja.csc'
 cooja_output = 'COOJA.testlog'
 
 #######################################################
 # Run a child process and get its output
 
-
 def run_subprocess(args, input_string):
     retcode = -1
     stdoutdata = ''
     try:
-        proc = Popen(args, stdout=PIPE, stderr=STDOUT, stdin=PIPE,
-                     shell=True, universal_newlines=True)
+        proc = Popen(args, stdout=PIPE, stderr=STDOUT, stdin=PIPE, shell=True, universal_newlines=True)
         (stdoutdata, stderrdata) = proc.communicate(input_string)
         if not stdoutdata:
             stdoutdata = '\n'
@@ -50,7 +40,6 @@ def run_subprocess(args, input_string):
 #############################################################
 # Run a single instance of Cooja on a given simulation script
 
-
 def execute_test(cooja_file):
     # cleanup
     try:
@@ -62,61 +51,35 @@ def execute_test(cooja_file):
         return False
 
     filename = os.path.join(SELF_PATH, cooja_file)
-    args_contiki = " ".join(["java -Djava.awt.headless=true -jar ", cooja_jar,
-                             "-nogui=" + filename, "-contiki=" + CONTIKI_PATH])
-    sys.stdout.write("  Running Cooja, args={}\n".format(args_contiki))
+    args = " ".join(["java -Djava.awt.headless=true -jar ", cooja_jar, "-nogui=" + filename, "-contiki=" + CONTIKI_PATH])
+    sys.stdout.write("  Running Cooja, args={}\n".format(args))
 
-    args_controller = " ".join(
-        ["python3", CONTROLLER_PATH, "-c ../controller/etc/sdn-controller-config.json"])
-
-    sys.stdout.write("  Running Controller, args={}\n".format(args_controller))
-
-    # (retcode, output) = run_subprocess(args_controller, '')
-    # if retcode != 0:
-    #     sys.stderr.write("Failed, retcode=" + str(retcode) + ", output:")
-    #     sys.stderr.write(output)
-    #     return False
-
-    cmds_list = [args_controller]
-
-    procs_list = [Popen(cmd, stdout=PIPE, stderr=STDOUT, stdin=PIPE,
-                        shell=True, universal_newlines=True) for cmd in cmds_list]
-
-    for proc in procs_list:
-        proc.wait()
-        sys.stderr.write(proc.stdout.read())
-
-    # if retcode != 0:
-    #     sys.stderr.write("Failed, retcode=" + str(retcode) + ", output:")
-    #     sys.stderr.write(output)
-    #     return False
-
-    # if retcode != 0:
-    #     sys.stderr.write("Failed, retcode=" + str(retcode) + ", output:")
-    #     sys.stderr.write(output)
-    #     return False
+    (retcode, output) = run_subprocess(args, '')
+    if retcode != 0:
+        sys.stderr.write("Failed, retcode=" + str(retcode) + ", output:")
+        sys.stderr.write(output)
+        return False
 
     sys.stdout.write("  Checking for output...")
 
-    # is_done = False
-    # with open(cooja_output, "r") as f:
-    #     for line in f.readlines():
-    #         line = line.strip()
-    #         if line == "TEST OK":
-    #             sys.stdout.write(" done.\n")
-    #             is_done = True
-    #             continue
+    is_done = False
+    with open(cooja_output, "r") as f:
+        for line in f.readlines():
+            line = line.strip()
+            if line == "TEST OK":
+                sys.stdout.write(" done.\n")
+                is_done = True
+                continue
 
-    # if not is_done:
-    #     sys.stdout.write("  test failed.\n")
-    #     return False
+    if not is_done:
+        sys.stdout.write("  test failed.\n")
+        return False
 
-    # sys.stdout.write(" test done\n")
-    # return True
+    sys.stdout.write(" test done\n")
+    return True
 
 #######################################################
 # Run the application
-
 
 def main():
     if not os.access(cooja_jar, os.R_OK):
@@ -137,7 +100,6 @@ def main():
         exit(-1)
 
 #######################################################
-
 
 if __name__ == '__main__':
     main()
