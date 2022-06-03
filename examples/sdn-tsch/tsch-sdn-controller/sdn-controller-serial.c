@@ -39,13 +39,13 @@
  */
 
 #include "contiki.h"
-#include "sdn-net/sdn-controller-serial/sdn-serial-protocol.h"
+#include "sdn-serial-protocol.h"
 #include "net/netstack.h"
 #include "net/sdn-net/sd-wsn.h"
 #include "net/sdn-net/sdn-net.h"
 #include "net/mac/tsch/tsch.h"
 #include "net/sdn-net/sdn.h"
-#include "net/sdn-net/sdn-controller-serial/sdn-serial.h"
+#include "sdn-serial.h"
 #include "sys/node-id.h"
 #include <string.h>
 #include <stdio.h> /* For printf() */
@@ -59,12 +59,9 @@
 #endif
 
 /* Log configuration */
-#define DEBUG 1
-#if DEBUG
 #include "sys/log.h"
 #define LOG_MODULE "App"
 #define LOG_LEVEL LOG_LEVEL_INFO
-#endif
 
 linkaddr_t ctrl_addr;
 
@@ -98,7 +95,7 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
 
     is_coordinator = 0;
 
-#if SERIAL_SDN_CONTROLLER || SDN_CONTROLLER
+#if BUILD_WITH_SDN_CONTROLLER_SERIAL || SDN_CONTROLLER
     is_coordinator = 1;
 #endif
 

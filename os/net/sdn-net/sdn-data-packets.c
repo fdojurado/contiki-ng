@@ -52,10 +52,10 @@
 #include "lib/list.h"
 #include "lib/memb.h"
 
-#if SERIAL_SDN_CONTROLLER
+#if BUILD_WITH_SDN_CONTROLLER_SERIAL
 #include "sdn-controller-serial/sdn-serial.h"
 #include "sdn-controller-serial/sdn-serial-protocol.h"
-#endif /* SERIAL_SDN_CONTROLLER */
+#endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
 
 #if BUILD_WITH_SDN_ORCHESTRA
 #include "net/mac/tsch/tsch.h"
@@ -77,14 +77,14 @@
 #define SDN_DATA_PERIOD SDN_DATA_CONF_PERIOD
 #endif
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 struct etimer data_timer_periodic;
 struct stimer data_timer_send; /**< ND timer, to schedule ND sending */
 static uint16_t rand_time;     /**< random time value for timers */
 static uint16_t seq = 0;
 #endif
 
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
 
 #ifdef SDN_DS_CONF_MAX_NODE_CACHES
 #define NODE_CACHES SDN_DS_CONF_MAX_NODE_CACHES + 1
@@ -108,7 +108,7 @@ MEMB(pdr_memb, pdr_t, NODE_CACHES);
 #endif /* SDN_CONTROLLER */
 
 /*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
 pdr_t *
 sdn_data_pdr_head(void)
 {
@@ -116,7 +116,7 @@ sdn_data_pdr_head(void)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
 pdr_t *
 sdn_data_pdr_next(pdr_t *r)
 {
@@ -124,7 +124,7 @@ sdn_data_pdr_next(pdr_t *r)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
 pdr_t *
 sdn_data_pdr_lookup(const linkaddr_t *addr)
 {
@@ -152,7 +152,7 @@ sdn_data_pdr_lookup(const linkaddr_t *addr)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
 pdr_t *
 sdn_data_pdr_add(const linkaddr_t *addr, uint16_t seq)
 {
@@ -209,19 +209,19 @@ sdn_data_pdr_add(const linkaddr_t *addr, uint16_t seq)
 /*---------------------------------------------------------------------------*/
 void sdn_data_init(void)
 {
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     etimer_set(&data_timer_periodic, SDN_DATA_PERIOD);
     stimer_set(&data_timer_send, 2); /* wait to have a link local IP address */
 #endif
 
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
     memb_init(&pdr_memb);
     list_init(pdr_list);
 #endif
     return;
 }
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 void sdn_data_reset_seq(void)
 {
     seq = 0;
@@ -268,7 +268,7 @@ void sdn_data_input(void)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 static void send_data_output(void)
 {
     const linkaddr_t *nxthop;
@@ -331,7 +331,7 @@ static void send_data_output(void)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 static void sdn_send_nd_periodic(void)
 {
     send_data_output();
@@ -343,7 +343,7 @@ static void sdn_send_nd_periodic(void)
 /*---------------------------------------------------------------------------*/
 void sdn_data_periodic(void)
 {
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     if (stimer_expired(&data_timer_send) /* && (sdn_len == 0) */)
     {
         sdn_send_nd_periodic();

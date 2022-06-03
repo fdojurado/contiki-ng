@@ -63,24 +63,24 @@
 //     hum;
 // } sdn_data_pkt_t;
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 extern struct etimer data_timer_periodic; /**< Timer for periodic ND */
 #endif
 
 /** \brief Initialize ND structures */
 void sdn_data_init(void);
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 /** \brief Reset data sequence number */
 void sdn_data_reset_seq(void);
 #endif
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 /** \brief Periodic processing of data structures */
 void sdn_data_periodic(void);
 #endif
 
-#if SDN_CONTROLLER || SERIAL_SDN_CONTROLLER
+#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
 /**
  * \brief Handle an incoming ND message
 

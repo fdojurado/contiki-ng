@@ -44,7 +44,7 @@
 #include "lib/ringbuf.h"
 
 /* Log configuration */
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG
 #include <stdio.h>
 #include "net/sdn-net/sd-wsn.h"
@@ -61,8 +61,8 @@
 uint16_t sdn_serial_len;
 
 static uint8_t rxbuf_data[SDN_SERIAL_BUFSIZE];
-static uint8_t txbuf_data[SDN_SERIAL_BUFSIZE];
-static struct ringbuf rxbuf, txbuf;
+// static uint8_t txbuf_data[SDN_SERIAL_BUFSIZE];
+static struct ringbuf rxbuf;
 
 sdn_serial_send_char sdn_send_serial_function = NULL;
 
@@ -79,75 +79,29 @@ static void sdn_serial_putchar(char data)
     }
 }
 /*---------------------------------------------------------------------------*/
-static int copy_to_tx_buffer()
-{
-    /* Copy header */
-    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->addr.u8[0]) == 0)
-        return 1;
-    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->addr.u8[1]) == 0)
-        return 1;
-    // Copy checksum
-    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->addr.u8[0]) == 0)
-        return 1;
-    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->addr.u8[1]) == 0)
-        return 1;
-    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->type) == 0)
-        return 1;
-    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->payload_len) == 0)
-        return 1;
-    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->reserved[0]) == 0)
-        return 1;
-    if (ringbuf_put(&txbuf, (uint8_t)SDN_SERIAL_PACKET_BUF->reserved[1]) == 0)
-        return 1;
-
-    /* Copy payload */
-    uint16_t size = sdn_serial_len - SDN_SERIAL_PACKETH_LEN; // payload size
-    // PRINTF("payload size %d\n", size);
-    uint8_t i = 0;
-    uint8_t *ptr;
-    while (size)
-    {
-        ptr = SDN_SERIAL_PACKET_PAYLOAD_BUF(i);
-        // PRINTF("in payload %d\n", *ptr);
-        if (ringbuf_put(&txbuf, *ptr) == 0)
-            return 1;
-        size--;
-        i++;
-        // PRINTF("payload data %d\n", size);
-    }
-    return 0;
-}
-/*---------------------------------------------------------------------------*/
 int sdn_serial_send(void)
 {
     // Packet size
     uint16_t size = sdn_serial_len;
-    uint8_t data = 0;
+    // uint8_t data = 0;
     // PRINTF("size to send %d\n", size);
 
-    /* copy SDN_SERIAL_BUF into outgoing txbuf_data  */
-    if (copy_to_tx_buffer())
-    {
-        PRINTF("Fail copying to tx ring buffer\n");
-        return 1; // Failed copying to buffer
-    }
+    uint8_t *data;
+    data = (uint8_t *)SDN_SERIAL_PACKET_BUF;
 
     sdn_serial_putchar((uint8_t)FRAME_BOUNDARY_OCTET);
 
     while (size)
     {
-        data = ringbuf_get(&txbuf);
-        if (data != -1)
+        if ((*data == CONTROL_ESCAPE_OCTET) || (*data == FRAME_BOUNDARY_OCTET))
         {
-            if ((data == CONTROL_ESCAPE_OCTET) || (data == FRAME_BOUNDARY_OCTET))
-            {
-                sdn_serial_putchar((uint8_t)CONTROL_ESCAPE_OCTET);
-                data ^= INVERT_OCTET;
-            }
-            // PRINTF("in tx buffer %x\n", data);
-            sdn_serial_putchar((uint8_t)data);
-            size--;
+            sdn_serial_putchar((uint8_t)CONTROL_ESCAPE_OCTET);
+            *data ^= INVERT_OCTET;
         }
+        // PRINTF("in tx buffer %x\n", data);
+        sdn_serial_putchar((uint8_t)*data);
+        size--;
+        data++;
     }
     sdn_serial_putchar((uint8_t)FRAME_BOUNDARY_OCTET);
 
@@ -276,7 +230,6 @@ PROCESS_THREAD(sdn_serial_process, ev, data)
 void sdn_serial_init(sdn_serial_send_char callback)
 {
     ringbuf_init(&rxbuf, rxbuf_data, sizeof(rxbuf_data));
-    ringbuf_init(&txbuf, txbuf_data, sizeof(txbuf_data));
     sdn_send_serial_function = callback;
     PRINTF("Initialising sdn-serial.\n");
     process_start(&sdn_serial_process, NULL);

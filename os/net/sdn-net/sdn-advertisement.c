@@ -56,12 +56,12 @@
 #include "sdn-controller/sdn-ds-node-route.h"
 #endif
 
-#if SERIAL_SDN_CONTROLLER
-#include "sdn-controller-serial/sdn-serial.h"
-#include "sdn-controller-serial/sdn-serial-protocol.h"
-#endif /* SERIAL_SDN_CONTROLLER */
+#if BUILD_WITH_SDN_CONTROLLER_SERIAL
+#include "sdn-serial.h"
+#include "sdn-serial-protocol.h"
+#endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 #include "sdn-energy.h"
 #endif
 
@@ -81,7 +81,7 @@
 #define SDN_NA_PERIOD SDN_NA_CONF_PERIOD
 #endif
 
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 // static sdn_na_adv_t na_pkt; //Holds the rank value and the total rssi value to the controller
 struct stimer na_timer_na; /**< NA timer, to schedule NA sending */
 static uint16_t rand_time; /**< random time value for timers */
@@ -92,7 +92,7 @@ static uint16_t rand_time; /**< random time value for timers */
 struct etimer na_timer_periodic;
 
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER) && SDN_WITH_TABLE_CHKSUM
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL) && SDN_WITH_TABLE_CHKSUM
 static uint16_t
 chksum(uint16_t sum, const uint8_t *data, uint16_t len)
 {
@@ -132,7 +132,7 @@ chksum(uint16_t sum, const uint8_t *data, uint16_t len)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER) && SDN_WITH_TABLE_CHKSUM
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL) && SDN_WITH_TABLE_CHKSUM
 static uint16_t calculate_table_chksum(void)
 {
     sdn_ds_route_t *r;
@@ -182,7 +182,7 @@ neighbor_callback(int event, const sdn_ds_nbr_t *nbr)
 {
     if (event == SDN_DS_NBR_NOTIFICATION_ADD)
     {
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
         // PRINTF("adding neighbor, send NA\n");
         // send_advertisement = 1;
         // PRINTF("Sending NA because adding\n");
@@ -190,7 +190,7 @@ neighbor_callback(int event, const sdn_ds_nbr_t *nbr)
     }
     else if (event == SDN_DS_NBR_NOTIFICATION_RM)
     {
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
         // PRINTF("removing neighbor, send NA\n");
         // send_advertisement = 1;
         // PRINTF("Sending NA because removing\n");
@@ -198,7 +198,7 @@ neighbor_callback(int event, const sdn_ds_nbr_t *nbr)
     }
     else if (event == SDN_DS_NBR_NOTIFICATION_CH)
     {
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
         // PRINTF("neighbor changed, send NA\n");
         // send_advertisement = 1;
         // PRINTF("Sending NA because nb changed\n");
@@ -214,7 +214,7 @@ neighbor_callback(int event, const sdn_ds_nbr_t *nbr)
 void sdn_na_init(void)
 {
     etimer_set(&na_timer_periodic, SDN_NA_PERIOD);
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     stimer_set(&na_timer_na, 2); /* wait to have a link local IP address */
 #endif
 /* callback function when neighbor removed */
@@ -273,7 +273,7 @@ void sdn_na_input(void)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 static void send_na_output(void)
 {
     const linkaddr_t *nxthop;
@@ -338,7 +338,7 @@ static void send_na_output(void)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 static void sdn_send_na_periodic(void)
 {
     // if (send_advertisement)
@@ -357,7 +357,7 @@ void sdn_na_periodic(void)
 {
 /* Periodic ND sending */
 // PRINTF("periodic.\n");
-#if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     if (stimer_expired(&na_timer_na) /* && (sdn_len == 0) */)
     {
         sdn_send_na_periodic();

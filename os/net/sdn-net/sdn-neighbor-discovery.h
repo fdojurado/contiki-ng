@@ -61,7 +61,7 @@
 #endif /* NETSTACK_CONF_ROUTING_NEIGHBOR_ADDED_CALLBACK */
 #endif /* BUILD_WITH_SDN_ORCHESTRA */
 
-// #if !(SDN_CONTROLLER || SERIAL_SDN_CONTROLLER)
+// #if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 typedef struct
 {
     /* The ->addr field holds the Rime address of gateway to controller. */

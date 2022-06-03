@@ -44,7 +44,8 @@
 
 enum
 {
-    SERIAL_PACKET_INPUT
+    SERIAL_PACKET_INPUT,
+    SERIAL_PACKET_OUTPUT
 };
 
 void sdn_serial_protocol_init(void);

@@ -33,6 +33,10 @@ ifeq ($(MAKE_WITH_SDN_ORCHESTRA),1)
 MODULES += $(CONTIKI_NG_SERVICES_DIR)/orchestra-sdn-centralised
 endif
 
+ifeq ($(WITH_SERIAL_SDN_CONTROLLER),1)
+MODULES += $(CONTIKI_NG_SERVICES_DIR)/sdn-controller-serial
+endif
+
 #use this to enable TSCH: MAKE_MAC = MAKE_MAC_TSCH
 MAKE_MAC = MAKE_MAC_TSCH
 MAKE_NET = MAKE_NET_SDN
