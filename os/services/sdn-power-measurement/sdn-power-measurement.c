@@ -12,7 +12,7 @@
 
 /* EWMA (exponential moving average) used to maintain statistics over time */
 #define EWMA_SCALE 100
-#define EWMA_ALPHA 60
+#define EWMA_ALPHA 40
 
 static uint64_t last_tx, last_rx, last_time, last_cpu, last_lpm, last_deep_lpm;
 

@@ -234,7 +234,7 @@ static void send_nd_output(void)
     SDN_ND_BUF->ndchksum = 0;
     SDN_ND_BUF->ndchksum = ~sdn_ndchksum();
 
-    print_buff(sdn_buf, sdn_len, true);
+    // print_buff(sdn_buf, sdn_len, true);
 
     PRINTF("Sending ND packet (rank: %d, rssi: %d)\n",
            sdn_ntohs(SDN_ND_BUF->rank),
@@ -245,7 +245,7 @@ static void send_nd_output(void)
     SDN_STAT(++sdn_stat.nd.sent);
     SDN_STAT(sdn_stat.nd.sent_bytes += sdn_len);
 
-    sdnbuf_set_attr(SDNBUF_ATTR_MAX_MAC_TRANSMISSIONS, 3);
+    // sdnbuf_set_attr(SDNBUF_ATTR_MAX_MAC_TRANSMISSIONS, 3);
 
     sdn_ip_output(NULL);
 }
