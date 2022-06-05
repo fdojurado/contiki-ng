@@ -33,11 +33,11 @@
 #define PROJECT_CONF_H_
 /*---------------------------------------------------------------------------*/
 /* Set neighbour discovery period */
-#define SDN_CONF_MAX_ND_INTERVAL 30
+#define SDN_CONF_MAX_ND_INTERVAL 60
 /* Set neighbour advertisement period */
-#define SDN_CONF_MAX_NA_INTERVAL 70
+#define SDN_CONF_MAX_NA_INTERVAL 90
 /* Set the data packet period */
-#define SDN_CONF_DATA_PACKET_INTERVAL 90
+#define SDN_CONF_DATA_PACKET_INTERVAL 120
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
 /* Num of max routing routes */

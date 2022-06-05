@@ -157,7 +157,7 @@ input(void)
   // if (current_callback != NULL)
   // {
   LOG_INFO("received %u bytes from ", packetbuf_datalen());
-  LOG_PRINT_LLADDR(packetbuf_addr(PACKETBUF_ADDR_SENDER));
+  LOG_INFO_LLADDR(packetbuf_addr(PACKETBUF_ADDR_SENDER));
   LOG_INFO_("\n");
   // current_callback(packetbuf_dataptr(), packetbuf_datalen(),
   //                  packetbuf_addr(PACKETBUF_ADDR_SENDER), packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
@@ -260,7 +260,7 @@ output(const linkaddr_t *localdest)
   //          dest.u8[0], dest.u8[1]);
 
   LOG_INFO("sending %u bytes to ", packetbuf_datalen());
-  LOG_PRINT_LLADDR(packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
+  LOG_INFO_LLADDR(packetbuf_addr(PACKETBUF_ADDR_RECEIVER));
   LOG_INFO_("\n");
 
   // packetbuf_clear();
