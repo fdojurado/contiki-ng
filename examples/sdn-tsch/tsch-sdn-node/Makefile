@@ -20,7 +20,7 @@ endif
 
 include $(CONTIKI)/Makefile.dir-variables
 
-MODULES += $(CONTIKI_NG_SERVICES_DIR)/sdn-energy
+MODULES += $(CONTIKI_NG_SERVICES_DIR)/sdn-power-measurement
 
 # Here, we want to select whether we want this node to be controller or not.
 WITH_SDN_CONTROLLER=0

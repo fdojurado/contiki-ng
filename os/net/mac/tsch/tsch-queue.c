@@ -362,6 +362,11 @@ tsch_queue_packet_sent(struct tsch_neighbor *n, struct tsch_packet *p,
     /* Failed transmission */
     if(p->transmissions >= p->max_transmissions) {
       /* Drop packet */
+      linkaddr_t *addr;
+      addr = tsch_queue_get_nbr_address(n);
+      LOG_ERR("failed transmission to addr ");
+      LOG_ERR_LLADDR(addr);
+      LOG_ERR_("\n");
       tsch_queue_remove_packet_from_queue(n);
       in_queue = 0;
     }

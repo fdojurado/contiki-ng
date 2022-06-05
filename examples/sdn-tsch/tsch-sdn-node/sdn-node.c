@@ -48,7 +48,7 @@
 #include "sys/node-id.h"
 #include <string.h>
 #include <stdio.h> /* For printf() */
-#include "services/sdn-energy/sdn-energy.h"
+#include "sdn-power-measurement.h"
 
 #if CONTIKI_TARGET_IOTLAB
 #include "platform.h"
@@ -76,7 +76,7 @@ volatile uint16_t node_id;          // must be volatile
 /*---------------------------------------------------------------------------*/
 PROCESS(sdn_node_process, "sdn-node example");
 // AUTOSTART_PROCESSES(&sdn_node_process, &sdn_process, &sdn_energy);
-AUTOSTART_PROCESSES(&sdn_node_process, &sdn_energy);
+AUTOSTART_PROCESSES(&sdn_node_process);
 // AUTOSTART_PROCESSES(&sdn_process);
 // process_start(&sdn_process, NULL);
 
@@ -143,6 +143,8 @@ PROCESS_THREAD(sdn_node_process, ev, data)
     // see phy.h for correct value to use
     NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, PHY_POWER_0dBm);
 #endif /* CONTIKI_TARGET_IOTLAB */
+    /*  */
+    sdn_power_measurement_init();
     process_start(&sdn_process, NULL);
     while (1)
     {

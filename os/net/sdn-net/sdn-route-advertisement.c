@@ -4,13 +4,9 @@
 #include "sdn-ds-route.h"
 
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
-#else
-#define PRINTF(...)
-#endif
+#include "sys/log.h"
+#define LOG_MODULE "RA"
+#define LOG_LEVEL LOG_LEVEL_INFO
 
 static uint16_t sequence_number = 0;
 
@@ -18,11 +14,11 @@ static uint16_t sequence_number = 0;
 int sdn_ra_input(void)
 {
     uint16_t seq = sdnip_htons(SDN_RA_BUF->seq);
-    PRINTF("Processing RA pkt (SEQ:%u)\n", seq);
+    LOG_INFO("Received (SEQ:%u)\n", seq);
     // We first check whether we have seen this packet before.
     if (seq < sequence_number)
     {
-        PRINTF("pkt already processed, dropping\n");
+        LOG_WARN("pkt already processed, dropping\n");
         return 0;
     }
     // Update sequence number received
@@ -39,8 +35,8 @@ int sdn_ra_input(void)
         {
             dst.u16 = sdnip_htons(SDN_RA_PAYLOAD(i)->dest.u16);
             via.u16 = sdnip_htons(SDN_RA_PAYLOAD(i)->via.u16);
-            PRINTF("scr: %d.%d, dst: %d.%d, via: %d.%d\n",
-                   scr.u8[0], scr.u8[1], dst.u8[0], dst.u8[1], via.u8[0], via.u8[1]);
+            // PRINTF("scr: %d.%d, dst: %d.%d, via: %d.%d\n",
+            //        scr.u8[0], scr.u8[1], dst.u8[0], dst.u8[1], via.u8[0], via.u8[1]);
             sdn_ds_route_add(&dst, 0, &via, CONTROLLER);
         }
     }
@@ -48,7 +44,7 @@ int sdn_ra_input(void)
     if (SDN_RA_BUF->hop_limit <= my_rank.rank)
     {
         // Dont forward the packet, hop limit reached.
-        PRINTF("Hop limit reached.\n");
+        LOG_WARN("Hop limit reached (SEQ:%u).\n", seq);
         return 0;
     }
     return 1;

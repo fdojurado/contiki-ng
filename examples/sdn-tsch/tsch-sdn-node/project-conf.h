@@ -33,17 +33,13 @@
 #define PROJECT_CONF_H_
 /*---------------------------------------------------------------------------*/
 /* Set neighbour discovery period */
-#define SDN_CONF_MAX_ND_INTERVAL 30
+#define SDN_CONF_MAX_ND_INTERVAL 60
 /* Set neighbour advertisement period */
-#define SDN_CONF_MAX_NA_INTERVAL 70
+#define SDN_CONF_MAX_NA_INTERVAL 90
 /* Set the data packet period */
-#define SDN_CONF_DATA_PACKET_INTERVAL 90
-/* Energy tracking */
-#define ENERGEST_CONF_ON 1
+#define SDN_CONF_DATA_PACKET_INTERVAL 120
 /* Network configuration period */
 #define SDN_CONF_MIN_NC_INTERVAL 60 * 14
-/* Initial emergy */
-#define NODE_CONF_INIT_ENERGY 50000L
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
 /* Num of max routing routes */
@@ -104,8 +100,8 @@
 #define LOG_CONF_LEVEL_TCPIP                       LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_IPV6                        LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_6LOWPAN                     LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_MAC                         LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_FRAMER                      LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_MAC                         LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_FRAMER                      LOG_LEVEL_ERR
 #define TSCH_LOG_CONF_PER_SLOT                     0
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */
