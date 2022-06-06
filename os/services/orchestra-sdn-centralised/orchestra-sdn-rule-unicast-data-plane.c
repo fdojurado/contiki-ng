@@ -45,13 +45,9 @@
 #include "net/queuebuf.h"
 
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
-#else
-#define PRINTF(...)
-#endif
+#include "sys/log.h"
+#define LOG_MODULE "Orchestra UC"
+#define LOG_LEVEL LOG_LEVEL_INFO
 
 static uint16_t slotframe_handle = 0;
 static uint16_t current_seq = 0;
@@ -104,7 +100,7 @@ void orchestra_callback_packet_transmission_failed(struct tsch_neighbor *n,
   int packet_attr_frametype = queuebuf_attr(p->qb, PACKETBUF_ATTR_FRAME_TYPE);
   if (packet_attr_frametype == FRAME802154_DATAFRAME && current_seq > 0)
   {
-    PRINTF("Pkt tx failed\n");
+    LOG_WARN("Pkt tx failed\n");
     uint16_t timeslot, channel_offset;
     // Re-schedule the packet in the next closest and available UC link for neighbour
     get_ts_ch_from_dst_addr(&link->addr, &timeslot, &channel_offset);
@@ -164,7 +160,7 @@ get_ts_ch_from_dst_addr(const linkaddr_t *dst, uint16_t *timeslot, uint16_t *cha
 {
   /* We want to get the link which is the closest to the current ASN */
   uint16_t ts_asn = TSCH_ASN_MOD(tsch_current_asn, sf_unicast->size); // This is the timeslot of the current ASN
-  PRINTF("tsch current %lu, ts %d (%d.%d)\n", tsch_current_asn.ls4b, ts_asn, dst->u8[0], dst->u8[1]);
+  LOG_INFO("tsch current %lu, ts %d (%d.%d)\n", tsch_current_asn.ls4b, ts_asn, dst->u8[0], dst->u8[1]);
   int8_t difference, min = 127;
   uint16_t ts;
   struct tsch_link *l = list_head(sf_unicast->links_list);
@@ -182,25 +178,25 @@ get_ts_ch_from_dst_addr(const linkaddr_t *dst, uint16_t *timeslot, uint16_t *cha
         ts = l->timeslot;
       }
       difference = ts - ts_asn;
-      PRINTF("difference %d\n", difference);
+      // PRINTF("difference %d\n", difference);
       if (difference < min)
       {
         *timeslot = l->timeslot;
         *channel_offset = l->channel_offset;
         min = difference;
-        PRINTF("min difference %d\n", min);
+        // PRINTF("min difference %d\n", min);
       }
     }
     l = list_item_next(l);
   }
   if (min == 127)
   {
-    PRINTF("schedule not found %d\n", min);
+    LOG_INFO("schedule not found %d\n", min);
     return 0;
   }
   else
   {
-    PRINTF("schedule found %d\n", min);
+    LOG_INFO("schedule found %d (ts=%u)\n", min, *timeslot);
     return 1;
   }
 }
@@ -258,10 +254,10 @@ void orchestra_callback_slotframe_size(uint16_t sf_size, uint16_t seq)
   {
     current_seq = seq;
   }
-  PRINTF("changing slotframe size to %d\n", sf_size);
+  LOG_INFO("changing slotframe size to %d\n", sf_size);
   if (!tsch_schedule_remove_slotframe(sf_unicast))
   {
-    PRINTF("Unsuccessful removing dataplane slotframe.\n");
+    LOG_WARN("Unsuccessful removing dataplane slotframe.\n");
     return;
   }
   /* Create a new slotframe with the given size */
