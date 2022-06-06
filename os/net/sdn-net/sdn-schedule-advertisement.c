@@ -2,6 +2,7 @@
 #include "net/sdn-net/sd-wsn.h"
 #include "net/sdn-net/sdn-neighbor-discovery.h"
 #include "net/sdn-net/sdn-data-packets.h"
+#include "net/sdn-net/sdn-advertisement.h"
 
 #if BUILD_WITH_SDN_ORCHESTRA
 #include "net/mac/tsch/tsch.h"
@@ -31,7 +32,7 @@ int sdn_sa_input(void)
         return 0;
     }
     // Update sequence number received
-    sequence_number = seq + 1;
+    sequence_number = seq;
     // Set the slotframe size
     uint16_t sf_len = sdnip_htons(SDN_SA_BUF->sf_len);
 #if BUILD_WITH_SDN_ORCHESTRA
@@ -62,8 +63,9 @@ int sdn_sa_input(void)
     /* Look in the nbr TSCH queue with packets and update ts and ch */
     tsch_queue_reset();
     /* Reset the data packets sequence number */
-#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
-    sdn_data_reset_seq();
+#if !BUILD_WITH_SDN_CONTROLLER_SERIAL
+    sdn_data_reset_seq(sequence_number);
+    sdn_na_reset_seq(sequence_number);
 #endif
     /* If we are the hop limit, we do not forward the packet */
     if (SDN_SA_BUF->hop_limit <= my_rank.rank)

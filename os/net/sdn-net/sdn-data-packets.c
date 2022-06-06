@@ -81,194 +81,29 @@
 struct etimer data_timer_periodic;
 struct stimer data_timer_send; /**< ND timer, to schedule ND sending */
 static uint16_t rand_time;     /**< random time value for timers */
-static uint16_t seq = 0;
+static uint8_t cycle_seq = 0;
+static uint8_t seq = 0;
 #endif
 
-#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
-
-#ifdef SDN_DS_CONF_MAX_NODE_CACHES
-#define NODE_CACHES SDN_DS_CONF_MAX_NODE_CACHES + 1
-#else
-#define NODE_CACHES 10
-#endif
-
-typedef struct pdr
-{
-    struct pdr *next;
-    linkaddr_t addr;
-    uint16_t seq;
-    uint16_t last_seq;
-    uint16_t num_seqs;
-    // unsigned long pdr;
-} pdr_t;
-
-LIST(pdr_list);
-MEMB(pdr_memb, pdr_t, NODE_CACHES);
-
-#endif /* SDN_CONTROLLER */
-
-/*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
-pdr_t *
-sdn_data_pdr_head(void)
-{
-    return list_head(pdr_list);
-}
-#endif
-/*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
-pdr_t *
-sdn_data_pdr_next(pdr_t *r)
-{
-    return list_item_next(r);
-}
-#endif
-/*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
-pdr_t *
-sdn_data_pdr_lookup(const linkaddr_t *addr)
-{
-    pdr_t *found;
-    pdr_t *rt;
-
-    if (addr == NULL)
-    {
-        return NULL;
-    }
-
-    found = NULL;
-
-    for (rt = sdn_data_pdr_head();
-         rt != NULL;
-         rt = sdn_data_pdr_next(rt))
-    {
-        if (linkaddr_cmp(&rt->addr, addr))
-        {
-            found = rt;
-        }
-    }
-
-    return found;
-}
-#endif
-/*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
-pdr_t *
-sdn_data_pdr_add(const linkaddr_t *addr, uint16_t seq)
-{
-    if (addr == NULL)
-    {
-        return NULL;
-    }
-
-    pdr_t *rt;
-
-    /* First make sure that we don't add a route twice. If we find an
-     existing route for our destination, we'll delete the old
-     one first. */
-    rt = sdn_data_pdr_lookup(addr);
-    if (rt == NULL)
-    {
-        /* New node route */
-        rt = memb_alloc(&pdr_memb);
-        if (rt == NULL)
-        {
-            LOG_WARN("Couldn't allocate more pdr\n");
-            return NULL;
-        }
-        linkaddr_copy(&rt->addr, addr);
-        rt->seq = 0;
-        rt->last_seq = 0;
-        rt->num_seqs = 0;
-        list_add(pdr_list, rt);
-    }
-    /* avoid repeated seq */
-    if (seq == rt->last_seq)
-        return rt;
-    /* last sequence */
-    rt->last_seq = seq;
-    /* num of sequences */
-    rt->num_seqs += 1;
-    /* pdr */
-    // rt->pdr = rt->num_seqs * 100L / rt->last_seq;
-
-    LOG_INFO("1, %d, %u, %u, , , , , , , , ,\n",
-           rt->addr.u8[0],
-           rt->last_seq,
-           rt->num_seqs);
-
-    // LOG_INFO("last seq %d num seqs %d PDR %lu%% (%d.%d)\n",
-    //        rt->last_seq,
-    //        rt->num_seqs,
-    //        rt->pdr,
-    //        rt->addr.u8[0], rt->addr.u8[1]);
-
-    return rt;
-}
-#endif
 /*---------------------------------------------------------------------------*/
 void sdn_data_init(void)
 {
-#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
+#if !BUILD_WITH_SDN_CONTROLLER_SERIAL
     etimer_set(&data_timer_periodic, SDN_DATA_PERIOD);
     stimer_set(&data_timer_send, 2); /* wait to have a link local IP address */
-#endif
-
-#if SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL
-    memb_init(&pdr_memb);
-    list_init(pdr_list);
 #endif
     return;
 }
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
-void sdn_data_reset_seq(void)
+#if !BUILD_WITH_SDN_CONTROLLER_SERIAL
+void sdn_data_reset_seq(uint8_t new_cycle_seq)
 {
+    cycle_seq = new_cycle_seq;
     seq = 0;
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if SDN_CONTROLLER
-void sdn_data_input(void)
-{
-    linkaddr_t sender;
-#if !SDN_CONTROLLER
-    uint16_t seq;
-    uint8_t num;
-#endif /* !SDN_CONTROLLER */
-
-    /* Get the sender node address */
-    sender.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
-
-    num = SDN_DATA_HDR_BUF->len / SDN_DATA_LEN;
-
-    if (num == 1)
-    {
-        sender.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
-        seq = sdnip_htons(SDN_DATA_BUF(0)->seq);
-        // temp = SDN_DATA_BUF->temp;
-        // hum = SDN_DATA_BUF->humidty;
-
-        sdn_data_pdr_add(&sender, seq);
-        return;
-    }
-
-    // LOG_INFO("aggregated data packet received.\n");
-
-    uint8_t i;
-
-    for (i = 0; i < num; i++)
-    {
-        sender.u16 = sdnip_htons(SDN_DATA_BUF(i)->addr.u16);
-        seq = sdnip_htons(SDN_DATA_BUF(i)->seq);
-        sdn_data_pdr_add(&sender, seq);
-    }
-
-    return;
-}
-#endif
-/*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
+#if !BUILD_WITH_SDN_CONTROLLER_SERIAL
 static void send_data_output(void)
 {
     const linkaddr_t *nxthop;
@@ -289,7 +124,8 @@ static void send_data_output(void)
 
         /* Data packet */
         seq++;
-        SDN_DATA_BUF->seq = sdnip_htons(seq);
+        SDN_DATA_BUF->cycle_seq = cycle_seq;
+        SDN_DATA_BUF->seq = seq;
         SDN_DATA_BUF->temp = sdnip_htons(random_rand() % (uint8_t)(0x23));
         SDN_DATA_BUF->humidty = sdnip_htons(random_rand() % (uint8_t)(0x64));
         SDN_DATA_BUF->light = sdnip_htons(random_rand() % (uint8_t)(0x64));
@@ -331,7 +167,7 @@ static void send_data_output(void)
 }
 #endif
 /*---------------------------------------------------------------------------*/
-#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
+#if !BUILD_WITH_SDN_CONTROLLER_SERIAL
 static void sdn_send_nd_periodic(void)
 {
     send_data_output();
@@ -343,7 +179,7 @@ static void sdn_send_nd_periodic(void)
 /*---------------------------------------------------------------------------*/
 void sdn_data_periodic(void)
 {
-#if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
+#if !BUILD_WITH_SDN_CONTROLLER_SERIAL
     if (stimer_expired(&data_timer_send) /* && (sdn_len == 0) */)
     {
         sdn_send_nd_periodic();

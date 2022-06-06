@@ -44,7 +44,7 @@
 #define SDN_IPH_LEN sizeof(struct sdn_ip_hdr)
 
 #define SDN_NDH_LEN 6  /* Size of neighbor discovery header */
-#define SDN_NAH_LEN 6  /* Size of neighbor advertisement packet header */
+#define SDN_NAH_LEN 8  /* Size of neighbor advertisement packet header */
 #define SDN_NAPL_LEN 6 /* Size of neighbor advertisement payload size */
 #define SDN_RAH_LEN 6  /* Size of network configuration routing and schedules packet header */
 #define SDN_RAPL_LEN 6 /* Size of RA payload */
@@ -433,10 +433,9 @@ struct sdn_ip_hdr
 
 struct sdn_data
 {
-    /* SDN Data header */
-    // linkaddr_t addr;
-    uint16_t seq,
-        temp,
+    uint8_t cycle_seq,
+        seq;
+    uint16_t temp,
         humidty,
         light;
     uint16_t asn_ls2b,
@@ -456,6 +455,8 @@ struct sdn_na_hdr
     uint8_t payload_len,
         rank;
     uint16_t energy;
+    uint8_t cycle_seq,
+        seq;
     int16_t pkt_chksum;
 };
 
