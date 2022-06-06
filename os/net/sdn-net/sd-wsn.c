@@ -63,14 +63,15 @@
 #include "net/mac/tsch/tsch.h"
 // #include "net/mac/tsch/tsch-asn.h"
 #endif /* BUILD_WITH_SDN_ORCHESTRA */
+
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
+#include "sys/log.h"
+#define LOG_MODULE "SD-WSN"
+#if LOG_CONF_LEVEL_SDWSN
+#define LOG_LEVEL LOG_CONF_LEVEL_SDWSN
 #else
-#define PRINTF(...)
-#endif
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_SDWSN */
 
 #if SDN_STATISTICS == 1
 struct sdn_stats sdn_stat;
@@ -108,17 +109,19 @@ void print_buff(uint8_t *buf, size_t buflen, int8_t bare)
     // PRINTF("sof dump.\n");
     if (bare)
     {
+        LOG_INFO("Dump: ");
         while (buflen--)
-            PRINTF("%02X%s", *buf++, (buflen > 0) ? " " : "");
+            LOG_INFO_("%02X%s", *buf++, (buflen > 0) ? " " : "");
+        LOG_INFO_("\n");
     }
     else
     {
-        PRINTF("Dump: ");
+        LOG_INFO("Dump: ");
         while (buflen--)
-            PRINTF("%02X%s", *buf++, (buflen > 0) ? " " : "");
-        PRINTF("\n");
+            LOG_INFO_("%02X%s", *buf++, (buflen > 0) ? " " : "");
+        LOG_INFO_("\n");
     }
-    PRINTF("\n");
+    // PRINTF("\n");
 }
 /*---------------------------------------------------------------------------*/
 static uint16_t
@@ -169,7 +172,7 @@ sdn_ipchksum(void)
     uint16_t sum;
 
     sum = chksum(0, sdn_buf, SDN_IPH_LEN);
-    PRINTF("sdn_ipchksum: sum 0x%04x\n", sum);
+    LOG_DBG("sdn_ipchksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
@@ -178,7 +181,7 @@ uint16_t sdn_ndchksum(void)
     uint16_t sum;
 
     sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_NDH_LEN);
-    PRINTF("sdn_ndchksum: sum 0x%04x\n", sum);
+    LOG_DBG("sdn_ndchksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
@@ -187,7 +190,7 @@ uint16_t sdn_nachksum(uint8_t len)
     uint16_t sum;
 
     sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_NAH_LEN + len);
-    PRINTF("sdn_nachksum: sum 0x%04x\n", sum);
+    LOG_DBG("sdn_nachksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
@@ -196,7 +199,7 @@ uint16_t sdn_rachksum(uint8_t len)
     uint16_t sum;
 
     sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_RAH_LEN + len);
-    PRINTF("sdn_rachksum: sum 0x%04x\n", sum);
+    LOG_DBG("sdn_rachksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
@@ -205,7 +208,7 @@ uint16_t sdn_sachksum(uint8_t len)
     uint16_t sum;
 
     sum = chksum(0, SDN_IP_PAYLOAD(0), SDN_SAH_LEN + len);
-    PRINTF("sdn_sachksum: sum 0x%04x\n", sum);
+    LOG_DBG("sdn_sachksum: sum 0x%04x\n", sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
 /*---------------------------------------------------------------------------*/
@@ -241,10 +244,6 @@ void sdnip_process(uint8_t flag)
     uint8_t *next_header;
     linkaddr_t dest;
 
-#if DEBUG
-    linkaddr_t scr;
-#endif
-
 #if BUILD_WITH_SDN_CONTROLLER_SERIAL
     struct tsch_asn_t data_asn;
 #endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
@@ -259,7 +258,7 @@ void sdnip_process(uint8_t flag)
     {
         SDN_STAT(++sdn_stat.ip.drop);
         SDN_STAT(++sdn_stat.ip.chkerr);
-        PRINTF("ip bad checksum\n");
+        LOG_WARN("ip bad checksum\n");
         goto drop;
     }
 
@@ -270,7 +269,7 @@ void sdnip_process(uint8_t flag)
     if (sdn_len < sdnbuf_get_len_field(SDN_IP_BUF))
     {
         SDN_STAT(++sdn_stat.ip.drop);
-        PRINTF("packet shorter than reported in IP header\n");
+        LOG_WARN("packet shorter than reported in IP header\n");
         goto drop;
     }
 
@@ -278,8 +277,8 @@ void sdnip_process(uint8_t flag)
     if (sdn_len > sizeof(sdn_buf))
     {
         SDN_STAT(++sdn_stat.ip.drop);
-        PRINTF("dropping packet with length %d > %d\n",
-               (int)sdn_len, (int)sizeof(sdn_buf));
+        LOG_WARN("dropping packet with length %d > %d\n",
+                 (int)sdn_len, (int)sizeof(sdn_buf));
         goto drop;
     }
 
@@ -300,14 +299,14 @@ void sdnip_process(uint8_t flag)
     if (!linkaddr_cmp(&dest, &linkaddr_node_addr) &&
         !linkaddr_cmp(&dest, &linkaddr_null))
     {
-#if DEBUG
-        scr.u16 = sdn_ntohs(SDN_IP_BUF->scr.u16);
-        PRINTF("sdn ip packet Not for us from %d.%d\n", scr.u8[0], scr.u8[1]);
-#endif
+
+        LOG_INFO("sdn ip packet Not for us from ");
+        LOG_INFO_LLADDR(&SDN_IP_BUF->scr);
+        LOG_INFO_("\n");
 
         if (!sdn_update_ttl())
         {
-            PRINTF("ttl expired\n");
+            LOG_WARN("ttl expired\n");
             SDN_STAT(++sdn_stat.nd.drop);
             goto drop;
         }
@@ -328,17 +327,15 @@ void sdnip_process(uint8_t flag)
             SDN_DATA_BUF->asn_ms2b = sdnip_htons(data_asn.ls4b & 0xFFFF0000);
         }
 #endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
-        PRINTF("Forwarding packet to destination %d.%d\n",
-               dest.u8[0], dest.u8[1]);
+        LOG_INFO("Forwarding packet to destination %d.%d\n",
+                 dest.u8[0], dest.u8[1]);
         SDN_STAT(++sdn_stat.ip.forwarded);
         goto send;
     }
 
-#if DEBUG
-    scr.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
-    PRINTF("sdn ip packet for us from %d.%d\n",
-           scr.u8[0], scr.u8[1]);
-#endif
+    LOG_INFO("sdn ip packet for us from ");
+    LOG_INFO_LLADDR(&SDN_IP_BUF->scr);
+    LOG_INFO_("\n");
 
     next_header = sdnbuf_get_next_header(sdn_buf, sdn_len, &protocol);
 
@@ -364,7 +361,7 @@ void sdnip_process(uint8_t flag)
             goto data_input;
             break;
         }
-        PRINTF("Protocol not found.\n");
+        LOG_WARN("Protocol not found.\n");
         SDN_STAT(++sdn_stat.nd.drop);
         goto drop;
     }
@@ -375,20 +372,20 @@ nd_input:
     {
         SDN_STAT(++sdn_stat.nd.drop);
         SDN_STAT(++sdn_stat.nd.chkerr);
-        PRINTF("nd bad checksum\n");
+        LOG_WARN("nd bad checksum\n");
         goto drop;
     }
     /* This is ND processing. */
     sdn_nd_input();
     SDN_STAT(++sdn_stat.nd.recv);
-    PRINTF("ND input length %d\n", sdn_len);
+    LOG_INFO("ND input length %d\n", sdn_len);
     goto drop;
 data_input:
 #if SDN_CONTROLLER
     /* Process incoming data packet */
     sdn_data_input();
     // SDN_STAT(++sdn_stat.data.recv);
-    PRINTF("Data input length %d\n", sdn_len);
+    LOG_INFO("Data input length %d\n", sdn_len);
     goto drop;
 #endif
 na_input:
@@ -397,7 +394,7 @@ na_input:
     {
         // SDN_STAT(++sdn_stat.nd.drop);
         // SDN_STAT(++sdn_stat.nd.chkerr);
-        PRINTF("na bad checksum\n");
+        LOG_WARN("na bad checksum\n");
         goto drop;
     }
     /* This is NA processing. */
@@ -407,7 +404,7 @@ na_input:
 sa_input:
     if (sdn_sachksum(srbuf_get_len_field(SDN_SA_BUF)) != 0xffff)
     {
-        PRINTF("SA bad checksum\n");
+        LOG_WARN("SA bad checksum\n");
         goto drop;
     }
     /* Process SR packet */
@@ -420,7 +417,7 @@ sa_input:
 ra_input:
     if (sdn_rachksum(ncbuf_get_len_field(SDN_RA_BUF)) != 0xffff)
     {
-        PRINTF("RA bad checksum\n");
+        LOG_WARN("RA bad checksum\n");
         goto drop;
     }
     /* Process RA packet */
@@ -433,7 +430,7 @@ send:
     /* Recalculate the checksum */
     SDN_IP_BUF->hdr_chksum = 0;
     SDN_IP_BUF->hdr_chksum = ~sdn_ipchksum();
-    PRINTF("Forwarding packet with length %d (%d)\n", sdn_len, sdnbuf_get_len_field(SDN_IP_BUF));
+    LOG_INFO("Forwarding packet with length %d (%d)\n", sdn_len, sdnbuf_get_len_field(SDN_IP_BUF));
 
     SDN_STAT(++sdn_stat.ip.sent);
     return;

@@ -55,13 +55,13 @@
 #endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
 
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
+#include "sys/log.h"
+#define LOG_MODULE "SDN"
+#if LOG_CONF_LEVEL_SDN
+#define LOG_LEVEL LOG_CONF_LEVEL_SDN
 #else
-#define PRINTF(...)
-#endif
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_SDN */
 
 process_event_t sdn_event;
 process_event_t nd_event;
@@ -90,7 +90,7 @@ void sdn_output()
 
     if (((linkaddr_t *)&SDN_IP_BUF->dest) == NULL)
     {
-        PRINTF("output: Destination address unspecified");
+        LOG_INFO("output: Destination address unspecified");
         goto exit;
     }
 
@@ -98,7 +98,7 @@ void sdn_output()
      * loopback interface -- instead, process this directly as incoming. */
     if (linkaddr_cmp(&SDN_IP_BUF->dest, &linkaddr_node_addr))
     {
-        PRINTF("output: sending to ourself\n");
+        LOG_INFO("output: sending to ourself\n");
         packet_input();
         return;
     }
@@ -119,13 +119,13 @@ void sdn_output()
         if (linkaddr_cmp(&ctrl_addr, &dest))
         {
             // Forward packet to serial interface
-            PRINTF("Forwarding packet to serial interface\n");
+            LOG_INFO("Forwarding packet to serial interface\n");
             serial_ip_output();
         }
 #endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
         goto sent;
     }
-    PRINTF("output: sending to %d.%d\n",
+    LOG_INFO("output: sending to %d.%d\n",
            nexthop->u8[0], nexthop->u8[1]);
 
     sdn_ip_output(nexthop);
@@ -137,12 +137,12 @@ netflood:
     // sdn_ip_output(NULL);
 
 sent:
-    PRINTF("output: packet forwarded\n");
+    LOG_INFO("output: packet forwarded\n");
     // sdnbuf_clear();
     return;
 
 exit:
-    PRINTF("output: packet not forwarded\n");
+    LOG_INFO("output: packet not forwarded\n");
     sdnbuf_clear();
     return;
 }
@@ -152,7 +152,7 @@ packet_input(void)
 {
     if (sdn_len > 0)
     {
-        PRINTF("input: received %u bytes\n", sdn_len);
+        LOG_INFO("input: received %u bytes\n", sdn_len);
         sdn_input();
         if (sdn_len > 0)
         {
@@ -218,7 +218,7 @@ uint8_t sdn_ip_output(const linkaddr_t *dest)
 static void
 eventhandler(process_event_t ev, process_data_t data)
 {
-    // PRINTF("SDN event\n");
+    // LOG_INFO("SDN event\n");
     switch (ev)
     {
     case PROCESS_EVENT_TIMER:
@@ -267,7 +267,7 @@ eventhandler(process_event_t ev, process_data_t data)
 PROCESS_THREAD(sdn_process, ev, data)
 {
     PROCESS_BEGIN();
-    PRINTF("SDN started.\n");
+    LOG_INFO("SDN started.\n");
 
     sdn_event = process_alloc_event();
     nd_event = process_alloc_event();

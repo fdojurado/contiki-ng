@@ -66,13 +66,13 @@
 #endif
 
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
+#include "sys/log.h"
+#define LOG_MODULE "NA"
+#if LOG_CONF_LEVEL_NA
+#define LOG_LEVEL LOG_CONF_LEVEL_NA
 #else
-#define PRINTF(...)
-#endif
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_NA */
 
 /** Period for uip-ds6 periodic task*/
 #ifndef SDN_NA_CONF_PERIOD
@@ -124,7 +124,7 @@ chksum(uint16_t sum, const uint8_t *data, uint16_t len)
         }
     }
 
-    PRINTF("chksum, sum 0x%04x\n",
+    LOG_DBG("chksum, sum 0x%04x\n",
            sum);
 
     /* Return sum in host byte order. */
@@ -160,17 +160,17 @@ static uint16_t calculate_table_chksum(void)
          our neighbors */
         if (!linkaddr_cmp(&r->addr, via) || linkaddr_cmp(&r->addr, &ctrl_addr))
         {
-            PRINTF("calculate_table_chksum: %d.%d - %d.%d\n",
+            LOG_DBG("calculate_table_chksum: %d.%d - %d.%d\n",
                    r->addr.u8[0], r->addr.u8[1],
                    via->u8[0], via->u8[1]);
             data.u16[0] = r->addr.u16;
             data.u16[1] = via->u16;
             sum = chksum(sum, &data.u8[0], 4);
-            PRINTF("sum 0x%04x\n",
+            LOG_DBG("sum 0x%04x\n",
                    sum);
         }
     }
-    PRINTF("routing table chksum: sum 0x%04x\n",
+    LOG_DBG("routing table chksum: sum 0x%04x\n",
            sum);
     return (sum == 0) ? 0xffff : sdnip_htons(sum);
 }
@@ -232,7 +232,7 @@ void sdn_na_input(void)
     linkaddr_t from;
     /* Get the sender node address */
     from.u16 = sdnip_htons(SDN_IP_BUF->scr.u16);
-    PRINTF("NA processing rcv from %d.%d\n",
+    LOG_INFO("NA processing rcv from %d.%d\n",
            from.u8[0], from.u8[1]);
     uint8_t prev_ranks = 0, i;
     linkaddr_t neighbor_addr;
@@ -245,7 +245,7 @@ void sdn_na_input(void)
     /* Sender energy in host byte order */
     sender_energy = sdnip_htons(SDN_CP_BUF->energy);
     /* # of previous and next ranks */
-    PRINTF("num of neighbors %d sender rank %d sender energy %d\n", num_nb, sender_rank, sender_energy);
+    LOG_INFO("num of neighbors %d sender rank %d sender energy %d\n", num_nb, sender_rank, sender_energy);
     for (i = 0; i < num_nb; i++)
     {
         neighbor_addr.u16 = sdnip_htons(SDN_NA_BUF(i)->addr.u16);
@@ -256,7 +256,7 @@ void sdn_na_input(void)
             prev_ranks++;
         if (sender_rank < neighbor_rank)
             nxt_ranks++;
-        PRINTF("nb = %d.%d rssi = %d rank= %d\n", neighbor_addr.u8[0], neighbor_addr.u8[1],
+        LOG_INFO("nb = %d.%d rssi = %d rank= %d\n", neighbor_addr.u8[0], neighbor_addr.u8[1],
                neighbor_rssi,
                neighbor_rank);
 #if SDN_CONTROLLER
@@ -283,7 +283,7 @@ static void send_na_output(void)
     {
         /* payload size */
         int8_t payload_size = SDN_NAPL_LEN * sdn_ds_nbr_num();
-        PRINTF("Sending NA packet\n");
+        LOG_INFO("Sending NA packet\n");
         /* IP packet */
         SDN_IP_BUF->vap = (0x01 << 5) | SDN_PROTO_NA;
         /* Total length */
@@ -348,7 +348,7 @@ static void sdn_send_na_periodic(void)
     // }
     rand_time = SDN_MIN_NA_INTERVAL + random_rand() %
                                           (uint16_t)(SDN_MAX_NA_INTERVAL - SDN_MIN_NA_INTERVAL);
-    PRINTF("Random time = %u\n", rand_time);
+    LOG_INFO("Random time = %u\n", rand_time);
     stimer_set(&na_timer_na, rand_time);
 }
 #endif

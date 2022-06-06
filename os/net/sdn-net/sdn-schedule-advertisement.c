@@ -11,7 +11,11 @@
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "SA"
-#define LOG_LEVEL LOG_LEVEL_INFO
+#if LOG_CONF_LEVEL_SA
+#define LOG_LEVEL LOG_CONF_LEVEL_SA
+#else
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_SA */
 
 static uint16_t sequence_number = 0;
 

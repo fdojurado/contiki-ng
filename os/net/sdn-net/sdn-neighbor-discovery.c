@@ -54,13 +54,13 @@
 #endif /* BUILD_WITH_SDN_ORCHESTRA */
 
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
+#include "sys/log.h"
+#define LOG_MODULE "ND"
+#if LOG_CONF_LEVEL_ND
+#define LOG_LEVEL LOG_CONF_LEVEL_ND
 #else
-#define PRINTF(...)
-#endif
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_ND */
 
 /** Period for uip-ds6 periodic task*/
 #ifndef SDN_ND_CONF_PERIOD
@@ -85,11 +85,11 @@ neighbor_callback(int event, const sdn_ds_nbr_t *nbr)
     if (event == SDN_DS_NBR_NOTIFICATION_RM)
     {
 #if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
-        PRINTF("removing neighbor %d.%d, check whether is gtw to ctrl\n",
+        LOG_INFO("removing neighbor %d.%d, check whether is gtw to ctrl\n",
                nbr->addr.u8[0], nbr->addr.u8[1]);
         if (linkaddr_cmp(&my_rank.addr, &nbr->addr))
         {
-            PRINTF("removing gtw to ctrl\n");
+            LOG_INFO("removing gtw to ctrl\n");
             my_rank.rank = 0xff;
             my_rank.rssi = 0;
             /* Remove route to ctrl */
@@ -105,14 +105,14 @@ static void update_rank(int16_t rssi, uint8_t rank, const linkaddr_t *from)
 {
     // if (my_rank.rank > 1)
     if (sdn_ds_route_add(&ctrl_addr, rssi, from, SDN_NODE) == NULL)
-        PRINTF("rank route could not be updated, locked by ctrl\n");
+        LOG_INFO("rank route could not be updated, locked by ctrl\n");
     // else
     // {
     my_rank.rank = rank + 1;
     my_rank.rssi = rssi;
     linkaddr_copy(&my_rank.addr, from);
-    PRINTF("rank updated: rank %d total rssi %d\n", my_rank.rank, my_rank.rssi);
-    PRINTF(" gw address = %d.%d\n", my_rank.addr.u8[0], my_rank.addr.u8[1]);
+    LOG_INFO("rank updated: rank %d total rssi %d\n", my_rank.rank, my_rank.rssi);
+    LOG_INFO(" gw address = %d.%d\n", my_rank.addr.u8[0], my_rank.addr.u8[1]);
 #if BUILD_WITH_SDN_ORCHESTRA
     tsch_queue_update_time_source(from);
     NETSTACK_CONF_SDN_RANK_UPDATED_CALLBACK(from, my_rank.rank);
@@ -160,7 +160,7 @@ void sdn_nd_input(void)
     ndRank = sdn_ntohs(SDN_ND_BUF->rank);
     ndRssi = sdn_ntohs(SDN_ND_BUF->rssi);
 
-    PRINTF("Processing ND packet with rcv rssi %d and rank %d and rssi to ctrl %d\n",
+    LOG_INFO("Processing ND packet with rcv rssi %d and rank %d and rssi to ctrl %d\n",
            rssi,
            ndRank,
            ndRssi);
@@ -189,11 +189,11 @@ void sdn_nd_input(void)
     }
     else if (ndRank == my_rank.rank - 1)
     {
-        PRINTF("rank equal.\n");
+        LOG_INFO("rank equal.\n");
         /* acc rssi is greater? */
         if (ndRssi + rssi > my_rank.rssi)
         {
-            PRINTF("better link quality\n");
+            LOG_INFO("better link quality\n");
             update_rank(ndRssi + rssi, ndRank, addr);
         }
     }
@@ -236,7 +236,7 @@ static void send_nd_output(void)
 
     // print_buff(sdn_buf, sdn_len, true);
 
-    PRINTF("Sending ND packet (rank: %d, rssi: %d)\n",
+    LOG_INFO("Sending ND packet (rank: %d, rssi: %d)\n",
            sdn_ntohs(SDN_ND_BUF->rank),
            sdn_ntohs(SDN_ND_BUF->rssi));
 
@@ -253,17 +253,17 @@ static void send_nd_output(void)
 static void sdn_send_nd_periodic(void)
 {
     send_nd_output();
-    PRINTF("sending ND message.\n");
+    LOG_INFO("sending ND message.\n");
     rand_time = SDN_MIN_ND_INTERVAL + random_rand() %
                                           (uint16_t)(SDN_MAX_ND_INTERVAL - SDN_MIN_ND_INTERVAL);
-    PRINTF("Random time 1 = %u\n", rand_time);
+    LOG_INFO("Random time 1 = %u\n", rand_time);
     stimer_set(&nd_timer_na, rand_time);
 }
 /*---------------------------------------------------------------------------*/
 void sdn_nd_periodic(void)
 {
     /* Periodic ND sending */
-    // PRINTF("periodic.\n");
+    // LOG_INFO("periodic.\n");
     if (stimer_expired(&nd_timer_na) /* && (sdn_len == 0) */)
     {
         sdn_send_nd_periodic();

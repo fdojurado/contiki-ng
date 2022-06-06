@@ -42,13 +42,13 @@
 #include "net/routing/routing.h"
 
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
+#include "sys/log.h"
+#define LOG_MODULE "NBR-DS"
+#if LOG_CONF_LEVEL_NBR_DS
+#define LOG_LEVEL LOG_CONF_LEVEL_NBR_DS
 #else
-#define PRINTF(...)
-#endif
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_NBR_DS */
 
 /* Alpha for moving average */
 // #define ALPHA 0.6
@@ -119,14 +119,14 @@ sdn_ds_nbr_add(const linkaddr_t *from, int16_t *ndRank, int16_t *ndRssi,
     if (nbr == NULL)
     {
         /* New NB */
-        PRINTF("Adding new NB\n");
+        LOG_INFO("Adding new NB\n");
         nbr = nbr_table_add_lladdr(ds_neighbors, (linkaddr_t *)from, NBR_TABLE_REASON_IPV6_ND, data);
         // adv = 0;
         if (nbr)
         {
             linkaddr_copy(&nbr->addr, from);
             nbr->exp_avg = 0;
-            PRINTF("Adding neighbor with addr %d.%d\n",
+            LOG_INFO("Adding neighbor with addr %d.%d\n",
                    from->u8[0], from->u8[1]);
 #if SDN_DS_NBR_NOTIFICATIONS
             call_nbr_callback(SDN_DS_NBR_NOTIFICATION_ADD, nbr);
@@ -134,7 +134,7 @@ sdn_ds_nbr_add(const linkaddr_t *from, int16_t *ndRank, int16_t *ndRssi,
         }
         else
         {
-            PRINTF("Add drop addr %d.%d\n",
+            LOG_INFO("Add drop addr %d.%d\n",
                    from->u8[0], from->u8[1]);
             return NULL;
         }
@@ -152,7 +152,7 @@ sdn_ds_nbr_add(const linkaddr_t *from, int16_t *ndRank, int16_t *ndRssi,
     stimer_set(&nbr->lifetime, NEIGHBOR_TIMEOUT);
     // ctimer_set(&nbr->timeout, NEIGHBOR_TIMEOUT, sdn_ds_nbr_timer_rm, nbr);
     /* Print out a message. */
-    PRINTF("neighbor message received from %d.%d with RSSI %d rank %d cost %d\n", // exp avg %d.%d\n",
+    LOG_INFO("neighbor message received from %d.%d with RSSI %d rank %d cost %d\n", // exp avg %d.%d\n",
            from->u8[0], from->u8[1],
            nbr->rssi,
            nbr->rank,
@@ -165,7 +165,7 @@ sdn_ds_nbr_add(const linkaddr_t *from, int16_t *ndRank, int16_t *ndRssi,
     //     if (!adv)
     //     {
     //         NETSTACK_ROUTING.neighbor_state_changed(nbr);
-    //         PRINTF("neighbor data changed.\n");
+    //         LOG_INFO("neighbor data changed.\n");
     // #if SDN_DS_NBR_NOTIFICATIONS
     //         call_nbr_callback(SDN_DS_NBR_NOTIFICATION_CH, nbr);
     // #endif
@@ -183,7 +183,7 @@ int sdn_ds_nbr_rm(sdn_ds_nbr_t *nbr)
 {
     if (nbr != NULL)
     {
-        PRINTF("removing neighbor %d.%d\n", nbr->addr.u8[0], nbr->addr.u8[1]);
+        LOG_WARN("removing neighbor %d.%d\n", nbr->addr.u8[0], nbr->addr.u8[1]);
         NETSTACK_ROUTING.neighbor_removed(nbr);
 #if SDN_DS_NBR_NOTIFICATIONS
         call_nbr_callback(SDN_DS_NBR_NOTIFICATION_RM, nbr);
@@ -225,7 +225,7 @@ sdn_ds_nbr_t *sdn_ds_nbr_next(sdn_ds_nbr_t *nbr)
 sdn_ds_nbr_t *sdn_ds_nbr_lookup(const linkaddr_t *addr)
 {
     sdn_ds_nbr_t *nbr;
-    PRINTF("Looking up for neighbor %d.%d\n",
+    LOG_INFO("Looking up for neighbor %d.%d\n",
            addr->u8[0], addr->u8[1]);
     if (addr == NULL)
     {
@@ -238,22 +238,22 @@ sdn_ds_nbr_t *sdn_ds_nbr_lookup(const linkaddr_t *addr)
             return nbr;
         }
     }
-    PRINTF("No neighbor found\n");
+    LOG_INFO("No neighbor found\n");
     return NULL;
 }
 /*---------------------------------------------------------------------------*/
 static void sdn_ds_nbr_print(void)
 {
-    PRINTF("neighbor table:\n");
+    LOG_INFO("neighbor table:\n");
     sdn_ds_nbr_t *nbr;
     for (nbr = nbr_table_head(ds_neighbors);
          nbr != NULL;
          nbr = nbr_table_next(ds_neighbors, nbr))
     {
-        PRINTF(" node %d.%d", nbr->addr.u8[0], nbr->addr.u8[1]);
-        PRINTF(" exp. rssi avg: %d.%d", (int)nbr->exp_avg,
+        LOG_INFO(" node %d.%d", nbr->addr.u8[0], nbr->addr.u8[1]);
+        LOG_INFO_(" exp. rssi avg: %d.%d", (int)nbr->exp_avg,
                (int)(((-1) * nbr->exp_avg - (int)((-1) * nbr->exp_avg)) * 100));
-        PRINTF(" rank: %d ( %lus )\n", nbr->rank, stimer_remaining(&nbr->lifetime));
+        LOG_INFO_(" rank: %d ( %lus )\n", nbr->rank, stimer_remaining(&nbr->lifetime));
     }
 }
 /*---------------------------------------------------------------------------*/
@@ -265,9 +265,9 @@ void sdn_ds_neighbor_periodic(void)
     {
         if (stimer_expired(&nbr->lifetime))
         {
-            PRINTF("sdn_ds_neighbor_periodic: nbr %d.%d",
+            LOG_INFO("sdn_ds_neighbor_periodic: nbr %d.%d",
                    nbr->addr.u8[0], nbr->addr.u8[1]);
-            PRINTF(" lifetime expired\n");
+            LOG_INFO_(" lifetime expired\n");
             sdn_ds_nbr_rm(nbr);
             nbr = nbr_table_head(ds_neighbors);
         }

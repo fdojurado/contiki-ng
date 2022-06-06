@@ -6,7 +6,11 @@
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "RA"
-#define LOG_LEVEL LOG_LEVEL_INFO
+#if LOG_CONF_LEVEL_RA
+#define LOG_LEVEL LOG_CONF_LEVEL_RA
+#else
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_RA */
 
 static uint16_t sequence_number = 0;
 

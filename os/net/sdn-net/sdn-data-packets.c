@@ -62,13 +62,13 @@
 #endif /* BUILD_WITH_SDN_ORCHESTRA */
 
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
+#include "sys/log.h"
+#define LOG_MODULE "DATA"
+#if LOG_CONF_LEVEL_DATA
+#define LOG_LEVEL LOG_CONF_LEVEL_DATA
 #else
-#define PRINTF(...)
-#endif
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_DATA */
 
 /** Period for uip-ds6 periodic task*/
 #ifndef SDN_DATA_CONF_PERIOD
@@ -173,7 +173,7 @@ sdn_data_pdr_add(const linkaddr_t *addr, uint16_t seq)
         rt = memb_alloc(&pdr_memb);
         if (rt == NULL)
         {
-            PRINTF("Couldn't allocate more pdr\n");
+            LOG_WARN("Couldn't allocate more pdr\n");
             return NULL;
         }
         linkaddr_copy(&rt->addr, addr);
@@ -192,12 +192,12 @@ sdn_data_pdr_add(const linkaddr_t *addr, uint16_t seq)
     /* pdr */
     // rt->pdr = rt->num_seqs * 100L / rt->last_seq;
 
-    PRINTF("1, %d, %u, %u, , , , , , , , ,\n",
+    LOG_INFO("1, %d, %u, %u, , , , , , , , ,\n",
            rt->addr.u8[0],
            rt->last_seq,
            rt->num_seqs);
 
-    // PRINTF("last seq %d num seqs %d PDR %lu%% (%d.%d)\n",
+    // LOG_INFO("last seq %d num seqs %d PDR %lu%% (%d.%d)\n",
     //        rt->last_seq,
     //        rt->num_seqs,
     //        rt->pdr,
@@ -253,7 +253,7 @@ void sdn_data_input(void)
         return;
     }
 
-    // PRINTF("aggregated data packet received.\n");
+    // LOG_INFO("aggregated data packet received.\n");
 
     uint8_t i;
 
@@ -295,7 +295,7 @@ static void send_data_output(void)
         SDN_DATA_BUF->light = sdnip_htons(random_rand() % (uint8_t)(0x64));
 
 #if BUILD_WITH_SDN_ORCHESTRA
-        // PRINTF("Current ASN %lu.\n", tsch_current_asn.ls4b);
+        // LOG_INFO("Current ASN %lu.\n", tsch_current_asn.ls4b);
         SDN_DATA_BUF->asn_ls2b = sdnip_htons(tsch_current_asn.ls4b & 0x0000FFFF);
         SDN_DATA_BUF->asn_ms2b = sdnip_htons(tsch_current_asn.ls4b & 0xFFFF0000);
 #else
@@ -318,7 +318,7 @@ static void send_data_output(void)
         //     SDN_STAT(++sdn_stat.data.sent_agg);
         //     SDN_STAT(sdn_stat.data.sent_agg_bytes += sdn_len);
         // }
-        PRINTF("Sending Data pkt (SEQ: %d).\n", seq);
+        LOG_INFO("Sending Data pkt (SEQ: %d).\n", seq);
 
         print_buff(sdn_buf, sdn_len, true);
 

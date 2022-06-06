@@ -47,7 +47,7 @@
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "Orchestra UC"
-#define LOG_LEVEL LOG_LEVEL_INFO
+#define LOG_LEVEL LOG_LEVEL_NONE
 
 static uint16_t slotframe_handle = 0;
 static uint16_t current_seq = 0;

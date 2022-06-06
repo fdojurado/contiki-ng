@@ -52,9 +52,14 @@
 #include "net/sdn-net/sdnbuf.h"
 #include <string.h>
 /* Log configuration */
+/* Log configuration */
 #include "sys/log.h"
-#define LOG_MODULE "SDN-Net"
-#define LOG_LEVEL LOG_CONF_LEVEL_6LOWPAN
+#define LOG_MODULE "SD-NET"
+#if LOG_CONF_LEVEL_SDN_NET
+#define LOG_LEVEL LOG_CONF_LEVEL_SDN_NET
+#else
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_SDN_NET */
 
 // uint8_t *sdn_net_buf;
 // uint16_t sdn_net_len;

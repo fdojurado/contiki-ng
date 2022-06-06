@@ -50,13 +50,13 @@
 #endif /* BUILD_WITH_SDN_ORCHESTRA */
 
 /* Log configuration */
-#define DEBUG 0
-#if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
+#include "sys/log.h"
+#define LOG_MODULE "ROUTE-DS"
+#if LOG_CONF_LEVEL_ROUTE_DS
+#define LOG_LEVEL LOG_CONF_LEVEL_ROUTE_DS
 #else
-#define PRINTF(...)
-#endif
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_ROUTE_DS */
 
 uint8_t cluster_head;
 
@@ -226,7 +226,7 @@ sdn_ds_route_lookup(const linkaddr_t *addr)
     sdn_ds_route_t *found_route;
     // uint8_t longestmatch;
 
-    PRINTF("Looking up route for %d.%d\n",
+    LOG_INFO("Looking up route for %d.%d\n",
            addr->u8[0], addr->u8[1]);
 
     if (addr == NULL)
@@ -255,14 +255,14 @@ sdn_ds_route_lookup(const linkaddr_t *addr)
 
     if (found_route != NULL)
     {
-        PRINTF("Found route: %d.%d",
+        LOG_INFO("Found route: %d.%d",
                addr->u8[0], addr->u8[1]);
-        PRINTF(" via %d.%d\n",
+        LOG_INFO(" via %d.%d\n",
                sdn_ds_route_nexthop(found_route)->u8[0], sdn_ds_route_nexthop(found_route)->u8[1]);
     }
     else
     {
-        PRINTF("No route found\n");
+        LOG_INFO("No route found\n");
     }
 
     if (found_route != NULL && found_route != list_head(routelist))
@@ -317,7 +317,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
     const linkaddr_t *nexthop_lladdr = nexthop;
     if (nexthop_lladdr == NULL)
     {
-        PRINTF("Add: neighbor link-local address unknown for %d.%d\n",
+        LOG_INFO("Add: neighbor link-local address unknown for %d.%d\n",
                nexthop->u8[0], nexthop->u8[1]);
         return NULL;
     }
@@ -337,9 +337,9 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
             /* no need to update route - already correct! */
             return r;
         }
-        PRINTF("Add: old route for %d.%d",
+        LOG_INFO("Add: old route for %d.%d",
                dest->u8[0], dest->u8[1]);
-        PRINTF(" found, deleting it\n");
+        LOG_INFO_(" found, deleting it\n");
 
         sdn_ds_route_rm(r);
     }
@@ -362,7 +362,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
             {
                 return NULL;
             }
-            PRINTF("Add: dropping route to %d.%d\n",
+            LOG_INFO("Add: dropping route to %d.%d\n",
                    oldest->addr.u8[0], oldest->addr.u8[1]);
             sdn_ds_route_rm(oldest);
         }
@@ -392,7 +392,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
             {
                 /* This should not happen, as we explicitly deallocated one
            route table entry above. */
-                PRINTF("Add: could not allocate neighbor table entry\n");
+                LOG_WARN("Add: could not allocate neighbor table entry\n");
                 return NULL;
             }
             LIST_STRUCT_INIT(routes, route_list);
@@ -405,7 +405,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
         {
             /* This should not happen, as we explicitly deallocated one
          route table entry above. */
-            PRINTF("Add: could not allocate route\n");
+            LOG_WARN("Add: could not allocate route\n");
             return NULL;
         }
 
@@ -418,7 +418,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
         {
             /* This should not happen, as we explicitly deallocated one
          route table entry above. */
-            PRINTF("Add: could not allocate neighbor route list entry\n");
+            LOG_WARN("Add: could not allocate neighbor route list entry\n");
             memb_free(&routememb, r);
             return NULL;
         }
@@ -429,7 +429,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
         r->neighbor_routes = routes;
         num_routes++;
 
-        PRINTF("Add: num %d\n", num_routes);
+        LOG_INFO("Add: num %d\n", num_routes);
 
         /* lock this entry so that nexthop is not removed */
         nbr_table_lock(nbr_routes, routes);
@@ -439,9 +439,9 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
     r->cost = cost;
     r->user = user;
 
-    PRINTF("Add: adding route: %d.%d",
+    LOG_INFO("Add: adding route: %d.%d",
            dest->u8[0], dest->u8[1]);
-    PRINTF(" via %d.%d\n",
+    LOG_INFO_(" via %d.%d\n",
            nexthop->u8[0], nexthop->u8[1]);
 // LOG_ANNOTATE("#L %u 1;blue\n", nexthop->u8[sizeof(uip_ipaddr_t) - 1]);
 
@@ -475,7 +475,7 @@ void sdn_ds_route_rm(sdn_ds_route_t *route)
     if (route != NULL && route->neighbor_routes != NULL)
     {
 
-        PRINTF("Rm: removing route: %d.%d\n",
+        LOG_INFO("Rm: removing route: %d.%d\n",
                route->addr.u8[0], route->addr.u8[1]);
 
         /* Remove the route from the route list */
@@ -489,7 +489,7 @@ void sdn_ds_route_rm(sdn_ds_route_t *route)
 
         if (neighbor_route == NULL)
         {
-            PRINTF("Rm: neighbor_route was NULL for %d.%d\n",
+            LOG_INFO("Rm: neighbor_route was NULL for %d.%d\n",
                    route->addr.u8[0], route->addr.u8[1]);
         }
         list_remove(route->neighbor_routes->route_list, neighbor_route);
@@ -504,7 +504,7 @@ void sdn_ds_route_rm(sdn_ds_route_t *route)
             //                 LOG_ANNOTATE("#L %u 0\n", nexthop->u8[sizeof(uip_ipaddr_t) - 1]);
             //             }
             // #endif /* LOG_WITH_ANNOTATE */
-            PRINTF("Rm: removing neighbor too\n");
+            LOG_INFO("Rm: removing neighbor too\n");
             nbr_table_remove(nbr_routes, route->neighbor_routes->route_list);
         }
         memb_free(&routememb, route);
@@ -512,7 +512,7 @@ void sdn_ds_route_rm(sdn_ds_route_t *route)
 
         num_routes--;
 
-        PRINTF("Rm: num %d\n", num_routes);
+        LOG_INFO("Rm: num %d\n", num_routes);
     }
 
     // if (PRINTF_ENABLED)
@@ -561,21 +561,21 @@ sdn_ds_defrt_t *sdn_ds_defrt_add(const linkaddr_t *addr,
         return NULL;
     }
 
-    PRINTF("Add default\n");
+    LOG_INFO("Add default\n");
     d = sdn_ds_defrt_lookup(addr);
     if (d == NULL)
     {
         d = memb_alloc(&defaultroutermemb);
         if (d == NULL)
         {
-            PRINTF("Add default: could not add default route to %d.%d",
+            LOG_INFO("Add default: could not add default route to %d.%d",
                    addr->u8[0], addr->u8[1]);
-            PRINTF(", out of memory\n");
+            LOG_INFO_(", out of memory\n");
             return NULL;
         }
         else
         {
-            PRINTF("Add default: adding default route to %d.%d\n",
+            LOG_INFO("Add default: adding default route to %d.%d\n",
                    addr->u8[0], addr->u8[1]);
         }
 
@@ -619,7 +619,7 @@ void sdn_ds_defrt_rm(sdn_ds_defrt_t *defrt)
     {
         if (d == defrt)
         {
-            PRINTF("Removing default\n");
+            LOG_INFO("Removing default\n");
             list_remove(defaultrouterlist, defrt);
             memb_free(&defaultroutermemb, defrt);
             // LOG_ANNOTATE("#L %u 0\n", defrt->ipaddr.u8[sizeof(uip_ipaddr_t) - 1]);
@@ -663,19 +663,19 @@ const linkaddr_t *sdn_ds_defrt_choose(void)
          d != NULL;
          d = list_item_next(d))
     {
-        PRINTF("Default route, IP address %d.%d\n",
+        LOG_INFO("Default route, IP address %d.%d\n",
                d->addr.u8[0], d->addr.u8[1]);
         bestnbr = sdn_ds_nbr_lookup(&d->addr);
         if (bestnbr != NULL /* && bestnbr->state != NBR_INCOMPLETE */)
         {
-            PRINTF("Default route found, IP address %d.%d\n",
+            LOG_INFO("Default route found, IP address %d.%d\n",
                    d->addr.u8[0], d->addr.u8[1]);
             return &d->addr;
         }
         else
         {
             addr = &d->addr;
-            PRINTF("Default route Incomplete found, IP address %d.%d\n",
+            LOG_INFO("Default route Incomplete found, IP address %d.%d\n",
                    d->addr.u8[0], d->addr.u8[1]);
         }
     }
@@ -691,7 +691,7 @@ void sdn_ds_defrt_periodic(void)
         if (!d->isinfinite &&
             stimer_expired(&d->lifetime))
         {
-            PRINTF("Default route periodic: defrt lifetime expired\n");
+            LOG_INFO("Default route periodic: defrt lifetime expired\n");
             sdn_ds_defrt_rm(d);
             d = list_head(defaultrouterlist);
         }
@@ -705,7 +705,7 @@ void sdn_ds_defrt_periodic(void)
 #if DEBUG
 static void sdn_ds_route_print(void)
 {
-    PRINTF("routing table:\n");
+    LOG_INFO("routing table:\n");
     sdn_ds_route_t *r;
     const linkaddr_t *via;
     // struct sdn_ds_route_neighbor_routes *routes;
@@ -714,7 +714,7 @@ static void sdn_ds_route_print(void)
          r = sdn_ds_route_next(r))
     {
         via = sdn_ds_route_nexthop(r);
-        PRINTF(" dest %d.%d via %d.%d cost %d \n",
+        LOG_INFO(" dest %d.%d via %d.%d cost %d \n",
                r->addr.u8[0], r->addr.u8[1],
                via->u8[0], via->u8[1],
                r->cost);
@@ -723,7 +723,7 @@ static void sdn_ds_route_print(void)
             PRINTF(" via ");
             log_lladdr(sdn_ds_route_nexthop(r)); */
     }
-    PRINTF("\n");
+    // PRINTF("\n");
 }
 #endif
 /*---------------------------------------------------------------------------*/

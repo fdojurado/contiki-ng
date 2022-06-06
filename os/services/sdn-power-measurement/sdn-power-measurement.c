@@ -5,10 +5,13 @@
 #include <limits.h>
 
 /* Log configuration */
-/* Log configuration */
 #include "sys/log.h"
-#define LOG_MODULE "SDN power"
-#define LOG_LEVEL LOG_LEVEL_INFO
+#define LOG_MODULE "SDN-POWER"
+#if LOG_CONF_LEVEL_SDN_POWER
+#define LOG_LEVEL LOG_CONF_LEVEL_SDN_POWER
+#else
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_SDN_POWER */
 
 /* EWMA (exponential moving average) used to maintain statistics over time */
 #define EWMA_SCALE 100
@@ -112,86 +115,6 @@ PROCESS_THREAD(sdn_power_measurement_process, ev, data)
     simple_energest_step();
   }
   PROCESS_END();
-  //   PROCESS_BEGIN();
-
-  //   static unsigned long last_all_time = 0, last_all_cpu = 0, last_all_lpm = 0,
-  //                        last_all_transmit = 0, last_all_listen = 0;
-
-  //   unsigned long cpu, lpm, transmit, listen;
-  //   unsigned long all_time, all_cpu, all_lpm, all_transmit, all_listen;
-
-  //   unsigned long avg_power;
-  //   unsigned long stime; //, ttime;
-
-  // #if DEBUG
-  //   static unsigned int count = 0;
-  // #endif
-
-  //   ewma_power = NODE_INIT_ENERGY; // 10000 mJ or 10 J
-
-  //   etimer_set(&periodic_timer, CLOCK_SECOND * 10);
-  //   while (1)
-  //   {
-  //     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
-  //     etimer_reset(&periodic_timer);
-
-  //     /* Update all energest times. */
-  //     energest_flush();
-
-  //     /* update energy consumed at each state */
-  //     /* total time */
-  //     all_time = ENERGEST_GET_TOTAL_TIME();
-  //     all_cpu = energest_type_time(ENERGEST_TYPE_CPU);
-  //     all_lpm = energest_type_time(ENERGEST_TYPE_LPM);
-  //     all_transmit = energest_type_time(ENERGEST_TYPE_TRANSMIT);
-  //     all_listen = energest_type_time(ENERGEST_TYPE_LISTEN);
-  //     /* time for this period */
-  //     stime = all_time - last_all_time;
-  //     cpu = all_cpu - last_all_cpu;
-  //     lpm = all_lpm - last_all_lpm;
-  //     transmit = all_transmit - last_all_transmit;
-  //     listen = all_listen - last_all_listen;
-  //     /* sample & total time */
-  //     // ttime = all_cpu + all_lpm;
-  //     /* save last energy period */
-  //     last_all_time = all_time;
-  //     last_all_cpu = all_cpu;
-  //     last_all_lpm = all_lpm;
-  //     last_all_transmit = all_transmit;
-  //     last_all_listen = all_listen;
-  //     /* average power consumption */
-  //     avg_power = (NODE_VOLTAGE *
-  //                  (cpu * DEC2FIX(1L, 800L) +
-  //                   lpm * DEC2FIX(0L, 545L) +
-  //                   transmit * DEC2FIX(17L, 400L) +
-  //                   listen * DEC2FIX(20L, 0))) /
-  //                 ((64L * stime) / 1000);
-  //     /* energy consume in sample */
-  //     // sample_energy = avg_power * to_seconds(stime);
-  //     /* total energy consumed */
-  //     // convert to mJ
-  //     // sample_energy = sample_energy * 1L / 1000L;
-  //     /* Compute EWMA */
-  //     ewma_power = ((int32_t)ewma_power * (EWMA_SCALE - EWMA_ALPHA) +
-  //                   ((int32_t)avg_power * EWMA_ALPHA)) /
-  //                  EWMA_SCALE;
-
-  //     PRINTF("\nEnergest:\n");
-  //     PRINTF("--- Period summary #%u (%lu seconds)\n", count++, stime / ENERGEST_SECOND);
-  //     PRINTF("Total time  : %10lu\n", stime);
-  //     PRINTF("CPU         : %10lu/%10lu (%lu permil)\n", cpu, stime, to_permil(cpu, stime));
-  //     PRINTF("LPM         : %10lu/%10lu (%lu permil)\n", lpm, stime, to_permil(lpm, stime));
-  //     PRINTF("Radio Tx    : %10lu/%10lu (%lu permil)\n", transmit, stime, to_permil(transmit, stime));
-  //     PRINTF("Radio Rx    : %10lu/%10lu (%lu permil)\n", listen, stime, to_permil(listen, stime));
-  //     PRINTF("Radio total : %10lu/%10lu (%lu permil)\n", transmit + listen, stime, to_permil(transmit + listen, stime));
-  //     PRINTF("Power (uW): %lu\n", avg_power);
-  //     PRINTF("Moving average (uW): %lu\n", ewma_power);
-  //     // PRINTF("2, %ld, %lu, %lu, , , , , , , , ,\n",
-  //     //        energy,
-  //     //        sample_energy,
-  //     //        avg_power);
-  //   }
-  //   PROCESS_END();
 }
 
 /*---------------------------------------------------------------------------*/
