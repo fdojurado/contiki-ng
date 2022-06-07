@@ -4,6 +4,8 @@ import sys
 import os
 from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 
+# contiker bash -c 'cd examples/benchmarks/rl-sdwsn && ./run-cooja.py'
+
 # get the path of this example
 SELF_PATH = os.path.dirname(os.path.abspath(__file__))
 # move three levels up
