@@ -103,13 +103,17 @@ def plot(df):
     # Drop first row
     df.drop(0, inplace=True)
     fig, axs = pl.subplots(2, 2, layout='constrained')
-    fig.suptitle(r'$\alpha=0.8, \beta=0.1, \delta=0.1$', fontsize=title_font_size)
+    alpha_weight = df['alpha'].iloc[0]
+    beta_weight = df['beta'].iloc[0]
+    delta_weight = df['delta'].iloc[0]
+    last_ts = df['last_ts_in_schedule'].iloc[0]
+    fig.suptitle(r'$\alpha={},\beta={},\delta={},last~ts={}$'.format(alpha_weight,beta_weight,delta_weight,last_ts), fontsize=title_font_size)
     # $\alpha=0.8,\beta=0.1,\delta=0.1$
     # First char is the reward and slotframe size over time
     reward = df.copy(deep=True)
     values = reward['reward'].astype(float)
     values = values * -1
-    axs[0, 0].set_title('Reward and SF size over time\n',
+    axs[0, 0].set_title('Reward and SF size over time',
                         fontsize=title_font_size, fontweight=title_fontweight)
     axs[0, 0].set_xlabel('Cycles', fontsize=x_axis_font_size,
                          fontstyle=axis_labels_fontstyle)
@@ -188,7 +192,7 @@ def plot(df):
     axs2.legend([l1, l2], ['PDR', 'SF size'],
                 fontsize=legend_font_size, loc='lower center')
 
-    pl.savefig("plot_rl.pdf", bbox_inches='tight')
+    pl.savefig('alpha{},beta{},delta{},last_ts{}.pdf'.format(alpha_weight,beta_weight,delta_weight,last_ts), bbox_inches='tight')
     pl.close()
 
 #######################################################
