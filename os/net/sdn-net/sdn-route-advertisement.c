@@ -44,13 +44,6 @@ int sdn_ra_input(void)
             sdn_ds_route_add(&dst, 0, &via, CONTROLLER);
         }
     }
-    /* If we are the hop limit, we do not forward the packet */
-    if (SDN_RA_BUF->hop_limit <= my_rank.rank)
-    {
-        // Dont forward the packet, hop limit reached.
-        LOG_WARN("Hop limit reached (SEQ:%u).\n", seq);
-        return 0;
-    }
     return 1;
 }
 /*---------------------------------------------------------------------------*/

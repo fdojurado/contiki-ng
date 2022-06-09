@@ -42,9 +42,14 @@
 #include "net/sdn-net/sd-wsn.h"
 #include "net/routing/routing.h"
 
+/* Log configuration */
 #include "sys/log.h"
-#define LOG_MODULE "Orchestra"
-#define LOG_LEVEL LOG_LEVEL_MAC
+#define LOG_MODULE "SDN-Orchestra"
+#if LOG_CONF_LEVEL_SDN_ORCHESTRA
+#define LOG_LEVEL LOG_CONF_LEVEL_SDN_ORCHESTRA
+#else
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_SDN_ORCHESTRA */
 
 /* A net-layer sniffer for packets sent and received */
 static void orchestra_packet_received(void);

@@ -59,7 +59,7 @@ extern struct etimer na_timer_periodic; /**< Timer for periodic NA */
 
 #if !BUILD_WITH_SDN_CONTROLLER_SERIAL
 /** \brief Reset NA sequence number */
-void sdn_na_reset_seq(uint8_t new_cycle_seq);
+void sdn_na_reset_seq(uint16_t new_cycle_seq);
 #endif
 
 /** \brief Initialize ND structures */

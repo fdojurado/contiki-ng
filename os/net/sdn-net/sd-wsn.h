@@ -44,14 +44,14 @@
 #define SDN_IPH_LEN sizeof(struct sdn_ip_hdr)
 
 #define SDN_NDH_LEN 6  /* Size of neighbor discovery header */
-#define SDN_NAH_LEN 8  /* Size of neighbor advertisement packet header */
+#define SDN_NAH_LEN 10 /* Size of neighbor advertisement packet header */
 #define SDN_NAPL_LEN 6 /* Size of neighbor advertisement payload size */
 #define SDN_RAH_LEN 6  /* Size of network configuration routing and schedules packet header */
 #define SDN_RAPL_LEN 6 /* Size of RA payload */
-#define SDN_SAH_LEN 8  /* Size of Schedule advertisement (SA) header */
+#define SDN_SAH_LEN 6  /* Size of Schedule advertisement (SA) header */
 #define SDN_SAPL_LEN 8 /* Size of SA payload */
 // #define SDN_DATAH_LEN 1 /* Size of data header*/
-#define SDN_DATA_LEN 12 /* Size of data packet */
+#define SDN_DATA_LEN 10 /* Size of data packet */
 
 // #define sdn_l3_nd_hdr_len (SDN_IPH_LEN + SDN_NDH_LEN)
 // #define sdn_l3_cp_hdr_len (SDN_IPH_LEN + SDN_CPH_LEN)
@@ -433,10 +433,10 @@ struct sdn_ip_hdr
 
 struct sdn_data
 {
-    uint8_t cycle_seq,
-        seq;
-    uint16_t temp,
-        humidty,
+    uint16_t cycle_seq;
+    uint8_t seq;
+    uint8_t temp,
+        humidity,
         light;
     uint16_t asn_ls2b,
         asn_ms2b;
@@ -454,9 +454,10 @@ struct sdn_na_hdr
 {
     uint8_t payload_len,
         rank;
-    uint16_t energy;
-    uint8_t cycle_seq,
-        seq;
+    uint16_t energy,
+        cycle_seq;
+    uint8_t seq,
+        padding;
     int16_t pkt_chksum;
 };
 
@@ -472,9 +473,9 @@ struct sdn_na_payload
 struct sdn_ra_hdr
 {
     uint8_t payload_len,
-        hop_limit;
-    uint16_t seq;
-    int16_t pkt_chksum;
+        padding;
+    uint16_t seq,
+        pkt_chksum;
 };
 
 /* NC payload structure for routes */
@@ -489,10 +490,9 @@ struct sdn_ra_payload
 struct sdn_sa_hdr
 {
     uint8_t payload_len,
-        hop_limit;
-    uint16_t sf_len,
-        seq;
-    int16_t pkt_chksum;
+        sf_len;
+    uint16_t seq,
+        pkt_chksum;
 };
 
 /* NC message structure for schedules */

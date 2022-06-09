@@ -45,9 +45,14 @@
 #include "net/queuebuf.h"
 
 /* Log configuration */
+/* Log configuration */
 #include "sys/log.h"
-#define LOG_MODULE "Orchestra UC"
-#define LOG_LEVEL LOG_LEVEL_MAC
+#define LOG_MODULE "SDN-Orchestra-UC"
+#if LOG_CONF_LEVEL_SDN_ORCHESTRA_UC
+#define LOG_LEVEL LOG_CONF_LEVEL_SDN_ORCHESTRA_UC
+#else
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_SDN_ORCHESTRA_UC */
 
 static uint16_t slotframe_handle = 0;
 static uint16_t current_seq = 0;
@@ -248,7 +253,7 @@ new_time_source(const struct tsch_neighbor *old, const struct tsch_neighbor *new
 }
 /*---------------------------------------------------------------------------*/
 #ifdef NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK
-void orchestra_callback_slotframe_size(uint16_t sf_size, uint16_t seq)
+void orchestra_callback_slotframe_size(uint8_t sf_size, uint16_t seq)
 {
   if (seq > current_seq)
   {

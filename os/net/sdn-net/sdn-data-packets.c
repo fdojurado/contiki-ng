@@ -81,7 +81,7 @@
 struct etimer data_timer_periodic;
 struct stimer data_timer_send; /**< ND timer, to schedule ND sending */
 static uint16_t rand_time;     /**< random time value for timers */
-static uint8_t cycle_seq = 0;
+static uint16_t cycle_seq = 0;
 static uint8_t seq = 0;
 #endif
 
@@ -96,7 +96,7 @@ void sdn_data_init(void)
 }
 /*---------------------------------------------------------------------------*/
 #if !BUILD_WITH_SDN_CONTROLLER_SERIAL
-void sdn_data_reset_seq(uint8_t new_cycle_seq)
+void sdn_data_reset_seq(uint16_t new_cycle_seq)
 {
     cycle_seq = new_cycle_seq;
     seq = 0;
@@ -124,11 +124,11 @@ static void send_data_output(void)
 
         /* Data packet */
         seq++;
-        SDN_DATA_BUF->cycle_seq = cycle_seq;
+        SDN_DATA_BUF->cycle_seq = sdnip_htons(cycle_seq);
         SDN_DATA_BUF->seq = seq;
-        SDN_DATA_BUF->temp = sdnip_htons(random_rand() % (uint8_t)(0x23));
-        SDN_DATA_BUF->humidty = sdnip_htons(random_rand() % (uint8_t)(0x64));
-        SDN_DATA_BUF->light = sdnip_htons(random_rand() % (uint8_t)(0x64));
+        SDN_DATA_BUF->temp = random_rand() % (uint8_t)(0x23);
+        SDN_DATA_BUF->humidity = random_rand() % (uint8_t)(0x64);
+        SDN_DATA_BUF->light = random_rand() % (uint8_t)(0x64);
 
 #if BUILD_WITH_SDN_ORCHESTRA
         // LOG_INFO("Current ASN %lu.\n", tsch_current_asn.ls4b);

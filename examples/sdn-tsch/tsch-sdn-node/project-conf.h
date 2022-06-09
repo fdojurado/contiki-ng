@@ -115,5 +115,7 @@
 #define LOG_CONF_LEVEL_SA                          LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_SDN                         LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_SDN_POWER                   LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_SDN_ORCHESTRA               LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_SDN_ORCHESTRA_UC            LOG_LEVEL_NONE
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */

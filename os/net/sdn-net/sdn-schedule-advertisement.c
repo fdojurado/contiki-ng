@@ -31,13 +31,11 @@ int sdn_sa_input(void)
         LOG_WARN("pkt already processed, dropping\n");
         return 0;
     }
-    // Update sequence number received
-    sequence_number = seq;
     // Set the slotframe size
-    uint16_t sf_len = sdnip_htons(SDN_SA_BUF->sf_len);
+    uint8_t sf_len = SDN_SA_BUF->sf_len;
 #if BUILD_WITH_SDN_ORCHESTRA
     if (sf_len != 0)
-        NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK(sf_len, sequence_number);
+        NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK(sf_len, seq);
 #endif /* BUILD_WITH_SDN_ORCHESTRA */
     // Process schedules
     uint8_t num_schedules, i, type, channel_offset, time_offset;
@@ -67,13 +65,9 @@ int sdn_sa_input(void)
     sdn_data_reset_seq(sequence_number);
     sdn_na_reset_seq(sequence_number);
 #endif
-    /* If we are the hop limit, we do not forward the packet */
-    if (SDN_SA_BUF->hop_limit <= my_rank.rank)
-    {
-        // Dont forward the packet, hop limit reached.
-        LOG_WARN("Hop limit reached (SEQ:%u).\n", seq);
-        return 0;
-    }
+    // Update sequence number received
+    sequence_number = seq + 1;
+
     return 1;
 }
 /*---------------------------------------------------------------------------*/

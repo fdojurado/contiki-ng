@@ -85,7 +85,7 @@
 // static sdn_na_adv_t na_pkt; //Holds the rank value and the total rssi value to the controller
 struct stimer na_timer_na; /**< NA timer, to schedule NA sending */
 static uint16_t rand_time; /**< random time value for timers */
-static uint8_t cycle_seq = 0;
+static uint16_t cycle_seq = 0;
 static uint8_t seq = 0;
 #endif /* !BUILD_WITH_SDN_CONTROLLER_SERIAL */
 
@@ -93,6 +93,27 @@ static uint8_t seq = 0;
 
 struct etimer na_timer_periodic;
 
+/*---------------------------------------------------------------------------*/
+#if !BUILD_WITH_SDN_CONTROLLER_SERIAL
+static void print_na_packet()
+{
+
+    print_buff(sdn_buf, sdn_len, true);
+
+    /* Print header */
+    LOG_INFO("---------SDN-NA-PACKET--------------\n");
+    LOG_INFO("payload length: %d (0x%02x)\n", SDN_NA_BUF->payload_len, SDN_NA_BUF->payload_len);
+    LOG_INFO("rank: %d (0x%02x)\n", SDN_NA_BUF->rank, SDN_NA_BUF->rank);
+    LOG_INFO("power: %u (0x%04x)\n", sdnip_htons(SDN_NA_BUF->energy), sdnip_htons(SDN_NA_BUF->energy));
+    LOG_INFO("cycle sequence: %u (0x%04x)\n", sdnip_htons(SDN_NA_BUF->cycle_seq), sdnip_htons(SDN_NA_BUF->cycle_seq));
+    LOG_INFO("sequence: %u (0x%02x)\n", SDN_NA_BUF->seq, SDN_NA_BUF->seq);
+    LOG_INFO("checksum: 0x%04x\n", sdnip_htons(SDN_NA_BUF->pkt_chksum));
+
+    /* Print payload */
+    print_buff(sdn_buf + SDN_IPH_LEN + SDN_NAH_LEN, SDN_NA_BUF->payload_len, 0);
+    LOG_INFO("----------------------------------------\n");
+}
+#endif /* # BUILD_WITH_SDN_CONTROLLER_SERIAL */
 /*---------------------------------------------------------------------------*/
 #if SDN_DS_NBR_NOTIFICATIONS
 static void
@@ -170,7 +191,7 @@ static void send_na_output(void)
         SDN_NA_BUF->payload_len = payload_size;
         SDN_NA_BUF->rank = my_rank.rank;
         SDN_NA_BUF->energy = sdnip_htons((int16_t)moving_avg_power);
-        SDN_NA_BUF->cycle_seq = cycle_seq;
+        SDN_NA_BUF->cycle_seq = sdnip_htons(cycle_seq);
         SDN_NA_BUF->seq = seq;
 
         /* Put neighbor's info in payload */
@@ -203,7 +224,7 @@ static void send_na_output(void)
         SDN_STAT(++sdn_stat.cp.adv);
         SDN_STAT(sdn_stat.cp.adv_bytes += sdn_len);
 
-        print_buff(sdn_buf, sdn_len, true);
+        print_na_packet();
 
         sdnbuf_set_attr(SDNBUF_ATTR_MAX_MAC_TRANSMISSIONS, 3);
 
@@ -213,7 +234,7 @@ static void send_na_output(void)
 #endif
 /*---------------------------------------------------------------------------*/
 #if !BUILD_WITH_SDN_CONTROLLER_SERIAL
-void sdn_na_reset_seq(uint8_t new_cycle_seq)
+void sdn_na_reset_seq(uint16_t new_cycle_seq)
 {
     cycle_seq = new_cycle_seq;
     seq = 0;

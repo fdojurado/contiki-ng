@@ -72,7 +72,7 @@ void sdn_data_init(void);
 
 #if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 /** \brief Reset data sequence number */
-void sdn_data_reset_seq(uint8_t new_cycle_seq);
+void sdn_data_reset_seq(uint16_t new_cycle_seq);
 #endif
 
 #if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
