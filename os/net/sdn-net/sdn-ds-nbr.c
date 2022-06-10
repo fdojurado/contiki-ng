@@ -134,7 +134,7 @@ sdn_ds_nbr_add(const linkaddr_t *from, int16_t *ndRank, int16_t *ndRssi,
         }
         else
         {
-            LOG_INFO("Add drop addr %d.%d\n",
+            LOG_WARN("Add drop addr %d.%d\n",
                    from->u8[0], from->u8[1]);
             return NULL;
         }

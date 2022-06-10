@@ -101,21 +101,21 @@
 #define LOG_CONF_LEVEL_IPV6                        LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_6LOWPAN                     LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_MAC                         LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_FRAMER                      LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_FRAMER                      LOG_LEVEL_ERR
 #define TSCH_LOG_CONF_PER_SLOT                     0
 /* Logging for the SDWSN netstack */
-#define LOG_CONF_LEVEL_SDWSN                       LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_NA                          LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_DATA                        LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_NBR_DS                      LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_ROUTE_DS                    LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_ND                          LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_SDN_NET                     LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_RA                          LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_SA                          LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_SDN                         LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_SDN_POWER                   LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_SDN_ORCHESTRA               LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_SDN_ORCHESTRA_UC            LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_SDWSN                       LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_NA                          LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_DATA                        LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_NBR_DS                      LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_ROUTE_DS                    LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_ND                          LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_SDN_NET                     LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_RA                          LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_SA                          LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_SDN                         LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_SDN_POWER                   LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_SDN_ORCHESTRA               LOG_LEVEL_WARN
+#define LOG_CONF_LEVEL_SDN_ORCHESTRA_UC            LOG_LEVEL_WARN
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */
