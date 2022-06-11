@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as pl
 from database import *
+import math
 
 
 #######################################################
@@ -107,7 +108,8 @@ def plot(df):
     beta_weight = df['beta'].iloc[0]
     delta_weight = df['delta'].iloc[0]
     last_ts = df['last_ts_in_schedule'].iloc[0]
-    fig.suptitle(r'$\alpha={},\beta={},\delta={},last~ts={}$'.format(alpha_weight,beta_weight,delta_weight,last_ts), fontsize=title_font_size)
+    fig.suptitle(r'$\alpha={},\beta={},\delta={},last~ts={}$'.format(
+        alpha_weight, beta_weight, delta_weight, last_ts), fontsize=title_font_size)
     # $\alpha=0.8,\beta=0.1,\delta=0.1$
     # First char is the reward and slotframe size over time
     reward = df.copy(deep=True)
@@ -192,8 +194,139 @@ def plot(df):
     axs2.legend([l1, l2], ['PDR', 'SF size'],
                 fontsize=legend_font_size, loc='lower center')
 
-    pl.savefig('alpha{},beta{},delta{},last_ts{}.pdf'.format(alpha_weight,beta_weight,delta_weight,last_ts), bbox_inches='tight')
+    pl.savefig('alpha{},beta{},delta{},last_ts{}.pdf'.format(
+        alpha_weight, beta_weight, delta_weight, last_ts), bbox_inches='tight')
     pl.close()
+#######################################################
+
+
+def calculate_confidence_interval(df, x_name, y_name):
+    # print(df)
+    # print('-'*30)
+
+    stats = df.groupby([x_name])[
+        y_name].agg(['mean', 'count', 'std'])
+
+    stats = stats.reset_index()
+
+    # print(stats)
+    # print('-'*30)
+
+    ci95_hi = []
+    ci95_lo = []
+
+    for i in stats.index:
+        _, m, c, s = stats.loc[i]
+        ci95_hi.append(m + 1.96*s/math.sqrt(c))
+        ci95_lo.append(m - 1.96*s/math.sqrt(c))
+
+    stats['ci95_hi'] = ci95_hi
+    stats['ci95_lo'] = ci95_lo
+    # print(stats)
+    return stats
+#######################################################
+
+
+def plot_against_sf_size(df):
+    title_font_size = 8
+    x_axis_font_size = 8
+    y_axis_font_size = 8
+    ticks_font_size = 7
+    data_marker_size = 1.5
+    legend_font_size = 6
+    title_fontweight = 'bold'
+    axis_labels_fontstyle = 'italic'
+    # Drop first row
+    fig, axs = pl.subplots(2, 2, layout='constrained')
+    alpha_weight = df['alpha'].iloc[0]
+    beta_weight = df['beta'].iloc[0]
+    delta_weight = df['delta'].iloc[0]
+    last_ts = df['last_ts_in_schedule'].iloc[0]
+    fig.suptitle(r'$\alpha={},\beta={},\delta={},last~ts={}$'.format(
+        alpha_weight, beta_weight, delta_weight, last_ts), fontsize=title_font_size)
+    # $\alpha=0.8,\beta=0.1,\delta=0.1$
+    # First plot is the reward vs. slotframe size
+    reward = df.copy(deep=True)
+    values = reward['reward'].astype(float)
+    axs[0, 0].set_title('Reward vs SF size',
+                        fontsize=title_font_size, fontweight=title_fontweight)
+    axs[0, 0].set_xlabel('SF size', fontsize=x_axis_font_size,
+                         fontstyle=axis_labels_fontstyle)
+    axs[0, 0].set_ylabel('Reward', fontsize=y_axis_font_size,
+                         fontstyle=axis_labels_fontstyle)
+    axs[0, 0].tick_params(axis='both', which='major',
+                          labelsize=ticks_font_size)
+    # Confidence interval for all sf size
+    stats = calculate_confidence_interval(df, 'current_sf_len', 'reward')
+
+    x = stats['current_sf_len']
+    y = stats['mean']
+
+    axs[0, 0].plot(x, y, 'b-o', markersize=data_marker_size)
+    axs[0, 0].fill_between(x, stats['ci95_hi'], stats['ci95_lo'], color='b', alpha=.1)
+
+    # Second plot: Power vs. slotframe size
+    axs[0, 1].set_title('Network avg. power vs. SF size',
+                        fontsize=title_font_size, fontweight=title_fontweight)
+    axs[0, 1].set_xlabel('SF size', fontsize=x_axis_font_size,
+                         fontstyle=axis_labels_fontstyle)
+    axs[0, 1].set_ylabel(
+        'Power [mW]', fontsize=y_axis_font_size, fontstyle=axis_labels_fontstyle)
+    axs[0, 1].tick_params(axis='both', which='major',
+                          labelsize=ticks_font_size)
+    # Confidence interval for all sf size
+    stats = calculate_confidence_interval(df, 'current_sf_len', 'power_avg')
+
+    x = stats['current_sf_len']
+    y = stats['mean']
+
+    axs[0, 1].plot(x, y, 'b-o', markersize=data_marker_size)
+    axs[0, 1].fill_between(x, stats['ci95_hi'], stats['ci95_lo'], color='b', alpha=.1)
+
+    # Third plot: Delay vs. slotframe size
+    axs[1, 0].set_title('Network avg. delay vs. SF size',
+                        fontsize=title_font_size, fontweight=title_fontweight)
+    axs[1, 0].set_xlabel('SF size', fontsize=x_axis_font_size,
+                         fontstyle=axis_labels_fontstyle)
+    axs[1, 0].set_ylabel(
+        'Delay [ms]', fontsize=y_axis_font_size, fontstyle=axis_labels_fontstyle)
+    axs[1, 0].tick_params(axis='both', which='major',
+                          labelsize=ticks_font_size)
+    # Confidence interval for all sf size
+    stats = calculate_confidence_interval(df, 'current_sf_len', 'delay_avg')
+
+    x = stats['current_sf_len']
+    y = stats['mean']
+
+    axs[1, 0].plot(x, y, 'b-o', markersize=data_marker_size)
+    axs[1, 0].fill_between(x, stats['ci95_hi'], stats['ci95_lo'], color='b', alpha=.1)
+
+    # Fourth plot: PDR vs. slotframe size
+    axs[1, 1].set_title('Network avg. PDR vs. SF size',
+                        fontsize=title_font_size, fontweight=title_fontweight)
+    axs[1, 1].set_xlabel('SF size', fontsize=x_axis_font_size,
+                         fontstyle=axis_labels_fontstyle)
+    axs[1, 1].set_ylabel(
+        'PDR', fontsize=y_axis_font_size, fontstyle=axis_labels_fontstyle)
+    axs[1, 1].tick_params(axis='both', which='major',
+                          labelsize=ticks_font_size)
+    # Confidence interval for all sf size
+    stats = calculate_confidence_interval(df, 'current_sf_len', 'pdr_mean')
+
+    x = stats['current_sf_len']
+    y = stats['mean']
+
+    axs[1, 1].plot(x, y, 'b-o', markersize=data_marker_size)
+    axs[1, 1].fill_between(x, stats['ci95_hi'], stats['ci95_lo'], color='b', alpha=.1)
+    axs[1, 1].set_yticks(np.arange(0.8, 1.05, 0.05))
+
+
+    # Save plot
+
+    pl.savefig('alpha{},beta{},delta{},last_ts{},sf_size.pdf'.format(
+        alpha_weight, beta_weight, delta_weight, last_ts), bbox_inches='tight')
+    pl.close()
+
 
 #######################################################
 # Run the application
@@ -216,16 +349,8 @@ def main():
     # Plots in 4 axis
     plot(df)
 
-    # reward_plot(df, reward, values)
-
-    # Let's process the overall network power consumption
-    # average_network_power_consumption(df)
-
-    # Let's process the overall network delay
-    # average_network_delay(df)
-
-    # Let's process the overall network pdr
-    # average_network_pdr(df)
+    # Plot chars against the SF size
+    plot_against_sf_size(df)
 
 
 #######################################################
