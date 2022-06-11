@@ -112,7 +112,7 @@ def plot(df):
     # First char is the reward and slotframe size over time
     reward = df.copy(deep=True)
     values = reward['reward'].astype(float)
-    values = values * -1
+    # values = values * -1
     axs[0, 0].set_title('Reward and SF size over time',
                         fontsize=title_font_size, fontweight=title_fontweight)
     axs[0, 0].set_xlabel('Cycles', fontsize=x_axis_font_size,
@@ -126,7 +126,7 @@ def plot(df):
     axs2.set_ylabel('Slotframe size', fontsize=y_axis_font_size,
                     fontstyle=axis_labels_fontstyle)
     l1, = axs[0, 0].plot(range(len(reward['timestamp'])),
-                         values.cumsum(), 'b-o', markersize=data_marker_size)
+                         values, 'b-o', markersize=data_marker_size)
     l2, = axs2.plot(range(len(df['timestamp'])), df['current_sf_len'],
                     'g-o', markersize=data_marker_size)
     axs2.legend([l1, l2], ['Reward', 'SF size'], fontsize=legend_font_size)
