@@ -396,15 +396,15 @@ def plot_fit_curves(df):
     axs[0, 1].fill_between(x, stats['ci95_hi'],
                            stats['ci95_lo'], color='b', alpha=.1)
     # Fit the curve
-    # popt, _ = curve_fit(power_objective, x, y)
+    popt, _ = curve_fit(power_objective, x, y)
     # # summarize the parameter values
-    # power_a, power_b, power_c, power_d = popt
-    # print('power = %.5f * x + %.5f * x^2 + %.5f * x^3 + %.5f' %
-    #       (power_a, power_b, power_c, power_d))
+    power_a, power_b, power_c, power_d = popt
+    print('power = %.5f * x + %.5f * x^2 + %.5f * x^3 + %.5f' %
+          (power_a, power_b, power_c, power_d))
     x_line = arange(min(x), max(x), 1)
     # calculate the output for the range
-    y_line = power_equation(x_line)
-    # y_line = power_objective(x_line, power_a, power_b, power_c, power_d)
+    # y_line = power_equation(x_line)
+    y_line = power_objective(x_line, power_a, power_b, power_c, power_d)
     axs[0, 1].plot(x_line, y_line, 'r-o', markersize=data_marker_size)
 
     # Fit the plot for the delay
@@ -427,15 +427,15 @@ def plot_fit_curves(df):
     axs[1, 0].fill_between(x, stats['ci95_hi'],
                            stats['ci95_lo'], color='b', alpha=.1)
     # Fit the curve
-    # popt, _ = curve_fit(power_objective, x, y)
-    # # summarize the parameter values
-    # delay_a, delay_b, delay_c, delay_d = popt
-    # print('delay= %.5f * x + %.5f * x^2 + %.5f * x^3 + %.5f' %
-    #       (delay_a, delay_b, delay_c, delay_d))
+    popt, _ = curve_fit(power_objective, x, y)
+    # summarize the parameter values
+    delay_a, delay_b, delay_c, delay_d = popt
+    print('delay= %.5f * x + %.5f * x^2 + %.5f * x^3 + %.5f' %
+          (delay_a, delay_b, delay_c, delay_d))
     x_line = arange(min(x), max(x), 1)
     # calculate the output for the range
-    y_line = delay_equation(x_line)
-    # y_line = power_objective(x_line, delay_a, delay_b, delay_c, delay_d)
+    # y_line = delay_equation(x_line)
+    y_line = power_objective(x_line, delay_a, delay_b, delay_c, delay_d)
     axs[1, 0].plot(x_line, y_line, 'r-o', markersize=data_marker_size)
 
     # Fit the plot for the PDR
@@ -458,15 +458,15 @@ def plot_fit_curves(df):
     axs[1, 1].fill_between(x, stats['ci95_hi'],
                            stats['ci95_lo'], color='b', alpha=.1)
     # Fit the curve
-    # popt, _ = curve_fit(power_objective, x, y)
-    # # summarize the parameter values
-    # pdr_a, pdr_b, pdr_c, pdr_d = popt
-    # print('PDR = %.5f * x + %.5f * x^2 + %.5f * x^3 + %.5f' %
-    #       (pdr_a, pdr_b, pdr_c, pdr_d))
+    popt, _ = curve_fit(power_objective, x, y)
+    # summarize the parameter values
+    pdr_a, pdr_b, pdr_c, pdr_d = popt
+    print('PDR = %.5f * x + %.5f * x^2 + %.5f * x^3 + %.5f' %
+          (pdr_a, pdr_b, pdr_c, pdr_d))
     x_line = arange(min(x), max(x), 1)
     # calculate the output for the range
-    y_line = pdr_equation(x_line)
-    # y_line = power_objective(x_line, pdr_a, pdr_b, pdr_c, pdr_d)
+    # y_line = pdr_equation(x_line)
+    y_line = power_objective(x_line, pdr_a, pdr_b, pdr_c, pdr_d)
     axs[1, 1].plot(x_line, y_line, 'r-o', markersize=data_marker_size)
 
     # Plot the reward and the estimated reward
@@ -492,11 +492,11 @@ def plot_fit_curves(df):
     print(f'reward first element {y[0]}')
     # Calculate the reward using the regression data
     # x = arange(20, 60, 1)
-    power_estimated = power_equation(x)
+    power_estimated = power_equation(x, power_a, power_b, power_c, power_d)
 
-    delay_estimated = delay_equation(x)
+    delay_estimated = delay_equation(x, delay_a, delay_b, delay_c, delay_d)
 
-    pdr_estimated = pdr_equation(x)
+    pdr_estimated = pdr_equation(x, pdr_a, pdr_b, pdr_c, pdr_d)
 
     reward = -1*(alpha_weight*power_estimated+beta_weight *
                  delay_estimated-delta_weight*pdr_estimated)
