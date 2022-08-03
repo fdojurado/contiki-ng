@@ -24,18 +24,22 @@ uint64_t moving_avg_power;
 PROCESS(sdn_power_measurement_process, "SDN power measurement module");
 
 /*---------------------------------------------------------------------------*/
+#if !CONTIKI_TARGET_IOTLAB
 static uint64_t
 to_permil(uint64_t delta_metric, uint64_t delta_time)
 {
   return (1000ul * delta_metric) / delta_time;
 }
+#endif
 /*---------------------------------------------------------------------------*/
+#if !CONTIKI_TARGET_IOTLAB
 static void
 log_energest(const char *name, uint64_t delta, uint64_t delta_time)
 {
   LOG_INFO("%-12s: %10" PRIu64 "/%10" PRIu64 " (%" PRIu64 " permil)\n",
            name, delta, delta_time, to_permil(delta, delta_time));
 }
+#endif
 /*---------------------------------------------------------------------------*/
 static uint64_t
 calc_power(uint64_t cpu, uint64_t lpm, uint64_t dlpm, uint64_t transmit, uint64_t listen,
@@ -53,7 +57,9 @@ calc_power(uint64_t cpu, uint64_t lpm, uint64_t dlpm, uint64_t transmit, uint64_
 static void
 simple_energest_step(void)
 {
+#if !CONTIKI_TARGET_IOTLAB
   static unsigned count = 0;
+#endif
   uint64_t curr_tx, curr_rx, curr_time, curr_cpu, curr_lpm, curr_deep_lpm;
   uint64_t delta_time;
   uint64_t power;
@@ -81,6 +87,8 @@ simple_energest_step(void)
   LOG_INFO("--- Period summary #%u (%" PRIu64 " seconds)\n",
            count++, delta_time / ENERGEST_SECOND);
   LOG_INFO("Total time  : %10" PRIu64 "\n", delta_time);
+
+#if !CONTIKI_TARGET_IOTLAB
   log_energest("CPU", curr_cpu - last_cpu, delta_time);
   log_energest("LPM", curr_lpm - last_lpm, delta_time);
   log_energest("Deep LPM", curr_deep_lpm - last_deep_lpm, delta_time);
@@ -90,6 +98,7 @@ simple_energest_step(void)
                delta_time);
   log_energest("Power (uW)", power, delta_time);
   log_energest("EMA (uW)", moving_avg_power, delta_time);
+#endif
 
   last_time = curr_time;
   last_cpu = curr_cpu;
