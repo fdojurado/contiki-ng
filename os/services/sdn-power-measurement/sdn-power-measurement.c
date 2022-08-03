@@ -84,11 +84,10 @@ simple_energest_step(void)
                       power * EWMA_ALPHA) /
                      EWMA_SCALE;
 
+#if !CONTIKI_TARGET_IOTLAB
   LOG_INFO("--- Period summary #%u (%" PRIu64 " seconds)\n",
            count++, delta_time / ENERGEST_SECOND);
   LOG_INFO("Total time  : %10" PRIu64 "\n", delta_time);
-
-#if !CONTIKI_TARGET_IOTLAB
   log_energest("CPU", curr_cpu - last_cpu, delta_time);
   log_energest("LPM", curr_lpm - last_lpm, delta_time);
   log_energest("Deep LPM", curr_deep_lpm - last_deep_lpm, delta_time);
