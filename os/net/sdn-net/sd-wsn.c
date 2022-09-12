@@ -402,7 +402,6 @@ na_input:
 #endif
     goto drop;
 sa_input:
-#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
     if (sdn_sachksum(srbuf_get_len_field(SDN_SA_BUF)) != 0xffff)
     {
         LOG_WARN("SA bad checksum\n");
@@ -413,7 +412,6 @@ sa_input:
     {
         goto send;
     }
-#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
     goto drop;
 
 ra_input:

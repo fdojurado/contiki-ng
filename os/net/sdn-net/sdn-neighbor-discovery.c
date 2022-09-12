@@ -119,9 +119,7 @@ static void update_rank(int16_t rssi, uint8_t rank, const linkaddr_t *from)
     LOG_INFO(" gw address = %d.%d\n", my_rank.addr.u8[0], my_rank.addr.u8[1]);
 #if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
     tsch_queue_update_time_source(from);
-#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED 
     NETSTACK_CONF_SDN_RANK_UPDATED_CALLBACK(from, my_rank.rank);
-#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED  */
 #endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA */
     // }
 }

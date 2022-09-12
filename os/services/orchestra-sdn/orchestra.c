@@ -169,6 +169,18 @@ void orchestra_callback_new_time_source(const struct tsch_neighbor *old, const s
   }
 }
 /*---------------------------------------------------------------------------*/
+void orchestra_callback_rank_updated(const linkaddr_t *addr, uint8_t rank)
+{
+  int i;
+  for (i = 0; i < NUM_RULES; i++)
+  {
+    if (all_rules[i]->rank_updated != NULL)
+    {
+      all_rules[i]->rank_updated(addr, rank);
+    }
+  }
+}
+/*---------------------------------------------------------------------------*/
 void orchestra_callback_root_node_updated(const linkaddr_t *root, uint8_t is_added)
 {
   int i;

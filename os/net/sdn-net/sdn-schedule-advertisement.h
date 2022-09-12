@@ -47,6 +47,7 @@
 #ifndef NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK
 #define NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK orchestra_callback_slotframe_size
 #endif
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
 
 
 /**
@@ -54,6 +55,6 @@
 
  */
 int sdn_sa_input(void);
-#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
+
 
 #endif

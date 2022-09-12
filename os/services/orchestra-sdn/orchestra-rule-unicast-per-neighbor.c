@@ -132,6 +132,7 @@ struct orchestra_rule unicast_per_neighbor = {
   child_added,
   child_removed,
   NULL,
+  NULL,
   "unicast per neighbor",
   ORCHESTRA_UNICAST_PERIOD,
 };

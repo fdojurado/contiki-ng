@@ -203,6 +203,7 @@ struct orchestra_rule special_for_root = {
   NULL,
   NULL,
   root_node_updated,
+  NULL,
   "special for root",
   ORCHESTRA_ROOT_PERIOD,
 };
