@@ -4,10 +4,10 @@
 #include "net/sdn-net/sdn-data-packets.h"
 #include "net/sdn-net/sdn-advertisement.h"
 
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
 #include "net/mac/tsch/tsch.h"
 #include "services/orchestra-sdn-centralised/orchestra.h"
-#endif /* BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
 
 /* Log configuration */
 #include "sys/log.h"
@@ -17,6 +17,8 @@
 #else
 #define LOG_LEVEL LOG_LEVEL_NONE
 #endif /* LOG_CONF_LEVEL_SA */
+
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
 
 static uint16_t sequence_number = 0;
 
@@ -33,10 +35,10 @@ int sdn_sa_input(void)
     }
     // Set the slotframe size
     uint8_t sf_len = SDN_SA_BUF->sf_len;
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
     if (sf_len != 0)
         NETSTACK_CONF_SDN_SLOTFRAME_SIZE_CALLBACK(sf_len, seq);
-#endif /* BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
     // Process schedules
     uint8_t num_schedules, i, type, channel_offset, time_offset;
     linkaddr_t scr, dst;
@@ -53,9 +55,9 @@ int sdn_sa_input(void)
             dst.u16 = sdnip_htons(SDN_SA_PAYLOAD(i)->dst.u16);
             // PRINTF("Type: %u, chan: %u, time: %u, scr: %d.%d, dst= %d.%d\n",
             //        type, channel_offset, time_offset, scr.u8[0], scr.u8[1], dst.u8[0], dst.u8[1]);
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
             NETSTACK_CONF_SDN_SA_LINK_CALLBACK(type, channel_offset, time_offset, &dst);
-#endif /* BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
         }
     }
     /* Look in the nbr TSCH queue with packets and update ts and ch */
@@ -71,3 +73,4 @@ int sdn_sa_input(void)
     return 1;
 }
 /*---------------------------------------------------------------------------*/
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */

@@ -71,7 +71,7 @@
 
 #include "sys/node-id.h"
 #include "services/rpl-border-router/rpl-border-router.h"
-#if BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 #include "orchestra.h"
 #endif /* BUILD_WITH_ORCHESTRA */
 #if BUILD_WITH_SHELL

@@ -57,8 +57,12 @@
 #include "net/nbr-table.h"
 #include <string.h>
 
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
 #include "os/services/orchestra-sdn-centralised/orchestra.h"
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
+
+#if BUILD_WITH_SDN_ORCHESTRA
+#include "os/services/orchestra-sdn/orchestra.h"
 #endif /* BUILD_WITH_SDN_ORCHESTRA */
 
 /* Log configuration */
@@ -374,9 +378,9 @@ tsch_queue_packet_sent(struct tsch_neighbor *n, struct tsch_packet *p,
     if(is_unicast) {
       /* Failures on dedicated (== non-shared) leave the backoff
        * window nor exponent unchanged */
-// #if BUILD_WITH_SDN_ORCHESTRA
+// #if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
 //       NETSTACK_CONF_SDN_PACKET_TX_FAILED(n, p, link);
-// #endif /* BUILD_WITH_SDN_ORCHESTRA */
+// #endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
       if(is_shared_link) {
         /* Shared link: increment backoff exponent, pick a new window */
         tsch_queue_backoff_inc(n);

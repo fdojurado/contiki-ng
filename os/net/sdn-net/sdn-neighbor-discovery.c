@@ -49,8 +49,12 @@
 #include "sdnbuf.h"
 #include "net/link-stats.h"
 
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
 #include "services/orchestra-sdn-centralised/orchestra.h"
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
+
+#if BUILD_WITH_SDN_ORCHESTRA
+#include "services/orchestra-sdn/orchestra.h"
 #endif /* BUILD_WITH_SDN_ORCHESTRA */
 
 /* Log configuration */
@@ -113,10 +117,12 @@ static void update_rank(int16_t rssi, uint8_t rank, const linkaddr_t *from)
     linkaddr_copy(&my_rank.addr, from);
     LOG_INFO("rank updated: rank %d total rssi %d\n", my_rank.rank, my_rank.rssi);
     LOG_INFO(" gw address = %d.%d\n", my_rank.addr.u8[0], my_rank.addr.u8[1]);
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
     tsch_queue_update_time_source(from);
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED 
     NETSTACK_CONF_SDN_RANK_UPDATED_CALLBACK(from, my_rank.rank);
-#endif /* BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED  */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA */
     // }
 }
 #endif

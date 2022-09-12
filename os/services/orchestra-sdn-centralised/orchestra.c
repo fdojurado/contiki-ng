@@ -44,7 +44,7 @@
 
 /* Log configuration */
 #include "sys/log.h"
-#define LOG_MODULE "SDN-Orchestra"
+#define LOG_MODULE "SDN-Orchestra-C"
 #if LOG_CONF_LEVEL_SDN_ORCHESTRA
 #define LOG_LEVEL LOG_CONF_LEVEL_SDN_ORCHESTRA
 #else

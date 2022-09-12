@@ -59,10 +59,10 @@
 #if BUILD_WITH_SDN_CONTROLLER_SERIAL
 #include "sdn-serial.h"
 #endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 #include "net/mac/tsch/tsch.h"
 // #include "net/mac/tsch/tsch-asn.h"
-#endif /* BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA */
 
 /* Log configuration */
 #include "sys/log.h"
@@ -402,6 +402,7 @@ na_input:
 #endif
     goto drop;
 sa_input:
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
     if (sdn_sachksum(srbuf_get_len_field(SDN_SA_BUF)) != 0xffff)
     {
         LOG_WARN("SA bad checksum\n");
@@ -412,6 +413,7 @@ sa_input:
     {
         goto send;
     }
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
     goto drop;
 
 ra_input:

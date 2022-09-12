@@ -42,9 +42,14 @@
 #include "net/sdn-net/sd-wsn.h"
 #include "net/routing/routing.h"
 
+/* Log configuration */
 #include "sys/log.h"
-#define LOG_MODULE "Orchestra"
-#define LOG_LEVEL LOG_LEVEL_MAC
+#define LOG_MODULE "SDN-Orchestra"
+#if LOG_CONF_LEVEL_SDN_ORCHESTRA
+#define LOG_LEVEL LOG_CONF_LEVEL_SDN_ORCHESTRA
+#else
+#define LOG_LEVEL LOG_LEVEL_NONE
+#endif /* LOG_CONF_LEVEL_SDN_ORCHESTRA */
 
 /* A net-layer sniffer for packets sent and received */
 static void orchestra_packet_received(void);
@@ -107,7 +112,7 @@ void orchestra_callback_child_removed(const linkaddr_t *addr)
 /*---------------------------------------------------------------------------*/
 int orchestra_callback_packet_ready(void)
 {
-  LOG_INFO("Initializing orchestra\n");
+  LOG_INFO("Initializing orchestra SDN\n");
   int i;
   /* By default, use any slotframe, any timeslot */
   uint16_t slotframe = 0xffff;
@@ -135,9 +140,10 @@ int orchestra_callback_packet_ready(void)
   packetbuf_set_attr(PACKETBUF_ATTR_TSCH_SLOTFRAME, slotframe);
   packetbuf_set_attr(PACKETBUF_ATTR_TSCH_TIMESLOT, timeslot);
   packetbuf_set_attr(PACKETBUF_ATTR_TSCH_CHANNEL_OFFSET, channel_offset);
+  LOG_INFO("link selector on\n");
 #endif
 
-  LOG_INFO("matched ruled %d\n", matched_rule);
+  LOG_INFO("matched ruled %d (%d,%d)\n", matched_rule, timeslot, channel_offset);
 
   return matched_rule;
 }

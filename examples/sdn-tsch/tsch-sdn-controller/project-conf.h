@@ -71,6 +71,7 @@
 
 #define QUEUEBUF_CONF_NUM  128
 
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
 #define TSCH_CALLBACK_PACKET_READY orchestra_callback_packet_ready
 #define TSCH_CALLBACK_NEW_TIME_SOURCE orchestra_callback_new_time_source
 #define NETSTACK_CONF_ROUTING_NEIGHBOR_ADDED_CALLBACK orchestra_callback_child_added
@@ -80,6 +81,7 @@
 #define NETSTACK_CONF_SDN_PACKET_TX_FAILED orchestra_callback_packet_transmission_failed
 #define NETSTACK_CONF_ROUTING_NEIGHBOR_REMOVED_CALLBACK orchestra_callback_child_removed
 #define TSCH_CALLBACK_ROOT_NODE_UPDATED orchestra_callback_root_node_updated
+#endif
 
 #if WITH_SECURITY
 

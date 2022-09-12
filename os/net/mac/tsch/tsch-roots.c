@@ -47,7 +47,7 @@
 #define LOG_LEVEL LOG_LEVEL_MAC
 
 /*---------------------------------------------------------------------------*/
-#if BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 /*---------------------------------------------------------------------------*/
 #define TSCH_MAX_ROOT_NODES 5
 #define ROOT_ALIVE_TIME_SECONDS     (2 * 60 * 60) /* 2h timeout */

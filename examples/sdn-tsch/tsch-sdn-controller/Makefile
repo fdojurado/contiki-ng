@@ -10,7 +10,7 @@ CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 MAKE_WITH_SECURITY ?= 0
 
 # force Orchestra from command line
-MAKE_WITH_SDN_ORCHESTRA = 1
+MAKE_WITH_SDN_ORCHESTRA ?= 1
 
 PLATFORMS_EXCLUDE = nrf52dk
 
@@ -31,6 +31,8 @@ endif
 
 ifeq ($(MAKE_WITH_SDN_ORCHESTRA),1)
 MODULES += $(CONTIKI_NG_SERVICES_DIR)/orchestra-sdn-centralised
+else
+MODULES += $(CONTIKI_NG_SERVICES_DIR)/orchestra-sdn
 endif
 
 ifeq ($(WITH_SERIAL_SDN_CONTROLLER),1)
