@@ -33,6 +33,4 @@ Find out more:
 Engage with the community:
 
 * Discussions on GitHub: https://github.com/fdojurado/contiki-ng/discussions
-<!-- * Contiki-NG tag on Stack Overflow: https://stackoverflow.com/questions/tagged/contiki-ng -->
-<!-- * Gitter: https://gitter.im/contiki-ng -->
 * Twitter: https://twitter.com/fdojurado
