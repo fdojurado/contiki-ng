@@ -57,9 +57,9 @@
 #include "sdn-controller-serial/sdn-serial-protocol.h"
 #endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
 
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 #include "net/mac/tsch/tsch.h"
-#endif /* BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA */
 
 /* Log configuration */
 #include "sys/log.h"
@@ -130,14 +130,14 @@ static void send_data_output(void)
         SDN_DATA_BUF->humidity = random_rand() % (uint8_t)(0x64);
         SDN_DATA_BUF->light = random_rand() % (uint8_t)(0x64);
 
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
         // LOG_INFO("Current ASN %lu.\n", tsch_current_asn.ls4b);
         SDN_DATA_BUF->asn_ls2b = sdnip_htons(tsch_current_asn.ls4b & 0x0000FFFF);
         SDN_DATA_BUF->asn_ms2b = sdnip_htons(tsch_current_asn.ls4b & 0xFFFF0000);
 #else
         SDN_DATA_BUF->asn.ls2b = 0;
         SDN_DATA_BUF->asn.ms2b = 0;
-#endif /* BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA */
 
         SDN_IP_BUF->hdr_chksum = 0;
         SDN_IP_BUF->hdr_chksum = ~sdn_ipchksum();

@@ -44,10 +44,10 @@
 #include "lib/memb.h"
 #include "net/nbr-table.h"
 
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 #include "sdn.h"
 #include "net/mac/tsch/tsch.h"
-#endif /* BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA */
 
 /* Log configuration */
 #include "sys/log.h"
@@ -301,7 +301,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
         return NULL;
     }
 
-// #ifdef BUILD_WITH_SDN_ORCHESTRA
+// #ifdef BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
 //     if (linkaddr_cmp(dest, &ctrl_addr))
 //     {
 //         PRINTF("destination is ctrl.\n");
@@ -311,7 +311,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
 //             tsch_queue_update_time_source(nexthop);
 //         }
 //     }
-// #endif /* BUILD_WITH_SDN_ORCHESTRA */
+// #endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
 
     /* Get link-layer address of next hop, make sure it is in neighbor table */
     const linkaddr_t *nexthop_lladdr = nexthop;

@@ -59,10 +59,10 @@
 #if BUILD_WITH_SDN_CONTROLLER_SERIAL
 #include "sdn-serial.h"
 #endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
-#if BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 #include "net/mac/tsch/tsch.h"
 // #include "net/mac/tsch/tsch-asn.h"
-#endif /* BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA */
 
 /* Log configuration */
 #include "sys/log.h"

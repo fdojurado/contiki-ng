@@ -95,7 +95,7 @@ frequency hopping for enhanced reliability.
 
 #endif /* UIP_CONF_IPV6_RPL */
 
-#if BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA
+#if BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 
 #ifndef TSCH_CALLBACK_NEW_TIME_SOURCE
 #define TSCH_CALLBACK_NEW_TIME_SOURCE orchestra_callback_new_time_source
@@ -109,7 +109,7 @@ frequency hopping for enhanced reliability.
 #define TSCH_CALLBACK_ROOT_NODE_UPDATED orchestra_callback_root_node_updated
 #endif /* TSCH_CALLBACK_ROOT_NODE_UPDATED */
 
-#endif /* BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA */
+#endif /* BUILD_WITH_ORCHESTRA || BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA */
 
 /* Called by TSCH when joining a network */
 #ifdef TSCH_CALLBACK_JOINING_NETWORK
