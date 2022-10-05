@@ -24,6 +24,7 @@
       <identifier>mtype603</identifier>
       <description>Cooja Mote Type #1</description>
       <source>[CONTIKI_DIR]/examples/sdn-tsch/tsch-sdn-controller/sdn-controller-serial.c</source>
+      <commands>make distclean</commands>
       <commands>make sdn-controller-serial.cooja TARGET=cooja MAKE_WITH_SDN_ORCHESTRA=0</commands>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.Battery</moteinterface>
@@ -31,7 +32,7 @@
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiMoteID</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiRS232</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiBeeper</moteinterface>
-      <moteinterface>org.contikios.cooja.interfaces.RimeAddress</moteinterface>
+      <!-- <moteinterface>org.contikios.cooja.interfaces.RimeAddress</moteinterface> -->
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiIPAddress</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiRadio</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiButton</moteinterface>
@@ -49,6 +50,7 @@
       <identifier>mtype856</identifier>
       <description>Cooja Mote Type #2</description>
       <source>[CONTIKI_DIR]/examples/sdn-tsch/tsch-sdn-node/sdn-node.c</source>
+      <commands>make distclean</commands>
       <commands>make sdn-node.cooja TARGET=cooja MAKE_WITH_SDN_ORCHESTRA=0</commands>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.Battery</moteinterface>
@@ -56,7 +58,7 @@
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiMoteID</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiRS232</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiBeeper</moteinterface>
-      <moteinterface>org.contikios.cooja.interfaces.RimeAddress</moteinterface>
+      <!-- <moteinterface>org.contikios.cooja.interfaces.RimeAddress</moteinterface> -->
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiIPAddress</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiRadio</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiButton</moteinterface>
