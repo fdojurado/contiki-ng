@@ -14,7 +14,7 @@ CONTIKI_PATH = os.path.dirname(os.path.dirname(SELF_PATH))
 COOJA_PATH = os.path.normpath(os.path.join(CONTIKI_PATH, "tools", "cooja"))
 cooja_input = 'cooja.csc'
 cooja_output = 'COOJA.testlog'
-cooja_log = 'COOJA.testlog'
+cooja_log = 'COOJA.log'
 
 #######################################################
 # Run a child process and get its output
