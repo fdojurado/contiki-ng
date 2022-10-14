@@ -547,8 +547,8 @@ tsch_schedule_print(void)
       while(l != NULL) {
         LOG_PRINT("* Link Options %02x, type %u, timeslot %u, channel offset %u, address ",
                l->link_options, l->link_type, l->timeslot, l->channel_offset);
-        LOG_INFO_LLADDR(&l->addr);
-        LOG_INFO_("\n");
+        LOG_PRINT_LLADDR(&l->addr);
+        LOG_PRINT_("\n");
         l = list_item_next(l);
       }
 
