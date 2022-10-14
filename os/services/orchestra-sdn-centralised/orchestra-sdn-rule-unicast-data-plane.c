@@ -165,7 +165,7 @@ get_ts_ch_from_dst_addr(const linkaddr_t *dst, uint16_t *timeslot, uint16_t *cha
 {
   /* We want to get the link which is the closest to the current ASN */
   uint16_t ts_asn = TSCH_ASN_MOD(tsch_current_asn, sf_unicast->size); // This is the timeslot of the current ASN
-  LOG_INFO("tsch current %lu, ts %d (%d.%d)\n", tsch_current_asn.ls4b, ts_asn, dst->u8[0], dst->u8[1]);
+  LOG_INFO("tsch current .%"PRIx32", ts %d (%d.%d)\n", tsch_current_asn.ls4b, ts_asn, dst->u8[0], dst->u8[1]);
   int8_t difference, min = 127;
   uint16_t ts;
   struct tsch_link *l = list_head(sf_unicast->links_list);
