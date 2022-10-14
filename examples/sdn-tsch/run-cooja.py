@@ -2,6 +2,7 @@
 
 import sys
 import os
+import argparse
 from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 
 # contiker bash -c 'cd examples/benchmarks/rl-sdwsn && ./run-cooja.py'
@@ -12,7 +13,6 @@ SELF_PATH = os.path.dirname(os.path.abspath(__file__))
 CONTIKI_PATH = os.path.dirname(os.path.dirname(SELF_PATH))
 
 COOJA_PATH = os.path.normpath(os.path.join(CONTIKI_PATH, "tools", "cooja"))
-cooja_input = 'cooja.csc'
 cooja_output = 'COOJA.testlog'
 cooja_log = 'COOJA.log'
 
@@ -99,10 +99,14 @@ def execute_test(cooja_file):
 
 def main():
 
-    input_file = cooja_input
-    if len(sys.argv) > 1:
-        # change from the default
-        input_file = sys.argv[1]
+    parser = argparse.ArgumentParser(
+        description='This script runs the given CSC simulation file.')
+
+    parser.add_argument('file', type=str,
+                        help="Simulation file (csc)")
+
+    args = parser.parse_args()
+    input_file = args.file
 
     if not os.access(input_file, os.R_OK):
         print('Simulation script "{}" does not exist'.format(input_file))
