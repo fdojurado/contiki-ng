@@ -31,7 +31,7 @@
  */
 
 /**
- * @file orchestra-conf.c
+ * @file orchestra-conf.h
  * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
  * @brief Orchestra configuration file
  * @version 0.1

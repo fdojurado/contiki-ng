@@ -46,12 +46,6 @@
 
 /* MAC will set the default for this packet */
 #define SDNBUF_ATTR_LLSEC_LEVEL_MAC_DEFAULT 0xffff
-/**
- * \file
- *         Buffer attributes of the SDN buffer
- * \author
- *         Fernando Jurado <fdo.jurado@gmail.com>
- */
 
 /**
  * \brief          Resets uIP buffer

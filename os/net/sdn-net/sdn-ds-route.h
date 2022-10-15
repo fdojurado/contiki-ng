@@ -147,3 +147,5 @@ int sdn_ds_route_is_nexthop(const linkaddr_t *addr);
 #endif
 
 /** @} */
+
+/** @} */

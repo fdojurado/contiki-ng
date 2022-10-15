@@ -34,7 +34,7 @@
  * \addtogroup sdn-advertisement
  * @{
  *
- * @file sdn-wsn.h
+ * @file sdn-advertisement.c
  * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
  * @brief Header for the Contiki/SD-WSN neighbor advertisement
  * @version 0.1

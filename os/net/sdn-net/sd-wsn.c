@@ -34,7 +34,7 @@
  * \addtogroup sdwsn
  * @{
  *
- * @file sdn-wsn.c
+ * @file sd-wsn.c
  * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
  * @brief Header for the Contiki/SD-WSN interface
  * @version 0.1
