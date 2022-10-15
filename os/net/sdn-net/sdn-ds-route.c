@@ -1,41 +1,49 @@
 /*
- * Copyright (c) 2017, RISE SICS.
+ * Copyright (c) 2022, Technical University of Denmark.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Institute nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * This file is part of the Contiki operating system.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 /**
- * \file
- *         routing table manipulation
- * \author
- *         Fernando Jurado <fdo.jurado@gmail.com>
+ * \addtogroup sdn-ds-route
+ * @{
+ *
+ * @file sdn-ds-route.c
+ * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
+ * @brief routing table manipulation
+ * @version 0.1
+ * @date 2022-10-15
+ *
+ * @copyright Copyright (c) 2022, Technical University of Denmark.
+ *
  */
+
 #include "net/ipv6/uip-ds6.h"
 #include "sdn-ds-nbr.h"
 #include "sdn-ds-route.h"
@@ -227,7 +235,7 @@ sdn_ds_route_lookup(const linkaddr_t *addr)
     // uint8_t longestmatch;
 
     LOG_INFO("Looking up route for %d.%d\n",
-           addr->u8[0], addr->u8[1]);
+             addr->u8[0], addr->u8[1]);
 
     if (addr == NULL)
     {
@@ -256,9 +264,9 @@ sdn_ds_route_lookup(const linkaddr_t *addr)
     if (found_route != NULL)
     {
         LOG_INFO("Found route: %d.%d",
-               addr->u8[0], addr->u8[1]);
+                 addr->u8[0], addr->u8[1]);
         LOG_INFO_(" via %d.%d\n",
-               sdn_ds_route_nexthop(found_route)->u8[0], sdn_ds_route_nexthop(found_route)->u8[1]);
+                  sdn_ds_route_nexthop(found_route)->u8[0], sdn_ds_route_nexthop(found_route)->u8[1]);
     }
     else
     {
@@ -301,24 +309,24 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
         return NULL;
     }
 
-// #ifdef BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
-//     if (linkaddr_cmp(dest, &ctrl_addr))
-//     {
-//         PRINTF("destination is ctrl.\n");
-//         if (tsch_is_associated == 1)
-//         {
-//             PRINTF("tsch associated.\n");
-//             tsch_queue_update_time_source(nexthop);
-//         }
-//     }
-// #endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
+    // #ifdef BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED
+    //     if (linkaddr_cmp(dest, &ctrl_addr))
+    //     {
+    //         PRINTF("destination is ctrl.\n");
+    //         if (tsch_is_associated == 1)
+    //         {
+    //             PRINTF("tsch associated.\n");
+    //             tsch_queue_update_time_source(nexthop);
+    //         }
+    //     }
+    // #endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED */
 
     /* Get link-layer address of next hop, make sure it is in neighbor table */
     const linkaddr_t *nexthop_lladdr = nexthop;
     if (nexthop_lladdr == NULL)
     {
         LOG_INFO("Add: neighbor link-local address unknown for %d.%d\n",
-               nexthop->u8[0], nexthop->u8[1]);
+                 nexthop->u8[0], nexthop->u8[1]);
         return NULL;
     }
 
@@ -338,7 +346,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
             return r;
         }
         LOG_INFO("Add: old route for %d.%d",
-               dest->u8[0], dest->u8[1]);
+                 dest->u8[0], dest->u8[1]);
         LOG_INFO_(" found, deleting it\n");
 
         sdn_ds_route_rm(r);
@@ -363,7 +371,7 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
                 return NULL;
             }
             LOG_INFO("Add: dropping route to %d.%d\n",
-                   oldest->addr.u8[0], oldest->addr.u8[1]);
+                     oldest->addr.u8[0], oldest->addr.u8[1]);
             sdn_ds_route_rm(oldest);
         }
 
@@ -440,9 +448,9 @@ sdn_ds_route_add(const linkaddr_t *dest, int16_t cost,
     r->user = user;
 
     LOG_INFO("Add: adding route: %d.%d",
-           dest->u8[0], dest->u8[1]);
+             dest->u8[0], dest->u8[1]);
     LOG_INFO_(" via %d.%d\n",
-           nexthop->u8[0], nexthop->u8[1]);
+              nexthop->u8[0], nexthop->u8[1]);
 // LOG_ANNOTATE("#L %u 1;blue\n", nexthop->u8[sizeof(uip_ipaddr_t) - 1]);
 
 // if (PRINTF_ENABLED)
@@ -476,7 +484,7 @@ void sdn_ds_route_rm(sdn_ds_route_t *route)
     {
 
         LOG_INFO("Rm: removing route: %d.%d\n",
-               route->addr.u8[0], route->addr.u8[1]);
+                 route->addr.u8[0], route->addr.u8[1]);
 
         /* Remove the route from the route list */
         list_remove(routelist, route);
@@ -490,7 +498,7 @@ void sdn_ds_route_rm(sdn_ds_route_t *route)
         if (neighbor_route == NULL)
         {
             LOG_INFO("Rm: neighbor_route was NULL for %d.%d\n",
-                   route->addr.u8[0], route->addr.u8[1]);
+                     route->addr.u8[0], route->addr.u8[1]);
         }
         list_remove(route->neighbor_routes->route_list, neighbor_route);
         if (list_head(route->neighbor_routes->route_list) == NULL)
@@ -569,14 +577,14 @@ sdn_ds_defrt_t *sdn_ds_defrt_add(const linkaddr_t *addr,
         if (d == NULL)
         {
             LOG_INFO("Add default: could not add default route to %d.%d",
-                   addr->u8[0], addr->u8[1]);
+                     addr->u8[0], addr->u8[1]);
             LOG_INFO_(", out of memory\n");
             return NULL;
         }
         else
         {
             LOG_INFO("Add default: adding default route to %d.%d\n",
-                   addr->u8[0], addr->u8[1]);
+                     addr->u8[0], addr->u8[1]);
         }
 
         list_push(defaultrouterlist, d);
@@ -664,19 +672,19 @@ const linkaddr_t *sdn_ds_defrt_choose(void)
          d = list_item_next(d))
     {
         LOG_INFO("Default route, IP address %d.%d\n",
-               d->addr.u8[0], d->addr.u8[1]);
+                 d->addr.u8[0], d->addr.u8[1]);
         bestnbr = sdn_ds_nbr_lookup(&d->addr);
         if (bestnbr != NULL /* && bestnbr->state != NBR_INCOMPLETE */)
         {
             LOG_INFO("Default route found, IP address %d.%d\n",
-                   d->addr.u8[0], d->addr.u8[1]);
+                     d->addr.u8[0], d->addr.u8[1]);
             return &d->addr;
         }
         else
         {
             addr = &d->addr;
             LOG_INFO("Default route Incomplete found, IP address %d.%d\n",
-                   d->addr.u8[0], d->addr.u8[1]);
+                     d->addr.u8[0], d->addr.u8[1]);
         }
     }
     return addr;
@@ -715,9 +723,9 @@ static void sdn_ds_route_print(void)
     {
         via = sdn_ds_route_nexthop(r);
         LOG_INFO(" dest %d.%d via %d.%d cost %d \n",
-               r->addr.u8[0], r->addr.u8[1],
-               via->u8[0], via->u8[1],
-               r->cost);
+                 r->addr.u8[0], r->addr.u8[1],
+                 via->u8[0], via->u8[1],
+                 r->cost);
         /* PRINTF(" dest ");
             log_lladdr(&r->addr);
             PRINTF(" via ");
@@ -726,4 +734,6 @@ static void sdn_ds_route_print(void)
     // PRINTF("\n");
 }
 #endif
+
+/** @} */
 /*---------------------------------------------------------------------------*/
