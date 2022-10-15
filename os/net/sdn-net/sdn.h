@@ -31,10 +31,20 @@
  */
 
 /**
- * \file
- *         Header for the Contiki/SD-WSN interface
- * \author
- *         Fernando Jurado <fdo.jurado@gmail.com>
+ * \addtogroup sdn-net
+ * @{
+ */
+
+/**
+ *
+ * @file  Header for the Contiki/SD-WSN interface
+ * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
+ * @brief
+ * @version 0.1
+ * @date 2022-10-15
+ *
+ * @copyright Copyright (c) 2022, Technical University of Denmark.
+ *
  */
 
 #ifndef SDN_H_
@@ -74,7 +84,6 @@ extern linkaddr_t ctrl_addr;
  */
 // void tcpip_icmp6_call(uint8_t type);
 
-/** @} */
 /**
  * The uIP event.
  *
@@ -129,8 +138,8 @@ extern unsigned char sdn_is_forwarding;
 
 #define sdn_set_forwarding(forwarding) sdn_do_forwarding = (forwarding)
 
-/** @} */
-
 PROCESS_NAME(sdn_process);
 
 #endif /* TCPIP_H_ */
+
+/** @} */

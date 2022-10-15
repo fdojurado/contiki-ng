@@ -30,10 +30,16 @@
  */
 
 /**
- * \file
- *         SDN-ROUTING, SD-WSN routing algorithm.
- * \author
- *         Fernando Jurado <fdo.jurado@gmail.com>
+ * \addtogroup routing
+ * @{
+ *
+ * @file sdn-routing.c
+ * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
+ * @brief
+ * @version 0.1
+ * @date 2022-10-15
+ *
+ * @copyright Copyright (c) 2022, Technical University of Denmark.
  *
  */
 

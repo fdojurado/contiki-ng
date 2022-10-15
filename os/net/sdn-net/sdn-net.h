@@ -31,12 +31,22 @@
  */
 
 /**
- * \file
- *         SDN-NET, a network layer for SD-WSN.
- * \author
- *         Fernando Jurado <fdo.jurado@gmail.com>
- *
+ * \addtogroup sdn-net
+ * @{
  */
+
+/**
+ * 
+ * @file  SDN-NET, a network layer for SD-WSN.
+ * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
+ * @brief
+ * @version 0.1
+ * @date 2022-10-15
+ *
+ * @copyright Copyright (c) 2022, Technical University of Denmark.
+ * 
+ */
+
 #ifndef SDN_NET_H_
 #define SDN_NET_H_
 
