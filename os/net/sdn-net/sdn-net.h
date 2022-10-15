@@ -37,7 +37,7 @@
 
 /**
  * 
- * @file  SDN-NET, a network layer for SD-WSN.
+ * @file  sdn-net.h
  * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
  * @brief
  * @version 0.1

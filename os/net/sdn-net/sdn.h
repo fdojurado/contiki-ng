@@ -37,7 +37,7 @@
 
 /**
  *
- * @file  Header for the Contiki/SD-WSN interface
+ * @file  sdn.h
  * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
  * @brief
  * @version 0.1
