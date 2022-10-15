@@ -54,10 +54,6 @@ $ wget -nv http://simonduq.github.io/resources/mspgcc-4.7.2-compiled.tar.bz2 && 
 
 If desired, instructions to compile MSP430 GCC 4.7.2 from source can be found [here](https://github.com/tecip-nes/contiki-tres/wiki/Building-the-latest-version-of-mspgcc). Currently the instructions do not seem to be updated for newer versions of Ubuntu but it is possible to compile in an older version of Ubuntu and copy the binaries. Binaries for 32-bit Ubuntu can be downloaded and installed following [this script](https://github.com/contiki-ng/contiki-ng/blob/develop/tools/docker/Dockerfile#L50).
 
-### Installing JN compiler
-See the JN page for instruction on setting up the JN compiler:
-[Set up JN516x](/doc/platforms/jn516x)
-
 ### Installing NRF sdk
 To get the NRF52dk platform to work you will need to add SDK and programming tools, see
 [Platform-nrf52dk](/doc/platforms/nrf52dk).
@@ -66,19 +62,9 @@ To get the NRF52dk platform to work you will need to add SDK and programming too
 
 ```bash
 $ sudo apt install default-jdk ant
-```
-
-Cooja needs to have the environment variable `JAVA_HOME` set to work with native Contiki nodes.
-
-```bash
 $ update-alternatives --config java
 There is only one alternative in link group java (providing /usr/bin/java): /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 Nothing to configure.
-```
-
-Set `JAVA_HOME` with the path found above in `.profile`:
-```bash
-$ echo 'export JAVA_HOME="/usr/lib/jvm/default-java"' >> ~/.profile
 ```
 
 ### Install JTAG software for CC2538 (optional)

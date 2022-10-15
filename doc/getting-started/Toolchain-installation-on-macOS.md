@@ -46,7 +46,7 @@ $ brew tap contiki-ng/contiki-ng-arm
 $ brew install contiki-ng-arm-gcc-bin
 ```
 
-This will automatically install the same version as the one currently installed in the [docker image](/doc/getting-started/Docker) and used by our travis CI tests.
+This will automatically install the same version as the one currently installed in the [docker image](/doc/getting-started/Docker) and used by the CI tests.
 
 The formula itself is hosted under [contiki-ng/homebrew-contiki-ng-arm](https://github.com/contiki-ng/homebrew-contiki-ng-arm)
 
@@ -66,10 +66,6 @@ You can also try using the latest version, but be prepared to get compilation wa
 ### Install the MSP430 toolchain
 
 The best way to achieve this on OS X is through homebrew, using a formula provided in a tap. Follow the instructions here: https://github.com/tgtakaoka/homebrew-mspgcc
-
-### Installing JN compiler
-Untested on OS X, but start by reading the JN page for instruction on setting up the JN compiler:
-[Set up JN516x](/doc/platforms/jn516x)
 
 ### Installing NRF sdk
 To get the NRF52dk platform to work you will need two things:
