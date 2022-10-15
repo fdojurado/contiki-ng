@@ -305,6 +305,10 @@ ifeq ($(MAKE_NET),MAKE_NET_SDN)
   ifeq ($(WITH_SERIAL_SDN_CONTROLLER),0)
     CFLAGS += -DSERIAL_SDN_CONTROLLER=0
   endif
+  # SLIP uses the rxbuf defined in uIP.
+  MODULES_SOURCES_EXCLUDES += slip.c
+  CONTIKI_SOURCES_EXCLUDES_COOJA += slip-arch.c
+  CONTIKI_SOURCES_EXCLUDES_NATIVE += tun6-net.c
 endif
 
 ifeq ($(WITH_IP64),1)
