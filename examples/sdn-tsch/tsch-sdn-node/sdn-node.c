@@ -39,7 +39,6 @@
  *
  * @copyright Copyright (c) 2022, Technical University of Denmark.
  *
- */
 */
 
 #include "contiki.h"
