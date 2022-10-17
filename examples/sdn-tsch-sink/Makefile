@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = sdn-tsch
+CONTIKI_PROJECT = sdn-tsch-sink
 all: $(CONTIKI_PROJECT)
 
 CONTIKI = ../../
