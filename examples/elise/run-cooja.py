@@ -65,7 +65,7 @@ def execute_test(cooja_file):
         return False
 
     filename = os.path.join(SELF_PATH, cooja_file)
-    args = " ".join(["cd", COOJA_PATH, "&&", "./gradlew run --args='-nogui=" +
+    args = " ".join(["cd", COOJA_PATH, "&&", "sudo ./gradlew run --args='-nogui=" +
                     filename, "-contiki=" + CONTIKI_PATH+" -logdir="+SELF_PATH+" -logname=COOJA"+"'"])
     sys.stdout.write("  Running Cooja, args={}\n".format(args))
 
