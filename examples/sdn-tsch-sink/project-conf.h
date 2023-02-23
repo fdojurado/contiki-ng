@@ -38,14 +38,11 @@
 #define SDN_CONF_MAX_NA_INTERVAL 60
 /* Set the data packet period */
 #define SDN_CONF_DATA_PACKET_INTERVAL 90
-/* Network configuration period */
-#define SDN_CONF_MIN_NC_INTERVAL 60 * 14
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
 /* Num of max routing routes */
-#define SDN_CONF_MAX_ROUTES 10
-/* Flocklab deployment? */
-#define FLOCKLAB_DEPLOYMENT 0
+#define SDN_CONF_MAX_ROUTES 30
+#define NBR_TABLE_CONF_MAX_NEIGHBORS 10
 /* SDN STATISTICS? */
 #define SDN_STATISTICS 0
 /* Max number of neighbors in cache */
@@ -71,8 +68,7 @@
 /* Do not start TSCH at init, wait for NETSTACK_MAC.on() */
 #define TSCH_CONF_AUTOSTART 0
 
-
-#define QUEUEBUF_CONF_NUM  128
+#define QUEUEBUF_CONF_NUM 128
 
 #if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 #define TSCH_CALLBACK_PACKET_READY orchestra_callback_packet_ready
@@ -100,30 +96,30 @@
 #endif /* WITH_SECURITY */
 
 /* Enable printing of packet counters */
-#define LINK_STATS_CONF_PACKET_COUNTERS          0
+#define LINK_STATS_CONF_PACKET_COUNTERS 0
 
 /* Logs */
 /* Logging */
-#define LOG_CONF_LEVEL_RPL                         LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_TCPIP                       LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_IPV6                        LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_6LOWPAN                     LOG_LEVEL_NONE
-#define LOG_CONF_LEVEL_MAC                         LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_FRAMER                      LOG_LEVEL_ERR
-#define TSCH_LOG_CONF_PER_SLOT                     0
+#define LOG_CONF_LEVEL_RPL LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_TCPIP LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_IPV6 LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_6LOWPAN LOG_LEVEL_NONE
+#define LOG_CONF_LEVEL_MAC LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_FRAMER LOG_LEVEL_ERR
+#define TSCH_LOG_CONF_PER_SLOT 0
 /* Logging for the SDWSN netstack */
-#define LOG_CONF_LEVEL_SDWSN                       LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_NA                          LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_DATA                        LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_NBR_DS                      LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_ROUTE_DS                    LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_ND                          LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_SDN_NET                     LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_RA                          LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_SA                          LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_SDN                         LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_SDN_POWER                   LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_SDN_ORCHESTRA               LOG_LEVEL_ERR
-#define LOG_CONF_LEVEL_SDN_ORCHESTRA_UC            LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_SDWSN LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_NA LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_DATA LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_NBR_DS LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_ROUTE_DS LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_ND LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_SDN_NET LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_RA LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_SA LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_SDN LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_SDN_POWER LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_SDN_ORCHESTRA LOG_LEVEL_ERR
+#define LOG_CONF_LEVEL_SDN_ORCHESTRA_UC LOG_LEVEL_ERR
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */

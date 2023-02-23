@@ -31,21 +31,24 @@
  */
 
 /**
- * \file
- *         SDN-NET, a network layer for SD-WSN.
- * \author
- *         Fernando Jurado <fdo.jurado@gmail.com>
+ * @file sdn-controller-serial.c
+ * @author F. Fernando Jurado-Lasso <ffjla@dtu.dk>
+ * @brief SDN TSCH example
+ * @version 0.1
+ * @date 2022-10-15
+ *
+ * @copyright Copyright (c) 2022, Technical University of Denmark.
  *
  */
 
 #include "contiki.h"
+#include "sdn-serial.h"
 #include "sdn-serial-protocol.h"
 #include "net/netstack.h"
 #include "net/sdn-net/sd-wsn.h"
 #include "net/sdn-net/sdn-net.h"
 #include "net/mac/tsch/tsch.h"
 #include "net/sdn-net/sdn.h"
-#include "sdn-serial.h"
 #include "sys/node-id.h"
 #include <string.h>
 #include <stdio.h> /* For printf() */
@@ -54,8 +57,8 @@
 #include "platform.h"
 #endif /* CONTIKI_TARGET_IOTLAB */
 
-#if CONTIKI_TARGET_WISMOTE
-#include "dev/cc2520/cc2520.h"
+#if MAC_CONF_WITH_TSCH
+#include "net/mac/tsch/tsch.h"
 #endif
 
 /* Log configuration */
@@ -65,29 +68,15 @@
 
 linkaddr_t ctrl_addr;
 
-#if FLOCKLAB_DEPLOYMENT
-uint16_t FLOCKLAB_NODE_ID = 0xbeef; // any value is ok, will be overwritten by FlockLab
-volatile uint16_t node_id;          // must be volatile
-#endif
-
-/* Configuration */
-// #define SEND_INTERVAL (8 * CLOCK_SECOND)
-
 /*---------------------------------------------------------------------------*/
-PROCESS(serial_sdn_controller_process, "serial-sdn-controller example");
-// AUTOSTART_PROCESSES(&serial_sdn_controller_process, &sdn_process);
-AUTOSTART_PROCESSES(&serial_sdn_controller_process);
-// process_start(&sdn_process, NULL);
-/*-------------------------------TSCH configuration---------------------------*/
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(serial_sdn_controller_process, ev, data)
+PROCESS(sdn_tsch, "serial-sdn-controller example");
+AUTOSTART_PROCESSES(&sdn_tsch);
+/*-------------------------------Process thread------------------------------*/
+PROCESS_THREAD(sdn_tsch, ev, data)
 {
-    // static struct etimer stats_timer;
     int is_coordinator;
 
     PROCESS_BEGIN();
-
-    // etimer_set(&stats_timer, CLOCK_SECOND * 10);
 
     // Set the controller address as 1.1 where the sink takes the 1.0 address
     ctrl_addr.u8[0] = 1;
@@ -104,11 +93,6 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
         LOG_INFO("Setting as the root\n");
         tsch_set_coordinator(1);
     }
-    NETSTACK_MAC.on();
-
-#if CONTIKI_TARGET_WISMOTE
-    cc2520_set_txpower(0xF7);
-#endif
 
 #if CONTIKI_TARGET_IOTLAB
     // Possible values for M3 radio 3, 2.8, 2.3, 1.8, 1.3, 0.7, 0.0, -1,
@@ -120,42 +104,15 @@ PROCESS_THREAD(serial_sdn_controller_process, ev, data)
     NETSTACK_MAC.on();
 
     process_start(&sdn_process, NULL);
+
+#if BUILD_WITH_SDN_CONTROLLER_SERIAL || SDN_CONTROLLER
     /* start the sdn serial interface */
     sdn_serial_protocol_init();
+#endif
 
-    /* Initialize NullNet */
-    // sdn_net_buf = (uint8_t *)&count;
-    // sdn_net_len = sizeof(count);
-    //  sdn_net_set_input_callback(input_callback);
-
-    // etimer_set(&periodic_timer, SEND_INTERVAL);
     while (1)
     {
         PROCESS_YIELD();
-        // if (ev == PROCESS_EVENT_TIMER && data == &stats_timer)
-        // {
-        //     printf("3, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu\n",
-        //            SDN_STAT(sdn_stat.ip.forwarded),
-        //            SDN_STAT(sdn_stat.data.sent_agg),
-        //            SDN_STAT(sdn_stat.data.sent_agg_bytes),
-        //            SDN_STAT(sdn_stat.data.sent_nagg),
-        //            SDN_STAT(sdn_stat.data.sent_nagg_bytes),
-        //            SDN_STAT(sdn_stat.cp.adv),
-        //            SDN_STAT(sdn_stat.cp.adv_bytes),
-        //            SDN_STAT(sdn_stat.cp.nc),
-        //            SDN_STAT(sdn_stat.cp.nc_bytes),
-        //            SDN_STAT(sdn_stat.nd.sent),
-        //            SDN_STAT(sdn_stat.nd.sent_bytes),
-        //            SDN_STAT(sdn_stat.nodes.dead));
-        //     etimer_reset(&stats_timer);
-        // }
-        // if (ev == PROCESS_EVENT_TIMER && data == &et)
-        // {
-        //     printf("printing current schedule\n");
-        //     tsch_schedule_print();
-        //     printf("end printing current schedule\n");
-        //     etimer_reset(&et);
-        // }
     }
 
     PROCESS_END();
