@@ -24,7 +24,8 @@
       <identifier>mtype603</identifier>
       <description>Cooja Mote Type #1</description>
       <source>[CONTIKI_DIR]/examples/sdn-tsch-sink/sdn-tsch-sink.c</source>
-      <commands>make sdn-tsch-sink.cooja TARGET=cooja MAKE_WITH_SDN_ORCHESTRA=0 WITH_SERIAL_SDN_CONTROLLER=1</commands>
+      <commands>make TARGET=cooja clean
+      make -j$(CPUS) sdn-tsch-sink.cooja TARGET=cooja MAKE_WITH_SDN_ORCHESTRA=0 WITH_SERIAL_SDN_CONTROLLER=1</commands>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.Battery</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiVib</moteinterface>
@@ -49,7 +50,8 @@
       <identifier>mtype856</identifier>
       <description>Cooja Mote Type #2</description>
       <source>[CONTIKI_DIR]/examples/sdn-tsch-node/sdn-tsch-node.c</source>
-      <commands>make sdn-tsch-node.cooja TARGET=cooja MAKE_WITH_SDN_ORCHESTRA=0</commands>
+      <commands>make TARGET=cooja clean
+      make -j$(CPUS) sdn-tsch-node.cooja TARGET=cooja MAKE_WITH_SDN_ORCHESTRA=0</commands>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.Battery</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiVib</moteinterface>
