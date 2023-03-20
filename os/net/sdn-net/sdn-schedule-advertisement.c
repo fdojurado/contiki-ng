@@ -111,8 +111,8 @@ int sdn_sa_input(void)
     tsch_queue_reset();
     /* Reset the data packets sequence number */
 #if !BUILD_WITH_SDN_CONTROLLER_SERIAL
-    sdn_data_reset_seq(sequence_number);
-    sdn_na_reset_seq(sequence_number);
+    sdn_data_reset_seq(seq);
+    sdn_na_reset_seq(seq);
 #endif
     // Update sequence number received
     sequence_number = seq + 1;
