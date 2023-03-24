@@ -49,6 +49,7 @@
 #include "sdn-power-measurement.h"
 #include <stdio.h>
 #include <limits.h>
+#include <inttypes.h>
 
 /* Log configuration */
 #include "sys/log.h"

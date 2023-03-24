@@ -33,6 +33,13 @@
 #ifndef PROJECT_CONF_H_
 #define PROJECT_CONF_H_
 /*---------------------------------------------------------------------------*/
+#define UIP_CONF_BUFFER_SIZE 0
+#define UIP_CONF_UDP 0
+#define UIP_CONF_UDP_CONNS 0
+#define UIP_CONF_ND6_AUTOFILL_NBR_CACHE 0
+#define SICSLOWPAN_CONF_FRAG 0
+#define SICSLOWPAN_CONF_COMPRESSION 0
+/*---------------------------------------------------------------------------*/
 /* Set neighbour discovery period */
 #define SDN_CONF_MAX_ND_INTERVAL 30
 /* Set neighbour advertisement period */
@@ -41,6 +48,10 @@
 #define SDN_CONF_DATA_PACKET_INTERVAL 90
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
+#define IEEE_ADDR_CONF_ADDRESS \
+    {                          \
+        0x00, 0x12             \
+    }
 /* Num of max routing routes */
 #if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 #define SDN_CONF_MAX_ROUTES 30
@@ -73,7 +84,7 @@
 /* Do not start TSCH at init, wait for NETSTACK_MAC.on() */
 #define TSCH_CONF_AUTOSTART 0
 
-#define QUEUEBUF_CONF_NUM 128
+#define QUEUEBUF_CONF_NUM 8
 
 #if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 #define TSCH_CALLBACK_PACKET_READY orchestra_callback_packet_ready
@@ -110,7 +121,11 @@
 #define LOG_CONF_LEVEL_IPV6 LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_6LOWPAN LOG_LEVEL_NONE
 #define LOG_CONF_LEVEL_MAC LOG_LEVEL_ERR
+/* Do not enable LOG_CONF_LEVEL_FRAMER on SimpleLink,
+   that will cause it to print from an interrupt context. */
+#ifndef CONTIKI_TARGET_SIMPLELINK
 #define LOG_CONF_LEVEL_FRAMER LOG_LEVEL_ERR
+#endif
 #define TSCH_LOG_CONF_PER_SLOT 0
 /* Logging for the SDWSN netstack */
 #define LOG_CONF_LEVEL_SDWSN LOG_LEVEL_ERR

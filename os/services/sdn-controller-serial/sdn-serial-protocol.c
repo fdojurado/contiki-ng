@@ -50,9 +50,13 @@
 #include "sdn-serial.h"
 #include "sd-wsn.h"
 #include "sdn.h"
-#if !CONTIKI_TARGET_COOJA
-#include "dev/uart1.h"
-#endif /* !CONTIKI_TARGET_COOJA */
+// #if !CONTIKI_TARGET_COOJA
+// #include "dev/uart1.h"
+// #endif /* !CONTIKI_TARGET_COOJA */
+#ifdef CONTIKI_TARGET_SIMPLELINK
+#include "arch/cpu/simplelink-cc13xx-cc26xx/dev/uart0-arch.h"
+#endif
+
 
 #if CONTIKI_TARGET_COOJA
 #include "dev/rs232.h"
@@ -266,7 +270,7 @@ PROCESS_THREAD(sdn_serial_protocol_process, ev, data)
     uart1_set_input(&sdn_serial_input_byte); // set the callback function
 #endif
 #ifdef UART0_ARCH_H_
-    uart0_init(BAUD2UBR(115200));               // set the baud rate as necessary
+    uart0_init();               // set the baud rate as necessary
     uart0_set_callback(&sdn_serial_input_byte); // set the callback function
 #endif
 #ifdef CONTIKI_TARGET_IOTLAB

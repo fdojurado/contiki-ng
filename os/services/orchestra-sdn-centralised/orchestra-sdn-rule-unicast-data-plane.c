@@ -46,6 +46,7 @@
 #include "net/packetbuf.h"
 #include "net/mac/tsch/tsch.h"
 #include "net/queuebuf.h"
+#include <inttypes.h>
 
 /* Log configuration */
 /* Log configuration */
