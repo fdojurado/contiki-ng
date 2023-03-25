@@ -102,8 +102,8 @@ ieee_addr_cpy_to(uint8_t *dst, uint8_t len)
   }
 
 #ifdef IEEE_ADDR_NODE_ID
-  dst[len - 1] = (IEEE_ADDR_NODE_ID >> 0) & 0xFF;
-  dst[len - 2] = (IEEE_ADDR_NODE_ID >> 8) & 0xFF;
+  dst[len - 2] = (IEEE_ADDR_NODE_ID >> 0) & 0xFF;
+  dst[len - 1] = (IEEE_ADDR_NODE_ID >> 8) & 0xFF;
 #endif
 
   return 0;

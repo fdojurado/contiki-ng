@@ -84,7 +84,11 @@
 /* Do not start TSCH at init, wait for NETSTACK_MAC.on() */
 #define TSCH_CONF_AUTOSTART 0
 
+#ifdef CONTIKI_TARGET_SIMPLELINK
 #define QUEUEBUF_CONF_NUM 8
+#else
+#define QUEUEBUF_CONF_NUM 128
+#endif
 
 #if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
 #define TSCH_CALLBACK_PACKET_READY orchestra_callback_packet_ready
