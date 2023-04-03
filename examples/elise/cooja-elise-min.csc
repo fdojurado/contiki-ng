@@ -95,7 +95,7 @@
     <mote>
       <interface_config>
         org.contikios.cooja.interfaces.Position
-        <x>20.0</x>
+        <x>10.0</x>
         <y>30.0</y>
         <z>0.0</z>
       </interface_config>
@@ -116,7 +116,7 @@
     <mote>
       <interface_config>
         org.contikios.cooja.interfaces.Position
-        <x>-20.0</x>
+        <x>-10.0</x>
         <y>30.0</y>
         <z>0.0</z>
       </interface_config>
@@ -137,7 +137,7 @@
     <mote>
       <interface_config>
         org.contikios.cooja.interfaces.Position
-        <x>-20.0</x>
+        <x>-10.0</x>
         <y>70.0</y>
         <z>0.0</z>
       </interface_config>
