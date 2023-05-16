@@ -512,6 +512,12 @@ tsch_rx_process_pending()
       packetbuf_copyfrom(current_input->payload, current_input->len);
       packetbuf_set_attr(PACKETBUF_ATTR_RSSI, current_input->rssi);
       packetbuf_set_attr(PACKETBUF_ATTR_CHANNEL, current_input->channel);
+      uint16_t asn_ls4b_lsb = current_input->rx_asn.ls4b & 0x0000FFFF;
+      uint16_t asn_ls4b_msb = current_input->rx_asn.ls4b >> 16 & 0x0000FFFF;
+      uint8_t asn_ms1b = current_input->rx_asn.ms1b;
+      packetbuf_set_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_LSB, asn_ls4b_lsb);
+      packetbuf_set_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_MSB, asn_ls4b_msb);
+      packetbuf_set_attr(PACKETBUF_ATTR_RX_ASN_MS1B, asn_ms1b);
     }
 
     if(is_data) {

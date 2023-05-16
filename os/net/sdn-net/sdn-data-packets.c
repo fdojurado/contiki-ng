@@ -138,9 +138,14 @@ static void send_data_output(void)
         SDN_DATA_BUF->light = random_rand() % (uint8_t)(0x64);
 
 #if BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA
-        // LOG_INFO("Current ASN %lu.\n", tsch_current_asn.ls4b);
-        SDN_DATA_BUF->asn_ls2b = sdnip_htons(tsch_current_asn.ls4b & 0x0000FFFF);
-        SDN_DATA_BUF->asn_ms2b = sdnip_htons(tsch_current_asn.ls4b & 0xFFFF0000);
+        // LOG_INFO("Current ASN   %02x.%08" PRIx32 ".\n", tsch_current_asn.ms1b, tsch_current_asn.ls4b);
+        uint16_t asn_lsb = tsch_current_asn.ls4b & 0x0000FFFF;
+        // LOG_INFO("Current ASN LSB %04x.\n", asn_lsb);
+        uint16_t asn_msb = tsch_current_asn.ls4b >> 16 & 0x0000FFFF;
+        // LOG_INFO("Current ASN MSB %04x.\n", asn_msb);
+        SDN_DATA_BUF->asn_ls4b_lsb = sdnip_htons(asn_lsb);
+        SDN_DATA_BUF->asn_ls4b_msb = sdnip_htons(asn_msb);
+        SDN_DATA_BUF->asn_ms1b = sdnip_htons(tsch_current_asn.ms1b);
 #else
         SDN_DATA_BUF->asn.ls2b = 0;
         SDN_DATA_BUF->asn.ms2b = 0;

@@ -41,11 +41,11 @@
 #define SICSLOWPAN_CONF_COMPRESSION 0
 /*---------------------------------------------------------------------------*/
 /* Set neighbour discovery period */
-#define SDN_CONF_MAX_ND_INTERVAL 30
+#define SDN_CONF_MAX_ND_INTERVAL 20
 /* Set neighbour advertisement period */
 #define SDN_CONF_MAX_NA_INTERVAL 60
 /* Set the data packet period */
-#define SDN_CONF_DATA_PACKET_INTERVAL 90
+#define SDN_CONF_DATA_PACKET_INTERVAL 40
 /* Linkaddr size */
 #define LINKADDR_CONF_SIZE 2
 #define IEEE_ADDR_CONF_ADDRESS \

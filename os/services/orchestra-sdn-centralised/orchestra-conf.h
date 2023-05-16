@@ -90,7 +90,7 @@
 #ifdef ORCHESTRA_CONF_CONTROL_PERIOD
 #define ORCHESTRA_CONTROL_PERIOD ORCHESTRA_CONF_CONTROL_PERIOD
 #else /* ORCHESTRA_CONF_CONTROL_PERIOD */
-#define ORCHESTRA_CONTROL_PERIOD 500
+#define ORCHESTRA_CONTROL_PERIOD 499
 #endif /* ORCHESTRA_CONF_CONTROL_PERIOD */
 
 /* Slotframe size for the root rule. Usually this should be shorter than the unicast slotframe size,

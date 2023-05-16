@@ -2,10 +2,10 @@
  * Copyright (c) 2022, Technical University of Denmark.
  * All rights reserved.
  *
-* Redistribution and use in source and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -322,16 +322,27 @@ void sdnip_process(uint8_t flag)
 #if BUILD_WITH_SDN_CONTROLLER_SERIAL
         if ((SDN_IP_BUF->vap & 0x0F) == SDN_PROTO_DATA)
         {
-            data_asn = tsch_current_asn;
-            data_asn.ls4b = sdnip_htons(SDN_DATA_BUF->asn_ms2b) & 0x0000ffff;
+            uint16_t asn_ls4b_lsb = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_LSB);
+            uint16_t asn_ls4b_msb = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_MSB);
+            uint16_t asn_ms1b = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_MS1B);
+            struct tsch_asn_t tsch_rx_asn;
+            tsch_rx_asn.ls4b = asn_ls4b_msb << 16 | asn_ls4b_lsb;
+            tsch_rx_asn.ms1b = asn_ms1b;
+            // LOG_INFO("tsch_rx_asn %02x.%08" PRIx32 "\n", tsch_rx_asn.ms1b, tsch_rx_asn.ls4b);
+            // LOG_INFO("current tsch asn %02x.%08" PRIx32 "\n", tsch_current_asn.ms1b, tsch_current_asn.ls4b);
+            data_asn.ls4b = sdnip_htons(SDN_DATA_BUF->asn_ls4b_msb);
             data_asn.ls4b = data_asn.ls4b << 16;
-            data_asn.ls4b = data_asn.ls4b | sdnip_htons(SDN_DATA_BUF->asn_ls2b);
-            // PRINTF("rcv asn: %lu.\n", data_asn.ls4b);
-            data_asn.ls4b = TSCH_ASN_DIFF(tsch_current_asn, data_asn);
+            data_asn.ls4b = data_asn.ls4b | sdnip_htons(SDN_DATA_BUF->asn_ls4b_lsb);
+            // Because we subtract the ASN of the packet from the current ASN, the MS1B of
+            // the packet ASN is always 0
             data_asn.ms1b = 0;
-            // PRINTF("Difference:  %lu.\n", data_asn.ls4b);
-            SDN_DATA_BUF->asn_ls2b = sdnip_htons(data_asn.ls4b & 0x0000FFFF);
-            SDN_DATA_BUF->asn_ms2b = sdnip_htons(data_asn.ls4b & 0xFFFF0000);
+            // LOG_INFO("rcv tsch asn %02x.%08" PRIx32 "\n", data_asn.ms1b, data_asn.ls4b);
+            data_asn.ls4b = TSCH_ASN_DIFF(tsch_rx_asn, data_asn);
+            // LOG_INFO("Difference:  %02x.%08" PRIx32 ".\n", data_asn.ms1b, data_asn.ls4b);
+            // LOG_INFO("Difference:  %u.\n", data_asn.ls4b);
+            SDN_DATA_BUF->asn_ls4b_lsb = sdnip_htons(data_asn.ls4b & 0x0000FFFF);
+            SDN_DATA_BUF->asn_ls4b_msb = sdnip_htons(data_asn.ls4b >> 16);
+            SDN_DATA_BUF->asn_ms1b = 0;
         }
 #endif /* BUILD_WITH_SDN_CONTROLLER_SERIAL */
         LOG_INFO("Forwarding packet to destination %d.%d\n",
