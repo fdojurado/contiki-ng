@@ -85,8 +85,8 @@ sdn_rank_t my_rank; // Holds the rank value and the total rssi value to the cont
 // #endif
 
 struct etimer nd_timer_periodic;
-struct stimer nd_timer_na; /**< ND timer, to schedule ND sending */
-static uint16_t rand_time; /**< random time value for timers */
+struct timer nd_timer_send; /**< ND timer, to schedule ND sending */
+static uint32_t rand_time;  /**< random time value for timers */
 
 /*---------------------------------------------------------------------------*/
 #if SDN_DS_NBR_NOTIFICATIONS
@@ -97,7 +97,7 @@ neighbor_callback(int event, const sdn_ds_nbr_t *nbr)
     {
 #if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
         LOG_INFO("removing neighbor %d.%d, check whether is gtw to ctrl\n",
-               nbr->addr.u8[0], nbr->addr.u8[1]);
+                 nbr->addr.u8[0], nbr->addr.u8[1]);
         if (linkaddr_cmp(&my_rank.addr, &nbr->addr))
         {
             LOG_INFO("removing gtw to ctrl\n");
@@ -135,7 +135,7 @@ static void update_rank(int16_t rssi, uint8_t rank, const linkaddr_t *from)
 void sdn_nd_init(void)
 {
     etimer_set(&nd_timer_periodic, SDN_ND_PERIOD);
-    stimer_set(&nd_timer_na, 2); /* wait to have a link local IP address */
+    timer_set(&nd_timer_send, 2); /* wait to have a link local IP address */
 #if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     my_rank.rank = 0xff; /* Sensor node */
     my_rank.rssi = 0x00;
@@ -172,9 +172,9 @@ void sdn_nd_input(void)
     ndRssi = sdn_ntohs(SDN_ND_BUF->rssi);
 
     LOG_INFO("Processing ND packet with rcv rssi %d and rank %d and rssi to ctrl %d\n",
-           rssi,
-           ndRank,
-           ndRssi);
+             rssi,
+             ndRank,
+             ndRssi);
 
 #if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
     /* Check whether the ND message is
@@ -248,8 +248,8 @@ static void send_nd_output(void)
     // print_buff(sdn_buf, sdn_len, true);
 
     LOG_INFO("Sending ND packet (rank: %d, rssi: %d)\n",
-           sdn_ntohs(SDN_ND_BUF->rank),
-           sdn_ntohs(SDN_ND_BUF->rssi));
+             sdn_ntohs(SDN_ND_BUF->rank),
+             sdn_ntohs(SDN_ND_BUF->rssi));
 
     /* Update statistics */
     SDN_STAT(++sdn_stat.ip.sent);
@@ -265,17 +265,18 @@ static void sdn_send_nd_periodic(void)
 {
     send_nd_output();
     LOG_INFO("sending ND message.\n");
-    rand_time = SDN_MIN_ND_INTERVAL + random_rand() %
-                                          (uint16_t)(SDN_MAX_ND_INTERVAL - SDN_MIN_ND_INTERVAL);
-    LOG_INFO("Random time 1 = %u\n", rand_time);
-    stimer_set(&nd_timer_na, rand_time);
+    uint32_t interval =  SDN_MAX_ND_INTERVAL * CLOCK_SECOND;
+    uint32_t jitter_time = random_rand() % (CLOCK_SECOND / 10);
+    rand_time = interval + jitter_time;
+    // LOG_INFO("Random time 1 = %lu\n", rand_time);
+    timer_set(&nd_timer_send, rand_time);
 }
 /*---------------------------------------------------------------------------*/
 void sdn_nd_periodic(void)
 {
     /* Periodic ND sending */
     // LOG_INFO("periodic.\n");
-    if (stimer_expired(&nd_timer_na) /* && (sdn_len == 0) */)
+    if (timer_expired(&nd_timer_send) /* && (sdn_len == 0) */)
     {
         sdn_send_nd_periodic();
     }

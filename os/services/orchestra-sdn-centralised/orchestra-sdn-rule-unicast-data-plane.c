@@ -169,8 +169,8 @@ get_ts_ch_from_dst_addr(const linkaddr_t *dst, uint16_t *timeslot, uint16_t *cha
 {
   /* We want to get the link which is the closest to the current ASN */
   uint16_t ts_asn = TSCH_ASN_MOD(tsch_current_asn, sf_unicast->size); // This is the timeslot of the current ASN
-  LOG_INFO("tsch current .%"PRIx32", ts %d (%d.%d)\n", tsch_current_asn.ls4b, ts_asn, dst->u8[0], dst->u8[1]);
-  int8_t difference, min = 127;
+  LOG_INFO("tsch current .%" PRIx32 ", ts %d (%d.%d)\n", tsch_current_asn.ls4b, ts_asn, dst->u8[0], dst->u8[1]);
+  int16_t difference, min = 127;
   uint16_t ts;
   struct tsch_link *l = list_head(sf_unicast->links_list);
   /* Loop over all items. Assume there is max one link per timeslot */
@@ -178,22 +178,21 @@ get_ts_ch_from_dst_addr(const linkaddr_t *dst, uint16_t *timeslot, uint16_t *cha
   {
     if (linkaddr_cmp(dst, &l->addr))
     {
-      if (l->timeslot <= ts_asn)
-      {
-        ts = l->timeslot + sf_unicast->size.val;
-      }
-      else
-      {
-        ts = l->timeslot;
-      }
+      ts = l->timeslot;
+      LOG_INFO("ts %d to dst %d.%d\n", ts, dst->u8[0], dst->u8[1]);
+      // }
       difference = ts - ts_asn;
-      // PRINTF("difference %d\n", difference);
+      LOG_INFO("difference %d\n", difference);
+      if (difference < 0)
+      {
+        difference = difference + sf_unicast->size.val;
+      }
       if (difference < min)
       {
         *timeslot = l->timeslot;
         *channel_offset = l->channel_offset;
         min = difference;
-        // PRINTF("min difference %d\n", min);
+        LOG_INFO("min difference %d\n", min);
       }
     }
     l = list_item_next(l);

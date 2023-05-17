@@ -90,8 +90,8 @@
 
 #if !BUILD_WITH_SDN_CONTROLLER_SERIAL
 // static sdn_na_adv_t na_pkt; //Holds the rank value and the total rssi value to the controller
-struct stimer na_timer_na; /**< NA timer, to schedule NA sending */
-static uint16_t rand_time; /**< random time value for timers */
+struct timer na_timer_send; /**< NA timer, to schedule NA sending */
+static uint32_t rand_time;  /**< random time value for timers */
 static uint16_t cycle_seq = 0;
 static uint8_t seq = 0;
 #endif /* !BUILD_WITH_SDN_CONTROLLER_SERIAL */
@@ -152,7 +152,7 @@ neighbor_callback(int event, const sdn_ds_nbr_t *nbr)
     }
     /* Give extra time to network settle down */
     // #if !SDN_CONTROLLER
-    //     stimer_set(&na_timer_na, rand_time);
+    //     stimer_set(&na_timer_send, rand_time);
     // #endif
 }
 #endif
@@ -161,7 +161,7 @@ void sdn_na_init(void)
 {
     etimer_set(&na_timer_periodic, SDN_NA_PERIOD);
 #if !BUILD_WITH_SDN_CONTROLLER_SERIAL
-    stimer_set(&na_timer_na, 2); /* wait to have a link local IP address */
+    timer_set(&na_timer_send, 2); /* wait to have a link local IP address */
 #endif
 /* callback function when neighbor removed */
 #if SDN_DS_NBR_NOTIFICATIONS
@@ -256,10 +256,11 @@ static void sdn_send_na_periodic(void)
     send_na_output();
     // send_advertisement = 0;
     // }
-    rand_time = SDN_MIN_NA_INTERVAL + random_rand() %
-                                          (uint16_t)(SDN_MAX_NA_INTERVAL - SDN_MIN_NA_INTERVAL);
-    LOG_INFO("Random time = %u\n", rand_time);
-    stimer_set(&na_timer_na, rand_time);
+    uint32_t interval =  SDN_MAX_NA_INTERVAL * CLOCK_SECOND;
+    uint32_t jitter_time = random_rand() % (CLOCK_SECOND / 10);
+    rand_time = interval + jitter_time;
+    // LOG_INFO("Random time = %lu\n", rand_time);
+    timer_set(&na_timer_send, rand_time);
 }
 #endif
 /*---------------------------------------------------------------------------*/
@@ -268,7 +269,7 @@ void sdn_na_periodic(void)
 /* Periodic ND sending */
 // PRINTF("periodic.\n");
 #if !BUILD_WITH_SDN_CONTROLLER_SERIAL
-    if (stimer_expired(&na_timer_na) /* && (sdn_len == 0) */)
+    if (timer_expired(&na_timer_send) /* && (sdn_len == 0) */)
     {
         sdn_send_na_periodic();
     }

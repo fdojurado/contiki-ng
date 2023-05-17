@@ -86,8 +86,8 @@
 
 #if !(SDN_CONTROLLER || BUILD_WITH_SDN_CONTROLLER_SERIAL)
 struct etimer data_timer_periodic;
-struct stimer data_timer_send; /**< ND timer, to schedule ND sending */
-static uint16_t rand_time;     /**< random time value for timers */
+struct timer data_timer_send; /**< ND timer, to schedule ND sending */
+static uint32_t rand_time;    /**< random time value for timers */
 static uint16_t cycle_seq = 0;
 static uint8_t seq = 0;
 #endif
@@ -97,7 +97,7 @@ void sdn_data_init(void)
 {
 #if !BUILD_WITH_SDN_CONTROLLER_SERIAL
     etimer_set(&data_timer_periodic, SDN_DATA_PERIOD);
-    stimer_set(&data_timer_send, 2); /* wait to have a link local IP address */
+    timer_set(&data_timer_send, CLOCK_SECOND * 2); /* wait to have a link local IP address */
 #endif
     return;
 }
@@ -183,16 +183,18 @@ static void send_data_output(void)
 static void sdn_send_nd_periodic(void)
 {
     send_data_output();
-    rand_time = SDN_MIN_DATA_PACKET_INTERVAL + random_rand() %
-                                                   (uint16_t)(SDN_DATA_PACKET_INTERVAL - SDN_MIN_DATA_PACKET_INTERVAL);
-    stimer_set(&data_timer_send, rand_time);
+    uint32_t interval = SDN_DATA_PACKET_INTERVAL * CLOCK_SECOND;
+    uint32_t jitter_time = random_rand() % (CLOCK_SECOND / 10);
+    rand_time = interval + jitter_time;
+    // LOG_INFO("Next data pkt in %d ticks.\n", rand_time);
+    timer_set(&data_timer_send, rand_time);
 }
 #endif
 /*---------------------------------------------------------------------------*/
 void sdn_data_periodic(void)
 {
 #if !BUILD_WITH_SDN_CONTROLLER_SERIAL
-    if (stimer_expired(&data_timer_send) /* && (sdn_len == 0) */)
+    if (timer_expired(&data_timer_send) /* && (sdn_len == 0) */)
     {
         sdn_send_nd_periodic();
     }
