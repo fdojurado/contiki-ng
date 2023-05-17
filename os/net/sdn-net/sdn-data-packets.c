@@ -184,7 +184,7 @@ static void sdn_send_nd_periodic(void)
 {
     send_data_output();
     uint32_t interval = SDN_DATA_PACKET_INTERVAL * CLOCK_SECOND;
-    uint32_t jitter_time = random_rand() % (CLOCK_SECOND / 10);
+    uint32_t jitter_time = random_rand() % (CLOCK_SECOND);
     rand_time = interval + jitter_time;
     // LOG_INFO("Next data pkt in %d ticks.\n", rand_time);
     timer_set(&data_timer_send, rand_time);

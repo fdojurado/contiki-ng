@@ -266,7 +266,7 @@ static void sdn_send_nd_periodic(void)
     send_nd_output();
     LOG_INFO("sending ND message.\n");
     uint32_t interval =  SDN_MAX_ND_INTERVAL * CLOCK_SECOND;
-    uint32_t jitter_time = random_rand() % (CLOCK_SECOND / 10);
+    uint32_t jitter_time = random_rand() % (CLOCK_SECOND);
     rand_time = interval + jitter_time;
     // LOG_INFO("Random time 1 = %lu\n", rand_time);
     timer_set(&nd_timer_send, rand_time);
