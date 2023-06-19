@@ -80,6 +80,8 @@
 #define LOG_LEVEL LOG_LEVEL_NONE
 #endif /* LOG_CONF_LEVEL_SDWSN */
 
+#define PRINTF(...) printf(__VA_ARGS__)
+
 #if SDN_STATISTICS == 1
 struct sdn_stats sdn_stat;
 #endif
@@ -322,6 +324,7 @@ void sdnip_process(uint8_t flag)
 #if BUILD_WITH_SDN_CONTROLLER_SERIAL
         if ((SDN_IP_BUF->vap & 0x0F) == SDN_PROTO_DATA)
         {
+            PRINTF("Message received\n");
             uint16_t asn_ls4b_lsb = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_LSB);
             uint16_t asn_ls4b_msb = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_MSB);
             uint16_t asn_ms1b = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_MS1B);

@@ -171,7 +171,9 @@ void sdn_nd_input(void)
     ndRank = sdn_ntohs(SDN_ND_BUF->rank);
     ndRssi = sdn_ntohs(SDN_ND_BUF->rssi);
 
-    LOG_INFO("Processing ND packet with rcv rssi %d and rank %d and rssi to ctrl %d\n",
+    LOG_INFO("Processing ND packet from %d.%d with rcv rssi %d and rank %d and rssi to ctrl %d\n",
+             addr->u8[0],
+             addr->u8[1],
              rssi,
              ndRank,
              ndRssi);
@@ -265,7 +267,7 @@ static void sdn_send_nd_periodic(void)
 {
     send_nd_output();
     LOG_INFO("sending ND message.\n");
-    uint32_t interval =  SDN_MAX_ND_INTERVAL * CLOCK_SECOND;
+    uint32_t interval = SDN_MAX_ND_INTERVAL * CLOCK_SECOND;
     uint32_t jitter_time = random_rand() % (CLOCK_SECOND);
     rand_time = interval + jitter_time;
     // LOG_INFO("Random time 1 = %lu\n", rand_time);

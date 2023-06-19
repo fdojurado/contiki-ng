@@ -52,12 +52,12 @@
  * - a sender-based or receiver-based slotframe for unicast to RPL parents and children
  * - a common shared slotframe for any other traffic (mostly broadcast)
  *  */
-#define ORCHESTRA_RULES          \
-    {                            \
-        &eb_per_time_source,     \
-            &control_plane,      \
-            &data_plane, \
-            &default_common      \
+#define ORCHESTRA_RULES      \
+    {                        \
+        &eb_per_time_source, \
+            &control_plane,  \
+            &data_plane,     \
+            &default_common  \
     }
 /* Example configuration for RPL storing mode: */
 /* #define ORCHESTRA_RULES { &eb_per_time_source, \
@@ -77,7 +77,7 @@
 #ifdef ORCHESTRA_CONF_COMMON_SHARED_PERIOD
 #define ORCHESTRA_COMMON_SHARED_PERIOD ORCHESTRA_CONF_COMMON_SHARED_PERIOD
 #else /* ORCHESTRA_CONF_COMMON_SHARED_PERIOD */
-#define ORCHESTRA_COMMON_SHARED_PERIOD 31
+#define ORCHESTRA_COMMON_SHARED_PERIOD 23
 #endif /* ORCHESTRA_CONF_COMMON_SHARED_PERIOD */
 
 #ifdef ORCHESTRA_CONF_UNICAST_PERIOD
@@ -90,7 +90,7 @@
 #ifdef ORCHESTRA_CONF_CONTROL_PERIOD
 #define ORCHESTRA_CONTROL_PERIOD ORCHESTRA_CONF_CONTROL_PERIOD
 #else /* ORCHESTRA_CONF_CONTROL_PERIOD */
-#define ORCHESTRA_CONTROL_PERIOD 499
+#define ORCHESTRA_CONTROL_PERIOD 19
 #endif /* ORCHESTRA_CONF_CONTROL_PERIOD */
 
 /* Slotframe size for the root rule. Usually this should be shorter than the unicast slotframe size,
