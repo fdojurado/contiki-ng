@@ -14,10 +14,81 @@ network_throughput_list = [];
 // Create a struct that holds the throughput values for each node in the network
 function Throughput(node_id) {
   this.node_id = node_id;
-  this.num_messages_rx = 0;
+  this.num_data_pkts = 0;
+  this.num_na_pkts = 0;
   this.last_throughput = 0;
   this.all_throughput = [];
   this.average_throughput = 0;
+}
+// Create a linked list to hold the routing table
+function LinkedList() {
+  this.head = null;
+  this.tail = null;
+}
+// Create a node to hold the routing table entry
+function Route(node_id, dst_id, via) {
+  this.node_id = node_id;
+  this.dst_id = dst_id;
+  this.via = via;
+  this.next = null;
+}
+// Add a routing table entry to the linked list
+LinkedList.prototype.addRoute = function (node_id, dst_id, via) {
+  var node = new Route(node_id, dst_id, via);
+  // If the list is empty, add the node as the head and tail
+  if (this.head == null) {
+    this.head = node;
+    this.tail = node;
+  } else {
+    // If the list is not empty, add the node to the tail
+    this.tail.next = node;
+    this.tail = node;
+  }
+};
+// Use the addRoute method to add a routing table entry to the linked list
+var routing_table = new LinkedList();
+routing_table.addRoute(2, 1, 1);
+routing_table.addRoute(3, 1, 1);
+routing_table.addRoute(4, 1, 1);
+routing_table.addRoute(5, 1, 3);
+// print the routing table
+log.log("Routing table\n");
+var current = routing_table.head;
+while (current != null) {
+  log.log(
+    "Node " +
+    current.node_id +
+    " dst_id: " +
+    current.dst_id +
+    " via: " +
+    current.via +
+    "\n"
+  );
+  current = current.next;
+}
+// Loop through the path from 5 to 1 and print the path
+log.log("Path from 5 to 1\n");
+// Get the node 5 entry
+var current = routing_table.head;
+while (current != null) {
+  if (current.node_id == 5) {
+    break;
+  }
+  current = current.next;
+}
+// Print the path
+while (current != null) {
+  log.log(
+    "Node " +
+    current.node_id +
+    " dst_id: " +
+    current.dst_id +
+    " via: " +
+    current.via +
+    "\n"
+  );
+  current = current.via;
+  log.log("current: " + current + "\n");
 }
 // List to append the throughput values
 throughput_list = [];
@@ -28,9 +99,9 @@ timeout_function = function () {
 };
 
 // Throughput calculation based on the number of messages received
-function calculateThroughput(num_messages_rx) {
+function calculateThroughput(num_pkts) {
   // Calculate the throughput
-  throughput = num_messages_rx * packet_size * 8 / sample_time;
+  throughput = num_pkts * packet_size * 8 / sample_time;
   return throughput;
 }
 
@@ -44,18 +115,21 @@ function average(list) {
 }
 
 // Method to add num rx messages count to the node
-function addRxPacket(node_id, num_messages_rx) {
+function addRxPacket(node_id, num_pkts, field) {
   // Check if the node is already in the list
   for (i = 0; i < throughput_list.length; i++) {
     if (throughput_list[i].node_id == node_id) {
-      // Add the number of messages received to the node
-      throughput_list[i].num_messages_rx += num_messages_rx;
+      // Add the number of packets received to the specified field of the node
+      throughput_list[i][field] += num_pkts;
       return;
     }
   }
   // If the node is not in the list, add it
-  throughput_list.push(new Throughput(node_id, num_messages_rx));
+  var newThroughput = new Throughput(node_id);
+  newThroughput[field] = num_pkts;
+  throughput_list.push(newThroughput);
 }
+
 
 // Calculate the throughput for each node
 function calculateThroughputByNode() {
@@ -64,12 +138,14 @@ function calculateThroughputByNode() {
   for (i = 0; i < throughput_list.length; i++) {
     // Calculate the last throughput
     throughput_list[i].last_throughput = calculateThroughput(
-      throughput_list[i].num_messages_rx);
+      throughput_list[i].num_data_pkts + throughput_list[i].num_na_pkts);
     log.log(
       "Node " +
       throughput_list[i].node_id +
-      " num_messages_rx: " +
-      throughput_list[i].num_messages_rx +
+      " num_data_pkts: " +
+      throughput_list[i].num_data_pkts +
+      " num_na_pkts: " +
+      throughput_list[i].num_na_pkts +
       " last_throughput: " +
       throughput_list[i].last_throughput +
       "\n"
@@ -90,7 +166,8 @@ function calculateThroughputByNode() {
       "\n"
     );
     // Reset the number of messages received
-    throughput_list[i].num_messages_rx = 0;
+    throughput_list[i].num_data_pkts = 0;
+    throughput_list[i].num_na_pkts = 0;
   }
 }
 
@@ -117,13 +194,21 @@ function calculateNetworkThroughputBySum() {
 
 while (true) {
   YIELD();
-  if (msg.contains("Message received from ")) {
+  if (msg.contains("Data message received from ")) {
     // Network number of messages received
     network_rx += 1;
     // Get the node id, which is at the end of the message
     node_id = msg.slice(-1);
     // Add the number of messages received to the node
-    addRxPacket(node_id, 1);
+    addRxPacket(node_id, 1, "num_data_pkts");
+  }
+  if (msg.contains("NA message received from ")) {
+    // Network number of messages received
+    network_rx += 1;
+    // Get the node id, which is at the end of the message
+    node_id = msg.slice(-1);
+    // Add the number of messages received to the node
+    addRxPacket(node_id, 1, "num_na_pkts");
   }
   if (msg.contains("[INFO: SA")) {
     // Clear the number of messages received by each node
