@@ -324,7 +324,7 @@ void sdnip_process(uint8_t flag)
 #if BUILD_WITH_SDN_CONTROLLER_SERIAL
         if ((SDN_IP_BUF->vap & 0x0F) == SDN_PROTO_DATA)
         {
-            PRINTF("Message received\n");
+            PRINTF("Message received from %u.%u\n", SDN_IP_BUF->scr.u8[0], SDN_IP_BUF->scr.u8[1]);
             uint16_t asn_ls4b_lsb = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_LSB);
             uint16_t asn_ls4b_msb = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_MSB);
             uint16_t asn_ms1b = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_MS1B);
