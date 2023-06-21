@@ -77,6 +77,8 @@
 #define LOG_LEVEL LOG_LEVEL_NONE
 #endif /* LOG_CONF_LEVEL_DATA */
 
+#define PRINTF(...) printf(__VA_ARGS__)
+
 /** Period for uip-ds6 periodic task*/
 #ifndef SDN_DATA_CONF_PERIOD
 #define SDN_DATA_PERIOD (CLOCK_SECOND / 10)
@@ -167,6 +169,8 @@ static void send_data_output(void)
         //     SDN_STAT(sdn_stat.data.sent_agg_bytes += sdn_len);
         // }
         LOG_INFO("Sending Data pkt (SEQ: %d).\n", seq);
+
+        PRINTF("Sending Data pkt.\n");
 
         print_buff(sdn_buf, sdn_len, true);
 

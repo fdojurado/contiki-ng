@@ -355,6 +355,7 @@ void sdnip_process(uint8_t flag)
         LOG_INFO("Forwarding packet to destination %d.%d\n",
                  dest.u8[0], dest.u8[1]);
         SDN_STAT(++sdn_stat.ip.forwarded);
+        PRINTF("Forwarding packet of type %d from %u.%u to %u.%u\n", SDN_IP_BUF->vap & 0x0F, SDN_IP_BUF->scr.u8[0], SDN_IP_BUF->scr.u8[1], SDN_IP_BUF->dest.u8[0], SDN_IP_BUF->dest.u8[1]);
         goto send;
     }
 

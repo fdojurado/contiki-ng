@@ -81,6 +81,8 @@
 #define LOG_LEVEL LOG_LEVEL_NONE
 #endif /* LOG_CONF_LEVEL_NA */
 
+#define PRINTF(...) printf(__VA_ARGS__)
+
 /** Period for uip-ds6 periodic task*/
 #ifndef SDN_NA_CONF_PERIOD
 #define SDN_NA_PERIOD (CLOCK_SECOND / 10)
@@ -232,6 +234,8 @@ static void send_na_output(void)
         SDN_STAT(sdn_stat.cp.adv_bytes += sdn_len);
 
         print_na_packet();
+
+        PRINTF("Sending NA pkt\n");
 
         sdnbuf_set_attr(SDNBUF_ATTR_MAX_MAC_TRANSMISSIONS, 3);
 

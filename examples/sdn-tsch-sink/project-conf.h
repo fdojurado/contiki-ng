@@ -114,6 +114,8 @@
 /* Enable printing of packet counters */
 #define LINK_STATS_CONF_PACKET_COUNTERS 0
 
+#define TSCH_CONF_MAC_MAX_FRAME_RETRIES 0
+
 /* Logs */
 /* Logging */
 #define LOG_CONF_LEVEL_RPL LOG_LEVEL_NONE
@@ -126,7 +128,7 @@
 #ifndef CONTIKI_TARGET_SIMPLELINK
 #define LOG_CONF_LEVEL_FRAMER LOG_LEVEL_ERR
 #endif
-#define TSCH_LOG_CONF_PER_SLOT 0
+#define TSCH_LOG_CONF_PER_SLOT 1
 /* Logging for the SDWSN netstack */
 #define LOG_CONF_LEVEL_SDWSN LOG_LEVEL_ERR
 #define LOG_CONF_LEVEL_NA LOG_LEVEL_ERR
