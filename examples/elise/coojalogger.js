@@ -4,14 +4,14 @@
 TIMEOUT(1800000); /* 3600 seconds or 1 hour */
 
 packet_size = 11;
-sample_time = 60; // 1 minute
+sample_time = 150; // 1 minute
 
 time_aux = 0;
 time_difference = 0;
 // Throughput calculation based on the number of messages received
 function calculateThroughput(num_pkts) {
   // Calculate the throughput
-  throughput = num_pkts * packet_size * 8 / sample_time;
+  throughput = num_pkts / sample_time;
   return throughput;
 }
 // Create constructor function for statistics
@@ -352,7 +352,7 @@ while (true) {
   }
   // log.log("Checking if it is time to print statistics\n");
   time_difference = time - time_aux;
-  if (time_difference > 60000000) {
+  if (time_difference > 150000000) {
     // log.log("Processing statistics\n");
     // print the time
     log.log(time_difference + "\n");
