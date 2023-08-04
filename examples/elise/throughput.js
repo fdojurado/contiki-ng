@@ -1,6 +1,6 @@
 /* A simple log file generator script */
 
-TIMEOUT(900000); /* 3600 seconds or 1 hour */
+TIMEOUT(1800000); /* 3600 seconds or 1 hour */
 
 // Create a Node class
 function Node(id) {
