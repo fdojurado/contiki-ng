@@ -329,6 +329,7 @@ void sdnip_process(uint8_t flag)
         if ((SDN_IP_BUF->vap & 0x0F) == SDN_PROTO_DATA)
         {
             PRINTF("Data message received from %u.%u\n", SDN_IP_BUF->scr.u8[0], SDN_IP_BUF->scr.u8[1]);
+            PRINTF("Received Data pkt from: %u.%u, SEQ: %d\n", SDN_IP_BUF->scr.u8[0], SDN_IP_BUF->scr.u8[1], SDN_DATA_BUF->seq);
             uint16_t asn_ls4b_lsb = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_LSB);
             uint16_t asn_ls4b_msb = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_LSB4B_MSB);
             uint16_t asn_ms1b = packetbuf_attr(PACKETBUF_ATTR_RX_ASN_MS1B);

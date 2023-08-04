@@ -372,7 +372,7 @@
   <plugin>
     org.contikios.cooja.plugins.ScriptRunner
     <plugin_config>
-      <scriptfile>[CONFIG_DIR]/coojalogger.js</scriptfile>
+      <scriptfile>[CONFIG_DIR]/power_consumption.js</scriptfile>
       <active>true</active>
     </plugin_config>
     <width>457</width>
@@ -384,7 +384,7 @@
   <plugin>
     org.contikios.cooja.plugins.ScriptRunner
     <plugin_config>
-      <scriptfile>[CONFIG_DIR]/power_consumption.js</scriptfile>
+      <scriptfile>[CONFIG_DIR]/latency.js</scriptfile>
       <active>true</active>
     </plugin_config>
     <width>457</width>
