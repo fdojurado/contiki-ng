@@ -116,8 +116,11 @@ while (true) {
   //   We only start collecting throughput samples after motes print "[INFO: SA"
   //   This is to avoid collecting throughput samples from the booting process
   if (msg.contains("[INFO: SA")) {
+    // Everytime we see "[INFO: SA", we start collecting throughput samples
+    // and we reset the throughput timer and clear the packet counters
     start_samples = true;
     start_samples_time = time;
+    network.clearPacketCounters();
   }
   if (start_samples) {
     if (

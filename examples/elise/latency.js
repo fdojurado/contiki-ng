@@ -77,6 +77,15 @@ Network.prototype.updateReceptionTime = function (id, seq, reception_time) {
     network_node.latency[seq].reception_time -
     network_node.latency[seq].emission_time;
 };
+Network.prototype.clearLatencySamples = function () {
+  var keys = Object.keys(this.nodes);
+  keys.forEach(
+    function (key) {
+      network_node = this.getNode(key);
+      network_node.latency = {};
+    }.bind(this)
+  );
+};
 Network.prototype.printLatencySamples = function () {
   var keys = Object.keys(this.nodes);
   keys.forEach(
@@ -124,6 +133,8 @@ while (true) {
   //   This is to avoid collecting latency samples from the booting process
   if (msg.contains("[INFO: SA")) {
     start_samples = true;
+    // Clear the latency samples
+    network.clearLatencySamples();
   }
   if (start_samples) {
     if (msg.contains("Sending Data pkt (SEQ:")) {

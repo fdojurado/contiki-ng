@@ -32,6 +32,15 @@ Network.prototype.addPowerSample = function (id, power) {
   }
   this.nodes[id].addPower(power);
 };
+Network.prototype.clearPowerSamples = function () {
+  var keys = Object.keys(this.nodes);
+  keys.forEach(
+    function (key) {
+      network_node = this.getNode(key);
+      network_node.power = [];
+    }.bind(this)
+  );
+};
 Network.prototype.printPowerSamples = function () {
   var keys = Object.keys(this.nodes);
   keys.forEach(
@@ -68,6 +77,8 @@ while (true) {
   //   This is to avoid collecting power samples from the booting process
   if (msg.contains("[INFO: SA")) {
     start_samples = true;
+    // Clear the power samples
+    network.clearPowerSamples();
   }
   if (start_samples) {
     //   We only collect power samples from motes which have the SDN-POWER module
