@@ -261,7 +261,7 @@ static void sdn_send_na_periodic(void)
     // send_advertisement = 0;
     // }
     uint32_t interval =  SDN_MAX_NA_INTERVAL * CLOCK_SECOND;
-    uint32_t jitter_time = random_rand() % (CLOCK_SECOND);
+    uint32_t jitter_time = random_rand() % (CLOCK_SECOND/10);
     rand_time = interval + jitter_time;
     // LOG_INFO("Random time = %lu\n", rand_time);
     timer_set(&na_timer_send, rand_time);
