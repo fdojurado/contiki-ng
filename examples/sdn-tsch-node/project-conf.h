@@ -105,7 +105,7 @@
 #endif /* BUILD_WITH_SDN_ORCHESTRA_CENTRALIZED || BUILD_WITH_SDN_ORCHESTRA */
 
 #if BUILD_WITH_SDN_ORCHESTRA
-#define ORCHESTRA_CONF_UNICAST_PERIOD 10 // This is the number of sensor nodes
+#define ORCHESTRA_CONF_UNICAST_PERIOD 17 // This is the number of sensor nodes
 #endif
 
 #if WITH_SECURITY
